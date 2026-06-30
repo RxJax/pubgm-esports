@@ -25,9 +25,21 @@ export const prisma =
       return new PrismaClient({ adapter });
     }
 
-    // For production remote databases (PostgreSQL, MySQL, CockroachDB, etc.)
-    // Prisma Client automatically reads process.env.DATABASE_URL
-    return new PrismaClient();
+    // For production remote PostgreSQL database (Supabase pooler)
+    // Prisma 7 requires passing a driver adapter for direct connection client setups
+    const { PrismaPg } = require("@prisma/adapter-pg");
+    const { Pool } = require("pg");
+
+    const pool = new Pool({
+      connectionString: dbUrl,
+      max: 10, // Optimizes connection pooling under concurrent global traffic
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 5000,
+    });
+
+    const adapter = new PrismaPg(pool);
+
+    return new PrismaClient({ adapter });
   })();
 
 if (process.env.NODE_ENV !== "production") {
