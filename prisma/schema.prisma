@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Team {
+  id        String   @id @default(uuid())
+  name      String
+  tag       String   @unique
+  region    String
+  logoUrl   String?
+  players   Player[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Player {
+  id           String                @id @default(uuid())
+  email        String                @unique
+  password     String
+  ign          String
+  characterId  String                @unique
+  region       String
+  bio          String
+  status       String                // "Looking For Team" or "Signed"
+  
+  // Playstyle & Setup
+  role         String                // "IGL", "Entry Fragger", "Support", "Sniper"
+  device       String                // e.g. "iPhone 15 Pro Max", "iPad Pro"
+  controlSetup String                // e.g. "4-finger claw, gyro always-on"
+  
+  // Ultimate Royale Season stats snapshot
+  kdRatio      Float
+  headshotPct  Float
+  winRate      Float
+  matchesPlayed Int
+  urRank       String                // Vanguard, Exceed, Supreme, Peerless, Legend
+  urPoints     Int                   // Season Points
+  
+  // Recruitment Contact channels (Optional)
+  facebook     String?
+  instagram    String?
+  twitter      String?
+  discord      String?
+  
+  // Relations
+  teamId       String?
+  team         Team?                 @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  placements   TournamentPlacement[]
+  highlights   Highlight[]
+  
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+}
+
+model TournamentPlacement {
+  id             String   @id @default(uuid())
+  date           String   // e.g., "2026-05"
+  tournamentName String
+  teamRepresented String
+  placement      Int      // Placement position (e.g. 1 for 1st)
+  playerId       String
+  player         Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Highlight {
+  id        String   @id @default(uuid())
+  title     String
+  url       String   // YouTube/TikTok video link (embed or watch URL)
+  playerId  String
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
