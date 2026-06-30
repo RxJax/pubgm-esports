@@ -13,32 +13,37 @@ interface PlayerPageProps {
 export default async function PlayerPage({ params }: PlayerPageProps) {
   const { id } = await params;
 
-  // Query player data with all nested relations directly on the server
-  const player = await prisma.player.findUnique({
-    where: { id },
-    include: {
-      team: {
-        include: {
-          players: {
-            select: {
-              id: true,
-              ign: true,
-              role: true,
-              status: true,
-              kdRatio: true,
-              urRank: true,
+  let player = null;
+  try {
+    // Query player data with all nested relations directly on the server
+    player = await prisma.player.findUnique({
+      where: { id },
+      include: {
+        team: {
+          include: {
+            players: {
+              select: {
+                id: true,
+                ign: true,
+                role: true,
+                status: true,
+                kdRatio: true,
+                urRank: true,
+              },
             },
           },
         },
-      },
-      placements: {
-        orderBy: {
-          date: "desc",
+        placements: {
+          orderBy: {
+            date: "desc",
+          },
         },
+        highlights: true,
       },
-      highlights: true,
-    },
-  });
+    });
+  } catch (error: any) {
+    console.error("Database connection error in Player page:", error.message);
+  }
 
   if (!player) {
     notFound();

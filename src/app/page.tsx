@@ -5,19 +5,27 @@ import DiscoveryClient from "./components/DiscoveryClient";
 export const revalidate = 0;
 
 export default async function Home() {
-  // Query players sorted by most recently updated
-  const players = await prisma.player.findMany({
-    include: {
-      team: true,
-    },
-    orderBy: {
-      updatedAt: "desc",
-    },
-  });
+  let players: any[] = [];
+  let dbError = false;
+
+  try {
+    // Query players sorted by most recently updated
+    players = await prisma.player.findMany({
+      include: {
+        team: true,
+      },
+      orderBy: {
+        updatedAt: "desc",
+      },
+    });
+  } catch (error: any) {
+    console.error("Database connection error in Home page:", error.message);
+    dbError = true;
+  }
 
   return (
     <main className="min-h-screen bg-gaming-black flex flex-col">
-      <DiscoveryClient initialPlayers={players} />
+      <DiscoveryClient initialPlayers={players} initialError={dbError} />
     </main>
   );
 }

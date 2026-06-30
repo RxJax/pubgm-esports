@@ -24,18 +24,23 @@ export default async function DashboardPage() {
   }
 
   // Fetch the logged-in player's profile data
-  const player = await prisma.player.findUnique({
-    where: { id: playerId },
-    include: {
-      placements: {
-        orderBy: {
-          date: "desc",
+  let player = null;
+  try {
+    player = await prisma.player.findUnique({
+      where: { id: playerId },
+      include: {
+        placements: {
+          orderBy: {
+            date: "desc",
+          },
         },
+        highlights: true,
+        team: true,
       },
-      highlights: true,
-      team: true,
-    },
-  });
+    });
+  } catch (error: any) {
+    console.error("Database connection error in Dashboard page:", error.message);
+  }
 
   if (!player) {
     redirect("/login");
