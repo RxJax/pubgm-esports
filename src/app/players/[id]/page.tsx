@@ -42,7 +42,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
       },
     });
   } catch (error: any) {
-    console.error("Database connection error in Player page:", error.message);
+    console.warn("⚠️ Database connection failed: The remote Supabase PostgreSQL database is currently unreachable (requires IPv6).");
   }
 
   if (!player) {

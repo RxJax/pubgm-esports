@@ -39,7 +39,7 @@ export default async function DashboardPage() {
       },
     });
   } catch (error: any) {
-    console.error("Database connection error in Dashboard page:", error.message);
+    console.warn("⚠️ Database connection failed: The remote Supabase PostgreSQL database is currently unreachable (requires IPv6).");
   }
 
   if (!player) {
