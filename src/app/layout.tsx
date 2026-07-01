@@ -31,14 +31,16 @@ export default async function RootLayout({
   let isLoggedIn = false;
   let playerIgn = "";
   let playerId = "";
+  let isAdmin = false;
 
   if (token) {
     try {
       const JWT_SECRET = process.env.JWT_SECRET || "pubgm-esports-super-secret-key-2026";
-      const decoded = jwt.verify(token, JWT_SECRET) as { playerId: string; ign: string };
+      const decoded = jwt.verify(token, JWT_SECRET) as { playerId: string; ign: string; email?: string; role?: string };
       isLoggedIn = true;
       playerIgn = decoded.ign;
       playerId = decoded.playerId;
+      isAdmin = decoded.email?.includes("admin") || decoded.role === "admin";
     } catch (e) {
       // Cookie is invalid or expired
     }
@@ -50,7 +52,7 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-gaming-black">
-        <Navbar isLoggedIn={isLoggedIn} playerIgn={playerIgn} playerId={playerId} />
+        <Navbar isLoggedIn={isLoggedIn} playerIgn={playerIgn} playerId={playerId} isAdmin={isAdmin} />
         <div className="flex-1 flex flex-col">{children}</div>
       </body>
     </html>

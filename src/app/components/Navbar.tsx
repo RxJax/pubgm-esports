@@ -8,9 +8,10 @@ interface NavbarProps {
   isLoggedIn: boolean;
   playerIgn: string;
   playerId: string;
+  isAdmin?: boolean;
 }
 
-export default function Navbar({ isLoggedIn, playerIgn, playerId }: NavbarProps) {
+export default function Navbar({ isLoggedIn, playerIgn, playerId, isAdmin }: NavbarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -140,6 +141,14 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId }: NavbarProps)
 
             {isLoggedIn ? (
               <>
+                {isAdmin && (
+                  <Link
+                    href="/admin/moderation"
+                    className="text-xs font-black uppercase tracking-widest text-[#ef4444] hover:text-white transition"
+                  >
+                    🛡️ MODERATION
+                  </Link>
+                )}
                 <Link
                   href="/dashboard"
                   className="text-xs font-black uppercase tracking-widest text-[#a855f7] hover:text-digital-yellow transition"
@@ -148,7 +157,7 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId }: NavbarProps)
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="text-xs font-black uppercase tracking-widest text-[#ef4444] hover:text-red-500 transition cursor-pointer"
+                  className="text-xs font-black uppercase tracking-widest text-gray-400 hover:text-red-500 transition cursor-pointer"
                 >
                   LOG OUT
                 </button>
@@ -250,6 +259,15 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId }: NavbarProps)
 
           {isLoggedIn ? (
             <>
+              {isAdmin && (
+                <Link
+                  href="/admin/moderation"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-xs font-black uppercase tracking-widest text-airdrop-red hover:text-white min-h-[48px] flex items-center border-b border-gaming-gray/30 transition gap-2"
+                >
+                  🛡️ MODERATION
+                </Link>
+              )}
               <Link
                 href="/dashboard"
                 onClick={() => setMobileMenuOpen(false)}
@@ -262,7 +280,7 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId }: NavbarProps)
                   setMobileMenuOpen(false);
                   handleLogout();
                 }}
-                className="text-xs font-black uppercase tracking-widest text-airdrop-red hover:text-red-500 min-h-[48px] flex items-center py-1 text-left transition cursor-pointer"
+                className="text-xs font-black uppercase tracking-widest text-gray-400 hover:text-red-500 min-h-[48px] flex items-center py-1 text-left transition cursor-pointer"
               >
                 Log Out
               </button>
