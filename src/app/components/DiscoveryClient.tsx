@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 interface Team {
   id: string;
@@ -106,6 +107,15 @@ export default function DiscoveryClient({
   const [players, setPlayers] = useState<Player[]>(initialPlayers);
   const [loading, setLoading] = useState(false);
   const [activeSection, setActiveSection] = useState<"pool" | "overview">("pool");
+  
+  const searchParams = useSearchParams();
+  
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "overview" || tab === "pool") {
+      setActiveSection(tab);
+    }
+  }, [searchParams]);
   
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");

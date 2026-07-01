@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
+import { Suspense } from "react";
 import DiscoveryClient from "./components/DiscoveryClient";
 
 // Configure ISR (Incremental Static Regeneration) with 60s cache revalidation
@@ -70,13 +71,15 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-gaming-black flex flex-col">
-      <DiscoveryClient
-        initialPlayers={players}
-        initialRising={risingPlayers}
-        initialFeatured={featuredPlayers}
-        initialError={dbError}
-        loggedInPlayerId={loggedInPlayerId}
-      />
+      <Suspense fallback={<div className="min-h-screen bg-gaming-black flex items-center justify-center text-xs font-black text-gray-500 uppercase tracking-widest">Loading Portal...</div>}>
+        <DiscoveryClient
+          initialPlayers={players}
+          initialRising={risingPlayers}
+          initialFeatured={featuredPlayers}
+          initialError={dbError}
+          loggedInPlayerId={loggedInPlayerId}
+        />
+      </Suspense>
     </main>
   );
 }

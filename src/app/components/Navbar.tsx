@@ -30,14 +30,23 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId }: NavbarProps)
     <nav className="w-full bg-[#0D0E12] border-b-2 border-gaming-gray relative z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo Branding */}
-          <Link href="/" className="relative flex items-center h-16 px-6 bg-gradient-to-b from-[#1c1f26] to-[#0A0D14] border-x-2 border-b-2 border-[#FFBD03]/50 rounded-b-2xl shadow-lg shadow-black/80 group">
-            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#FFBD03] to-transparent" />
-            <span className="text-lg mr-2 filter drop-shadow-[0_0_3px_rgba(255,189,3,0.5)]">🏆</span>
-            <span className="font-black text-sm uppercase tracking-widest text-white group-hover:text-digital-yellow transition">
-              PUBGM <span className="text-digital-yellow">SCOUT</span>
-            </span>
-          </Link>
+          {/* Left: Branding & Candidate Feed Link next to it */}
+          <div className="flex items-center gap-4">
+            <Link href="/" className="relative flex items-center h-16 px-6 bg-gradient-to-b from-[#1c1f26] to-[#0A0D14] border-x-2 border-b-2 border-[#FFBD03]/50 rounded-b-2xl shadow-lg shadow-black/80 group">
+              <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#FFBD03] to-transparent" />
+              <span className="text-lg mr-2 filter drop-shadow-[0_0_3px_rgba(255,189,3,0.5)]">🏆</span>
+              <span className="font-black text-sm uppercase tracking-widest text-white group-hover:text-digital-yellow transition">
+                PUBGM <span className="text-digital-yellow">SCOUT</span>
+              </span>
+            </Link>
+
+            <Link
+              href="/?tab=pool"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gaming-gray hover:border-[#FFBD03]/30 bg-gaming-black/40 text-[10px] font-black text-gray-300 hover:text-white uppercase tracking-widest transition"
+            >
+              🔍 Candidate Feed
+            </Link>
+          </div>
 
           {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center gap-6">
@@ -103,7 +112,14 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId }: NavbarProps)
       {mobileMenuOpen && (
         <div className="md:hidden bg-[#0D0E12]/95 backdrop-blur-md border-b-2 border-gaming-gray px-6 py-3 flex flex-col gap-1.5 shadow-2xl animate-fade-in">
           <Link
-            href="/"
+            href="/?tab=pool"
+            onClick={() => setMobileMenuOpen(false)}
+            className="text-xs font-black uppercase tracking-widest text-digital-yellow hover:text-amber-400 min-h-[48px] flex items-center border-b border-gaming-gray/30 transition gap-2"
+          >
+            🔍 Candidate Feed
+          </Link>
+          <Link
+            href="/?tab=overview"
             onClick={() => setMobileMenuOpen(false)}
             className="text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white min-h-[48px] flex items-center border-b border-gaming-gray/30 transition"
           >
