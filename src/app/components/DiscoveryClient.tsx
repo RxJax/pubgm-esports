@@ -38,6 +38,9 @@ interface Player {
   coachingYears?: number;
   coachingHistory?: string | null;
   specialties?: string | null;
+  underContract?: boolean;
+  contractStartDate?: Date | string | null;
+  contractEndDate?: Date | string | null;
 }
 
 interface DiscoveryClientProps {
@@ -60,6 +63,18 @@ export default function DiscoveryClient({
   initialError = false,
   loggedInPlayerId = null,
 }: DiscoveryClientProps) {
+  const getContractDurationText = (player: Player) => {
+    if (!player.contractStartDate || !player.contractEndDate) return "";
+    try {
+      const options: Intl.DateTimeFormatOptions = { month: "short", year: "numeric" };
+      const start = new Date(player.contractStartDate).toLocaleDateString("en-US", options);
+      const end = new Date(player.contractEndDate).toLocaleDateString("en-US", options);
+      return `Contract: ${start} – ${end}`;
+    } catch (e) {
+      return "";
+    }
+  };
+
   // Return elegant full-screen empty database state if no players exist and no user is logged in
   if (initialPlayers.length === 0 && !loggedInPlayerId) {
     return (
@@ -420,7 +435,12 @@ export default function DiscoveryClient({
                           <p className="text-[9px] text-gray-400 font-black uppercase tracking-wider">
                             {player.status === "Signed" ? (player.team?.name || "Not Available") : (player.team?.name || "Free Agent")}
                           </p>
-                          <span className="inline-block text-[8px] bg-digital-yellow/15 text-digital-yellow border border-digital-yellow/20 px-2 py-0.2 rounded font-black uppercase mt-1">
+                          {player.status !== "Looking For Team" && player.status !== "Free Agent" && player.underContract && player.contractStartDate && player.contractEndDate && (
+                            <div className="mt-1 inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-airdrop-red/30 bg-airdrop-red/10 text-[8px] font-black text-airdrop-red uppercase tracking-wider animate-pulse">
+                              🔒 {getContractDurationText(player)}
+                            </div>
+                          )}
+                          <span className="inline-block text-[8px] bg-digital-yellow/15 text-digital-yellow border border-digital-yellow/20 px-2 py-0.2 rounded font-black uppercase mt-1 block w-fit">
                             🎯 {player.role}
                           </span>
                         </div>
@@ -582,6 +602,11 @@ export default function DiscoveryClient({
                           <p className="text-[9px] text-gray-500 uppercase truncate">
                             {player.status === "Signed" ? (player.team?.name || "Not Available") : (player.team?.name || "Free Agent")}
                           </p>
+                          {player.status !== "Looking For Team" && player.status !== "Free Agent" && player.underContract && player.contractStartDate && player.contractEndDate && (
+                            <div className="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-airdrop-red/30 bg-airdrop-red/10 text-[7px] font-bold text-airdrop-red uppercase tracking-wider block w-fit">
+                              🔒 {getContractDurationText(player)}
+                            </div>
+                          )}
                         </div>
                       </div>
 

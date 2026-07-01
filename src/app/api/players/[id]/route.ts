@@ -93,6 +93,9 @@ export async function PUT(
       coachingYears,
       coachingHistory,
       specialties,
+      underContract,
+      contractStartDate,
+      contractEndDate,
     } = body;
 
     // Validate characterId (UID) if provided
@@ -142,6 +145,9 @@ export async function PUT(
         coachingYears: coachingYears !== undefined ? parseInt(coachingYears) || 0 : undefined,
         coachingHistory: coachingHistory !== undefined ? coachingHistory : undefined,
         specialties: specialties !== undefined ? specialties : undefined,
+        underContract: underContract !== undefined ? Boolean(underContract) : undefined,
+        contractStartDate: contractStartDate !== undefined ? (contractStartDate ? new Date(contractStartDate) : null) : undefined,
+        contractEndDate: contractEndDate !== undefined ? (contractEndDate ? new Date(contractEndDate) : null) : undefined,
       },
     });
 

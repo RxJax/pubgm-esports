@@ -65,6 +65,9 @@ interface Player {
   coachingYears?: number;
   coachingHistory?: string | null;
   specialties?: string | null;
+  underContract?: boolean;
+  contractStartDate?: Date | string | null;
+  contractEndDate?: Date | string | null;
   team: Team | null;
   placements: Placement[];
   highlights: Highlight[];
@@ -107,6 +110,17 @@ function DiscordBadge({ username }: { username: string }) {
 
 export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfolioClientProps) {
   const router = useRouter();
+  const getContractDurationText = (p: Player) => {
+    if (!p.contractStartDate || !p.contractEndDate) return "";
+    try {
+      const options: Intl.DateTimeFormatOptions = { month: "short", year: "numeric" };
+      const start = new Date(p.contractStartDate).toLocaleDateString("en-US", options);
+      const end = new Date(p.contractEndDate).toLocaleDateString("en-US", options);
+      return `Contract: ${start} – ${end}`;
+    } catch (e) {
+      return "";
+    }
+  };
   const [activeTab, setActiveTab] = useState<TabType>("stats");
   const [showRosterModal, setShowRosterModal] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
@@ -251,6 +265,21 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
   const [editCoachingHistory, setEditCoachingHistory] = useState(player.coachingHistory || "");
   const [editSpecialties, setEditSpecialties] = useState<string[]>(player.specialties ? player.specialties.split(",") : []);
 
+  const formatDateString = (dateVal: any) => {
+    if (!dateVal) return "";
+    try {
+      const d = new Date(dateVal);
+      if (isNaN(d.getTime())) return "";
+      return d.toISOString().substring(0, 10);
+    } catch (e) {
+      return "";
+    }
+  };
+
+  const [editUnderContract, setEditUnderContract] = useState(player.underContract || false);
+  const [editContractStartDate, setEditContractStartDate] = useState(formatDateString(player.contractStartDate));
+  const [editContractEndDate, setEditContractEndDate] = useState(formatDateString(player.contractEndDate));
+
   // Compressed WebP Image handler for client-side upload
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -341,6 +370,9 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
       coachingYears: parseInt(editCoachingYears) || 0,
       coachingHistory: editCoachingHistory || null,
       specialties: editSpecialties.join(",") || null,
+      underContract: editUnderContract,
+      contractStartDate: editUnderContract && editContractStartDate ? editContractStartDate : null,
+      contractEndDate: editUnderContract && editContractEndDate ? editContractEndDate : null,
     };
 
     // If new trophy fields are filled, append it
@@ -545,6 +577,11 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
               <div className="text-[10px] text-gray-500 mt-1">
                 {player.status === "Looking For Team" || player.status === "Free Agent" ? "Available for active tryouts" : "Contracted to active roster"}
               </div>
+              {player.status !== "Looking For Team" && player.status !== "Free Agent" && player.underContract && player.contractStartDate && player.contractEndDate && (
+                <div className="mt-2 text-[9px] font-black text-airdrop-red/80 bg-airdrop-red/5 border border-airdrop-red/20 px-2 py-0.5 rounded uppercase tracking-wider block w-fit mx-auto">
+                  🔒 {getContractDurationText(player)}
+                </div>
+              )}
             </div>
 
             {/* Teammates box if signed */}
@@ -1189,6 +1226,42 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                           <option value="Legend">Tier-1 Pro</option>
                         </select>
                       </div>
+
+                      {/* Contract Management Section */}
+                      <div className="border-t border-gaming-gray/30 pt-4 mt-3 flex flex-col gap-3">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Contracted Status</label>
+                        <select
+                          value={editUnderContract ? "yes" : "no"}
+                          onChange={(e) => setEditUnderContract(e.target.value === "yes")}
+                          className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full"
+                        >
+                          <option value="no">No, I am a Free Agent / Open for Offers</option>
+                          <option value="yes">Yes, I am signed/under contract with a team</option>
+                        </select>
+                      </div>
+
+                      {editUnderContract && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1 animate-fade-in">
+                          <div className="flex flex-col gap-1">
+                            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Contract Start Date</label>
+                            <input
+                              type="date"
+                              value={editContractStartDate}
+                              onChange={(e) => setEditContractStartDate(e.target.value)}
+                              className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full [color-scheme:dark]"
+                            />
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Contract End Date</label>
+                            <input
+                              type="date"
+                              value={editContractEndDate}
+                              onChange={(e) => setEditContractEndDate(e.target.value)}
+                              className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full [color-scheme:dark]"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </>
                   )}
 

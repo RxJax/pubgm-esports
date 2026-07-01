@@ -54,6 +54,9 @@ interface Player {
   coachingYears?: number;
   coachingHistory?: string | null;
   specialties?: string | null;
+  underContract?: boolean;
+  contractStartDate?: Date | string | null;
+  contractEndDate?: Date | string | null;
   placements: Placement[];
   highlights: Highlight[];
   team: Team | null;
@@ -97,6 +100,21 @@ export default function DashboardClient({ player }: DashboardClientProps) {
   const [role, setRole] = useState(player.role);
   const [region, setRegion] = useState(player.region);
   const [highestTier, setHighestTier] = useState(player.highestTier || "None");
+
+  const formatDateString = (dateVal: any) => {
+    if (!dateVal) return "";
+    try {
+      const d = new Date(dateVal);
+      if (isNaN(d.getTime())) return "";
+      return d.toISOString().substring(0, 10);
+    } catch (e) {
+      return "";
+    }
+  };
+
+  const [underContract, setUnderContract] = useState(player.underContract || false);
+  const [contractStartDate, setContractStartDate] = useState(formatDateString(player.contractStartDate));
+  const [contractEndDate, setContractEndDate] = useState(formatDateString(player.contractEndDate));
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -182,6 +200,9 @@ export default function DashboardClient({ player }: DashboardClientProps) {
       coachingYears: parseInt(coachingYears) || 0,
       coachingHistory: coachingHistory || null,
       specialties: specialties.join(",") || null,
+      underContract: underContract,
+      contractStartDate: underContract && contractStartDate ? contractStartDate : null,
+      contractEndDate: underContract && contractEndDate ? contractEndDate : null,
     };
 
     // If new trophy filled, append it
@@ -446,6 +467,42 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                       <option value="Legend">Tier-1 Pro</option>
                     </select>
                   </div>
+
+                  {/* Contract Management Section */}
+                  <div className="flex flex-col gap-1 border-t border-gaming-gray/40 pt-4">
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Contracted Status</label>
+                    <select
+                      value={underContract ? "yes" : "no"}
+                      onChange={(e) => setUnderContract(e.target.value === "yes")}
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full"
+                    >
+                      <option value="no">No, I am a Free Agent / Open for Offers</option>
+                      <option value="yes">Yes, I am signed/under contract with a team</option>
+                    </select>
+                  </div>
+
+                  {underContract && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 animate-fade-in">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Contract Start Date</label>
+                        <input
+                          type="date"
+                          value={contractStartDate}
+                          onChange={(e) => setContractStartDate(e.target.value)}
+                          className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full [color-scheme:dark]"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Contract End Date</label>
+                        <input
+                          type="date"
+                          value={contractEndDate}
+                          onChange={(e) => setContractEndDate(e.target.value)}
+                          className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full [color-scheme:dark]"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
 

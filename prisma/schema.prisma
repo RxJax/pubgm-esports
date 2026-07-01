@@ -67,6 +67,11 @@ model Player {
   coachingYears   Int                  @default(0)
   coachingHistory String?              // comma-separated past organizations/teams
   specialties     String?              // comma-separated specialty tags
+
+  // Contract tracking fields
+  underContract     Boolean            @default(false) @map("under_contract")
+  contractStartDate DateTime?          @map("contract_start_date")
+  contractEndDate   DateTime?          @map("contract_end_date")
   
   createdAt    DateTime              @default(now())
   updatedAt    DateTime              @updatedAt
