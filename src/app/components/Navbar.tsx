@@ -28,6 +28,22 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId }: NavbarProps)
     const val = e.target.value;
     setSearchVal(val);
 
+    const cleanVal = val.trim();
+    // If it's a numeric character ID (typically 5 to 15 digits), check if we can redirect immediately
+    if (/^\d{5,15}$/.test(cleanVal)) {
+      fetch(`/api/players?search=${encodeURIComponent(cleanVal)}`)
+        .then((res) => (res.ok ? res.json() : []))
+        .then((data) => {
+          const match = data.find((p: any) => p.characterId === cleanVal);
+          if (match) {
+            router.push(`/players/${match.id}`);
+            if (showMobileSearch) setShowMobileSearch(false);
+            setMobileMenuOpen(false);
+          }
+        })
+        .catch((err) => console.error("Error matching character ID:", err));
+    }
+
     const params = new URLSearchParams(searchParams.toString());
     if (val) {
       params.set("search", val);
@@ -39,6 +55,32 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId }: NavbarProps)
       router.push(`/?${params.toString()}`);
     } else {
       router.replace(`/?${params.toString()}`);
+    }
+  };
+
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      const val = searchVal.trim();
+      if (!val) return;
+
+      try {
+        const res = await fetch(`/api/players?search=${encodeURIComponent(val)}`);
+        if (res.ok) {
+          const data = await res.json();
+          // Find exact match (case-insensitive for IGN, or exact for characterId)
+          const exactMatch = data.find((p: any) =>
+            p.ign.toLowerCase() === val.toLowerCase() ||
+            p.characterId === val
+          );
+          if (exactMatch) {
+            router.push(`/players/${exactMatch.id}`);
+            if (showMobileSearch) setShowMobileSearch(false);
+            setMobileMenuOpen(false);
+          }
+        }
+      } catch (err) {
+        console.error("Search redirect matching error:", err);
+      }
     }
   };
 
@@ -80,6 +122,7 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId }: NavbarProps)
                 placeholder="Search IGN or Character ID..."
                 value={searchVal}
                 onChange={handleSearchChange}
+                onKeyDown={handleKeyDown}
                 className="w-full bg-[#0b0c10]/70 backdrop-blur-md border border-gaming-gray hover:border-[#FFBD03]/30 focus:border-[#FFBD03] rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-gray-600 focus:outline-none transition shadow-[inset_0_1px_4px_rgba(0,0,0,0.6)] focus:shadow-[0_0_10px_rgba(255,189,3,0.1)]"
               />
             </div>
@@ -179,6 +222,7 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId }: NavbarProps)
               placeholder="Search IGN or Character ID..."
               value={searchVal}
               onChange={handleSearchChange}
+              onKeyDown={handleKeyDown}
               className="w-full bg-[#0b0c10]/80 border border-gaming-gray focus:border-[#FFBD03] rounded-xl pl-9 pr-4 py-2.5 text-xs text-white focus:outline-none transition placeholder-gray-500"
               autoFocus
             />
