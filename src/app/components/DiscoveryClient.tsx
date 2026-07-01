@@ -29,6 +29,8 @@ interface Player {
   urPoints: number;
   team: Team | null;
   isFeatured?: boolean;
+  teamHistory?: string | null;
+  achievements?: string | null;
 }
 
 interface DiscoveryClientProps {
@@ -170,31 +172,31 @@ export default function DiscoveryClient({
       <header className="py-6 border-b border-gaming-gray mb-8 max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <span className="text-[10px] font-black uppercase bg-digital-yellow/10 text-digital-yellow border border-digital-yellow/20 px-2 py-0.5 rounded tracking-wider">
-            Esports Portal
+            Competitive Roster Portal
           </span>
           <h1 className="text-2xl md:text-3xl font-black tracking-wider bg-gradient-to-r from-airdrop-red to-digital-yellow bg-clip-text text-transparent uppercase mt-2">
-            Scout Discovery Hub
+            PRO ESPORTS RECRUITMENT PORTAL
           </h1>
           <p className="text-gray-400 text-xs mt-1">
-            Real-time filter engine querying official PUBG Mobile Ultimate Royale competitive metrics.
+            Professional competitive database tracking PUBG Mobile esports talent, achievements, and team histories.
           </p>
         </div>
         <div className="flex items-center gap-4 bg-gaming-gray/30 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-gaming-gray self-start md:self-auto">
           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
           <span className="text-xs font-bold text-gray-300">
-            {initialPlayers.length} UR Profiles Active
+            {initialPlayers.length} Pro Portfolios Active
           </span>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto flex flex-col gap-10">
-        {/* ================= SECTION 1: TOP RISING FRAGGERS ================= */}
+        {/* ================= SECTION 1: TIER-1 PROSPECTS ================= */}
         <section className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-black uppercase tracking-wider text-airdrop-red flex items-center gap-2">
-              <span className="text-xl">🔥</span> Top Rising Fraggers
+              <span className="text-xl">🔥</span> TIER-1 PROSPECTS
             </h2>
-            <span className="text-[10px] text-gray-500 font-black uppercase tracking-wider hidden sm:inline">UR K/D Ratio &ge; 6.0</span>
+            <span className="text-[10px] text-gray-500 font-black uppercase tracking-wider hidden sm:inline">Competitive Experience &ge; Semi-Pro</span>
           </div>
 
           <div className="flex overflow-x-auto pb-4 gap-5 scrollbar-thin scrollbar-thumb-gaming-gray scrollbar-track-transparent -mx-4 px-4 sm:mx-0 sm:px-0 w-full">
@@ -212,41 +214,47 @@ export default function DiscoveryClient({
                   key={player.id}
                   className="group flex-none w-[280px] bg-gradient-to-br from-gaming-gray/30 to-[#0c0d12] hover:from-gaming-gray/50 hover:to-[#0c0d12] border border-gaming-gray rounded-2xl p-5 transition-all duration-300 relative overflow-hidden shadow-lg shadow-black/40"
                 >
-                  <div className="absolute top-4 right-4 text-[10px] font-black bg-airdrop-red/10 text-airdrop-red border border-airdrop-red/20 px-2 py-0.5 rounded">
-                    UR K/D: {player.kdRatio.toFixed(2)}
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gaming-black border border-gaming-gray flex items-center justify-center shrink-0">
+                        {player.team?.logoUrl ? (
+                          <img src={player.team.logoUrl} className="w-full h-full object-cover" alt="" />
+                        ) : (
+                          <span className="text-xs font-black text-gray-600">FA</span>
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="font-extrabold text-white text-base group-hover:text-digital-yellow transition">
+                          {player.ign}
+                        </h3>
+                        <p className="text-[9px] text-gray-400 font-black uppercase tracking-wider">
+                          Role: <span className="text-digital-yellow">{player.role}</span>
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-[9px] font-black bg-airdrop-red/10 text-airdrop-red border border-airdrop-red/20 px-2 py-0.5 rounded">
+                      {player.urRank === "Legend" ? "Tier-1 Pro" : player.urRank === "Peerless" ? "Tier-2 Pro" : player.urRank === "Supreme" ? "Tier-3 Pro" : player.urRank === "Exceed" ? "Semi-Pro" : "Amateur"}
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-gaming-black border border-gaming-gray flex items-center justify-center shrink-0">
-                      {player.team?.logoUrl ? (
-                        <img src={player.team.logoUrl} className="w-full h-full object-cover" alt="" />
-                      ) : (
-                        <span className="text-xs font-black text-gray-600">FA</span>
-                      )}
-                    </div>
-                    <div>
-                      <h3 className="font-extrabold text-white text-base group-hover:text-digital-yellow transition">
-                        {player.ign}
-                      </h3>
-                      <p className="text-[9px] text-gray-400 font-black uppercase tracking-wider">
-                        {player.team?.name || "Free Agent"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <p className="text-gray-400 text-xs line-clamp-2 leading-relaxed mb-4 italic">
+                  <p className="text-gray-400 text-xs italic mb-2 line-clamp-1">
                     &ldquo;{player.bio}&rdquo;
                   </p>
 
-                  <div className="flex items-center justify-between text-[9px] bg-gaming-black border border-gaming-gray px-3 py-2 rounded-xl">
-                    <div>
-                      <span className="text-gray-500 block uppercase font-black">UR HS %</span>
-                      <span className="font-black text-gray-200">{player.headshotPct}%</span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-gray-500 block uppercase font-black">Season Tier</span>
-                      <span className="font-black text-digital-yellow">{player.urRank}</span>
-                    </div>
+                  <div className="text-[9px] text-gray-500 mb-3 font-mono flex flex-col gap-0.5">
+                    <div><span className="font-bold text-gray-600">Team:</span> {player.team?.name || "Free Agent"}</div>
+                    {player.teamHistory && (
+                      <div className="line-clamp-1"><span className="font-bold text-gray-600">History:</span> {player.teamHistory}</div>
+                    )}
+                    {player.achievements && (
+                      <div className="line-clamp-1 text-gray-300"><span className="font-bold text-gray-400">Achievements:</span> {player.achievements}</div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between text-[8px] bg-gaming-black border border-gaming-gray/60 px-3 py-1.5 rounded-xl text-gray-500">
+                    <span>In-Game Tier: {player.urRank}</span>
+                    <span>Win Rate: {player.winRate}%</span>
+                    <span>UR K/D: {player.kdRatio.toFixed(2)}</span>
                   </div>
                 </Link>
               ))
@@ -254,10 +262,10 @@ export default function DiscoveryClient({
           </div>
         </section>
 
-        {/* ================= SECTION 2: FEATURED PROFILES ================= */}
+        {/* ================= SECTION 2: FEATURED ESPORTS ROSTERS ================= */}
         <section className="flex flex-col gap-4">
           <h2 className="text-lg font-black uppercase tracking-wider text-digital-yellow flex items-center gap-2">
-            <span className="text-xl">⭐</span> Featured Roster Profiles
+            <span className="text-xl">⭐</span> FEATURED ESPORTS ROSTERS
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {featuredProfiles.length === 0 ? (
@@ -275,12 +283,8 @@ export default function DiscoveryClient({
                   className="group bg-gaming-black border border-gaming-gray p-5 rounded-2xl transition-all duration-300 flex flex-col justify-between shadow-lg relative overflow-hidden"
                 >
                   <div className="absolute top-0 right-0 w-24 h-24 bg-digital-yellow/[0.02] rounded-full blur-xl" />
-                  <div className="absolute top-4 right-4 flex items-center gap-1 bg-digital-yellow/10 text-digital-yellow border border-digital-yellow/20 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider">
-                    ★ Featured
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-3 mb-3">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-gaming-black border border-gaming-gray flex items-center justify-center shrink-0">
                         {player.team?.logoUrl ? (
                           <img src={player.team.logoUrl} className="w-full h-full object-cover" alt="" />
@@ -297,17 +301,29 @@ export default function DiscoveryClient({
                         </span>
                       </div>
                     </div>
-
-                    <p className="text-gray-400 text-xs italic line-clamp-2 leading-relaxed">
-                      &ldquo;{player.bio}&rdquo;
-                    </p>
+                    <div className="flex items-center gap-1 bg-digital-yellow/10 text-digital-yellow border border-digital-yellow/20 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider">
+                      ★ Featured
+                    </div>
                   </div>
 
-                  <div className="mt-4 pt-3 border-t border-gaming-gray flex items-center justify-between text-xs">
-                    <span className="text-gray-500 font-bold uppercase text-[9px]">UR Points</span>
-                    <span className="text-digital-yellow font-black">
-                      {player.urRank} ({player.urPoints} pts)
-                    </span>
+                  <p className="text-gray-400 text-xs italic mb-2 line-clamp-1">
+                    &ldquo;{player.bio}&rdquo;
+                  </p>
+
+                  <div className="text-[9px] text-gray-500 mb-3 font-mono flex flex-col gap-0.5">
+                    <div><span className="font-bold text-gray-600">Team:</span> {player.team?.name || "Free Agent"}</div>
+                    {player.teamHistory && (
+                      <div className="line-clamp-1"><span className="font-bold text-gray-600">History:</span> {player.teamHistory}</div>
+                    )}
+                    {player.achievements && (
+                      <div className="line-clamp-1 text-gray-300"><span className="font-bold text-gray-400">Achievements:</span> {player.achievements}</div>
+                    )}
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-gaming-gray flex items-center justify-between text-[8px] text-gray-500">
+                    <span>In-Game Tier: {player.urRank}</span>
+                    <span>Win Rate: {player.winRate}%</span>
+                    <span>Points: {player.urPoints}</span>
                   </div>
                 </Link>
               ))
@@ -411,19 +427,20 @@ export default function DiscoveryClient({
                 </div>
               </div>
 
-              {/* UR Ranks filter */}
+              {/* Experience Level filter */}
               <div className="flex flex-col gap-2">
-                <label className="text-[9px] font-black text-gray-500 uppercase tracking-wider">UR Rank Tier</label>
+                <label className="text-[9px] font-black text-gray-500 uppercase tracking-wider">Experience Level</label>
                 <select
                   value={selectedUrRank}
                   onChange={(e) => setSelectedUrRank(e.target.value)}
                   className="w-full bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none transition"
                 >
-                  {UR_RANKS.map((tier) => (
-                    <option key={tier} value={tier}>
-                      {tier === "All" ? "All Rank Tiers" : tier}
-                    </option>
-                  ))}
+                  <option value="All">All Experience Levels</option>
+                  <option value="Vanguard">Amateur</option>
+                  <option value="Exceed">Semi-Pro</option>
+                  <option value="Supreme">Tier-3 Pro</option>
+                  <option value="Peerless">Tier-2 Pro</option>
+                  <option value="Legend">Tier-1 Pro</option>
                 </select>
               </div>
 
@@ -564,7 +581,7 @@ export default function DiscoveryClient({
                     <Link
                       href={`/players/${player.id}`}
                       key={player.id}
-                      className="group bg-[#0d0e12] hover:bg-[#15161c] border border-gaming-gray hover:border-digital-yellow/40 rounded-2xl p-4 transition-all duration-200 flex flex-col justify-between shadow-md"
+                      className="group bg-[#0d0e12] hover:bg-[#15161c] border border-gaming-gray hover:border-digital-yellow/40 rounded-2xl p-4 transition-all duration-200 flex flex-col justify-between shadow-md relative overflow-hidden"
                     >
                       <div>
                         {/* Header details */}
@@ -578,7 +595,9 @@ export default function DiscoveryClient({
                           >
                             {player.status === "Signed" ? "Signed" : "LFT"}
                           </span>
-                          <span className="text-[9px] text-gray-600 font-mono">ID: {player.characterId}</span>
+                          <span className="text-[8px] bg-digital-yellow/10 text-digital-yellow border border-digital-yellow/20 px-2 py-0.5 rounded font-black uppercase">
+                            {player.role}
+                          </span>
                         </div>
 
                         {/* IGN */}
@@ -598,34 +617,47 @@ export default function DiscoveryClient({
                           )}
                         </div>
 
-                        {/* Playstyle tags */}
-                        <div className="flex flex-wrap gap-1 mt-3">
-                          <span className="bg-gaming-gray text-gray-300 text-[8px] px-1.5 py-0.5 rounded font-black uppercase">
-                            {player.role}
+                        {/* Team history snippet */}
+                        {player.teamHistory && (
+                          <p className="text-[9px] text-gray-500 mt-1 line-clamp-1">
+                            <span className="font-bold text-gray-600">History:</span> {player.teamHistory}
+                          </p>
+                        )}
+
+                        {/* Achievements snippet */}
+                        {player.achievements ? (
+                          <div className="bg-gaming-black/60 border border-gaming-gray/40 rounded-lg p-2 mt-2 text-[9px] text-gray-300 leading-normal font-mono line-clamp-2">
+                            🏆 {player.achievements}
+                          </div>
+                        ) : (
+                          <div className="mt-2 text-[9px] text-gray-600 italic line-clamp-2">
+                            No achievements registered yet.
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Curated slots */}
+                      <div className="border-t border-gaming-gray mt-3 pt-2.5 grid grid-cols-3 gap-1.5 text-center text-[9px]">
+                        <div className="bg-gaming-black/60 py-1.5 rounded-lg border border-gaming-gray/40">
+                          <span className="text-gray-500 block uppercase font-black">Tourney Tier</span>
+                          <span className="font-black text-digital-yellow text-[9px] mt-0.5 block">
+                            {player.urRank === "Legend" ? "Tier-1 Pro" : player.urRank === "Peerless" ? "Tier-2 Pro" : player.urRank === "Supreme" ? "Tier-3 Pro" : player.urRank === "Exceed" ? "Semi-Pro" : "Amateur"}
                           </span>
-                          <span className="bg-gaming-gray text-gray-300 text-[8px] px-1.5 py-0.5 rounded font-bold">
-                            {player.region}
-                          </span>
-                          <span className="bg-gaming-gray text-gray-300 text-[8px] px-1.5 py-0.5 rounded font-black text-digital-yellow">
-                            {player.urRank}
-                          </span>
+                        </div>
+                        <div className="bg-gaming-black/60 py-1.5 rounded-lg border border-gaming-gray/40">
+                          <span className="text-gray-500 block uppercase font-black">Win Rate</span>
+                          <span className="font-black text-gray-200 text-xs mt-0.5 block">{player.winRate}%</span>
+                        </div>
+                        <div className="bg-gaming-black/60 py-1.5 rounded-lg border border-gaming-gray/40">
+                          <span className="text-gray-500 block uppercase font-black">Region</span>
+                          <span className="font-black text-gray-300 text-xs mt-0.5 block">{player.region}</span>
                         </div>
                       </div>
 
-                      {/* Footer stats */}
-                      <div className="border-t border-gaming-gray mt-4 pt-3 grid grid-cols-3 gap-1.5 text-center text-[9px]">
-                        <div className="bg-gaming-black/60 py-1.5 rounded-lg border border-gaming-gray/40">
-                          <span className="text-gray-500 block uppercase font-black">UR K/D</span>
-                          <span className="font-black text-airdrop-red text-xs mt-0.5 block">{player.kdRatio.toFixed(2)}</span>
-                        </div>
-                        <div className="bg-gaming-black/60 py-1.5 rounded-lg border border-gaming-gray/40">
-                          <span className="text-gray-500 block uppercase font-black">UR Points</span>
-                          <span className="font-black text-gray-300 text-xs mt-0.5 block">{player.urPoints}</span>
-                        </div>
-                        <div className="bg-gaming-black/60 py-1.5 rounded-lg border border-gaming-gray/40">
-                          <span className="text-gray-500 block uppercase font-black">UR Matches</span>
-                          <span className="font-black text-gray-300 text-xs mt-0.5 block">{player.matchesPlayed}</span>
-                        </div>
+                      {/* Footnote */}
+                      <div className="mt-3 pt-2 border-t border-gaming-gray/40 flex justify-between items-center text-[8px] text-gray-600 font-mono">
+                        <span>In-Game Tier: {player.urRank}</span>
+                        <span>UR K/D: {player.kdRatio.toFixed(2)}</span>
                       </div>
                     </Link>
                   ))}

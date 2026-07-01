@@ -57,6 +57,9 @@ model Player {
   
   isFeatured   Boolean               @default(false) @map("is_featured")
   
+  teamHistory  String?               @map("team_history")
+  achievements String?               @map("achievements")
+  
   createdAt    DateTime              @default(now())
   updatedAt    DateTime              @updatedAt
 }

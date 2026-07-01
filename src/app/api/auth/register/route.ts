@@ -26,6 +26,8 @@ export async function POST(request: NextRequest) {
       instagram,
       twitter,
       discord,
+      teamHistory,
+      achievements,
       trophyName,
       trophyPlacement,
       trophyTeam,
@@ -86,6 +88,8 @@ export async function POST(request: NextRequest) {
         instagram: instagram || null,
         twitter: twitter || null,
         discord: discord || null,
+        teamHistory: teamHistory || null,
+        achievements: achievements || null,
       },
     });
 

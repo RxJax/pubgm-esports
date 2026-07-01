@@ -80,6 +80,8 @@ export async function PUT(
       instagram,
       twitter,
       discord,
+      teamHistory,
+      achievements,
       newTrophy,
     } = body;
 
@@ -90,7 +92,7 @@ export async function PUT(
     const validatedMatches = Math.max(0, parseInt(matchesPlayed) || 0);
     const validatedPoints = Math.max(0, parseInt(urPoints) || 0);
 
-    // Update the player record in SQLite
+    // Update the player record in database
     const updatedPlayer = await prisma.player.update({
       where: { id },
       data: {
@@ -109,6 +111,8 @@ export async function PUT(
         instagram: instagram !== undefined ? instagram : undefined,
         twitter: twitter !== undefined ? twitter : undefined,
         discord: discord !== undefined ? discord : undefined,
+        teamHistory: teamHistory !== undefined ? teamHistory : undefined,
+        achievements: achievements !== undefined ? achievements : undefined,
       },
     });
 

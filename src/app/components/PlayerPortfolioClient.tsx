@@ -56,6 +56,8 @@ interface Player {
   instagram: string | null;
   twitter: string | null;
   discord: string | null;
+  teamHistory: string | null;
+  achievements: string | null;
   team: Team | null;
   placements: Placement[];
   highlights: Highlight[];
@@ -112,6 +114,8 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
   const [editDevice, setEditDevice] = useState(player.device);
   const [editSetup, setEditSetup] = useState(player.controlSetup);
   const [editBio, setEditBio] = useState(player.bio);
+  const [editTeamHistory, setEditTeamHistory] = useState(player.teamHistory || "");
+  const [editAchievements, setEditAchievements] = useState(player.achievements || "");
 
   const [editFacebook, setEditFacebook] = useState(player.facebook || "");
   const [editInstagram, setEditInstagram] = useState(player.instagram || "");
@@ -153,6 +157,8 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
       instagram: editInstagram || null,
       twitter: editTwitter || null,
       discord: editDiscord || null,
+      teamHistory: editTeamHistory || null,
+      achievements: editAchievements || null,
     };
 
     // If new trophy fields are filled, append it
@@ -354,7 +360,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
         {/* Tab Controls */}
         <div className="flex border-b border-gaming-gray bg-gaming-gray/20 overflow-x-auto whitespace-nowrap scrollbar-none">
           {[
-            { id: "stats", label: "UR Season Stats" },
+            { id: "stats", label: "COMPETITIVE STANDING" },
             { id: "setup", label: "Control Setup" },
             { id: "trophies", label: `Trophy Room (${player.placements.length})` },
             { id: "highlights", label: `Showcase reels (${player.highlights.length})` },
@@ -382,24 +388,42 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
               {/* Stats Block */}
               <div className="md:col-span-2 bg-gaming-black/60 border border-gaming-gray p-6 rounded-2xl flex flex-col gap-6">
                 <h3 className="text-xs font-black text-digital-yellow uppercase tracking-widest border-b border-gaming-gray pb-3 flex items-center gap-2">
-                  <span className="w-1.5 h-3 bg-digital-yellow" /> UR Season Stats Snapshot
+                  <span className="w-1.5 h-3 bg-digital-yellow" /> COMPETITIVE CAREER & STANDING
                 </h3>
+
+                {/* Competitive Portfolio Block */}
+                {(player.teamHistory || player.achievements) && (
+                  <div className="bg-gaming-black p-4 rounded-xl border border-gaming-gray flex flex-col gap-3 font-mono text-xs">
+                    {player.teamHistory && (
+                      <div>
+                        <span className="text-gray-500 block uppercase font-black text-[9px] mb-1">Competitive Team History / Former Orgs</span>
+                        <span className="text-gray-300 font-semibold">{player.teamHistory}</span>
+                      </div>
+                    )}
+                    {player.achievements && (
+                      <div>
+                        <span className="text-gray-500 block uppercase font-black text-[9px] mb-1">Tournament Achievements</span>
+                        <span className="text-digital-yellow font-bold">🏆 {player.achievements}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <div className="bg-gaming-black p-4 rounded-xl border border-gaming-gray">
-                    <div className="text-gray-500 text-[9px] font-black uppercase tracking-wider">UR Matches</div>
+                    <div className="text-gray-500 text-[9px] font-black uppercase tracking-wider">Official Matches</div>
                     <div className="text-xl font-black text-white mt-1">{player.matchesPlayed}</div>
                   </div>
                   <div className="bg-gaming-black p-4 rounded-xl border border-gaming-gray">
-                    <div className="text-gray-500 text-[9px] font-black uppercase tracking-wider">UR K/D Ratio</div>
+                    <div className="text-gray-500 text-[9px] font-black uppercase tracking-wider">Official K/D Ratio</div>
                     <div className="text-xl font-black text-airdrop-red mt-1">{player.kdRatio.toFixed(2)}</div>
                   </div>
                   <div className="bg-gaming-black p-4 rounded-xl border border-gaming-gray">
-                    <div className="text-gray-500 text-[9px] font-black uppercase tracking-wider">UR Headshot %</div>
+                    <div className="text-gray-500 text-[9px] font-black uppercase tracking-wider">Official HS %</div>
                     <div className="text-xl font-black text-white mt-1">{player.headshotPct}%</div>
                   </div>
                   <div className="bg-gaming-black p-4 rounded-xl border border-gaming-gray">
-                    <div className="text-gray-500 text-[9px] font-black uppercase tracking-wider">UR Win Rate</div>
+                    <div className="text-gray-500 text-[9px] font-black uppercase tracking-wider">Official Win Rate</div>
                     <div className="text-xl font-black text-white mt-1">{player.winRate}%</div>
                   </div>
                 </div>
@@ -408,7 +432,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                 <div className="flex flex-col gap-5 mt-2">
                   <div>
                     <div className="flex justify-between text-xs font-bold text-gray-400 mb-1.5">
-                      <span>UR K/D Performance Ratio</span>
+                      <span>K/D Performance Ratio</span>
                       <span className="font-black text-airdrop-red">{player.kdRatio.toFixed(2)}</span>
                     </div>
                     <div className="w-full bg-gaming-black h-2.5 rounded-full overflow-hidden border border-gaming-gray">
@@ -421,7 +445,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
 
                   <div>
                     <div className="flex justify-between text-xs font-bold text-gray-400 mb-1.5">
-                      <span>UR Headshot Accuracy</span>
+                      <span>Headshot Accuracy</span>
                       <span className="font-black text-digital-yellow">{player.headshotPct}%</span>
                     </div>
                     <div className="w-full bg-gaming-black h-2.5 rounded-full overflow-hidden border border-gaming-gray">
@@ -437,14 +461,14 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
               {/* Ranks Block */}
               <div className="bg-gaming-black/60 border border-gaming-gray p-6 rounded-2xl flex flex-col gap-4">
                 <h3 className="text-xs font-black text-digital-yellow uppercase tracking-widest border-b border-gaming-gray pb-3 flex items-center gap-2">
-                  <span className="w-1.5 h-3 bg-digital-yellow" /> Ultimate Royale Status
+                  <span className="w-1.5 h-3 bg-digital-yellow" /> Roster Standing
                 </h3>
 
                 <div className="flex flex-col gap-5">
                   <div>
-                    <span className="text-[9px] text-gray-500 font-black uppercase tracking-wider">UR Rank Tier</span>
-                    <div className="text-lg font-black text-digital-yellow uppercase mt-1">
-                      👑 {player.urRank}
+                    <span className="text-[9px] text-gray-500 font-black uppercase tracking-wider">Tournament Tier</span>
+                    <div className="text-base font-black text-digital-yellow uppercase mt-1">
+                      👑 {player.urRank === "Legend" ? "Tier-1 Pro" : player.urRank === "Peerless" ? "Tier-2 Pro" : player.urRank === "Supreme" ? "Tier-3 Pro" : player.urRank === "Exceed" ? "Semi-Pro" : "Amateur"}
                     </div>
                   </div>
 
@@ -456,7 +480,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                   </div>
 
                   <div>
-                    <span className="text-[9px] text-gray-500 font-black uppercase tracking-wider">Scout Rating</span>
+                    <span className="text-[9px] text-gray-500 font-black uppercase tracking-wider">Esports Rating</span>
                     <div className="text-2xl font-black text-airdrop-red mt-1">
                       {Math.round(player.kdRatio * 10 + player.winRate * 2)} <span className="text-xs text-gray-500 font-normal">/ 150</span>
                     </div>
@@ -705,21 +729,21 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">UR Rank Tier</label>
+                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Tournament Tier</label>
                       <select
                         value={editUrRank}
                         onChange={(e) => setEditUrRank(e.target.value)}
                         className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none transition"
                       >
-                        {UR_RANKS.map((tier) => (
-                          <option key={tier} value={tier}>
-                            {tier}
-                          </option>
-                        ))}
+                        <option value="Vanguard">Amateur</option>
+                        <option value="Exceed">Semi-Pro</option>
+                        <option value="Supreme">Tier-3 Pro</option>
+                        <option value="Peerless">Tier-2 Pro</option>
+                        <option value="Legend">Tier-1 Pro</option>
                       </select>
                     </div>
                     <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Season Points</label>
+                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Season Point Equivalent</label>
                       <input
                         type="number"
                         min="0"
@@ -727,6 +751,29 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                         onChange={(e) => setEditUrPoints(e.target.value)}
                         className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-1.5 text-xs text-white focus:border-digital-yellow focus:outline-none transition"
                         required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-4 border-t border-gaming-gray/30 pt-3">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Competitive Team History / Former Orgs</label>
+                      <input
+                        type="text"
+                        value={editTeamHistory}
+                        onChange={(e) => setEditTeamHistory(e.target.value)}
+                        placeholder="e.g. Nova Esports, Alpha Team, Free Agent"
+                        className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none transition"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Tournament Achievements & Highlights</label>
+                      <textarea
+                        value={editAchievements}
+                        onChange={(e) => setEditAchievements(e.target.value)}
+                        placeholder="e.g. 1st Place PMCO 2025, MVP PMSL Season 2"
+                        rows={2}
+                        className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-1.5 text-xs text-white focus:border-digital-yellow focus:outline-none transition resize-none"
                       />
                     </div>
                   </div>

@@ -34,6 +34,8 @@ export default function RegisterWizard() {
   const [matchesPlayed, setMatchesPlayed] = useState("100");
   const [urRank, setUrRank] = useState("Vanguard");
   const [urPoints, setUrPoints] = useState("1200");
+  const [teamHistory, setTeamHistory] = useState("");
+  const [achievements, setAchievements] = useState("");
 
   const [facebook, setFacebook] = useState("");
   const [instagram, setInstagram] = useState("");
@@ -202,6 +204,8 @@ export default function RegisterWizard() {
       instagram: instagram || null,
       twitter: twitter || null,
       discord: discord || null,
+      teamHistory: teamHistory || null,
+      achievements: achievements || null,
       trophyName,
       trophyPlacement: parseInt(trophyPlacement) || 1,
       trophyTeam: trophyTeam || "Free Agent",
@@ -428,90 +432,113 @@ export default function RegisterWizard() {
             </div>
           )}
 
-          {/* STEP 3: Stats */}
+          {/* STEP 3: Competitive Experience & Achievements */}
           {step === 3 && (
             <div className="flex flex-col gap-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">UR K/D Ratio (0 - 15.0)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="15"
-                    value={kdRatio}
-                    onChange={(e) => setKdRatio(e.target.value)}
-                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
-                    required
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">UR Headshot % (0 - 100)</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    max="100"
-                    value={headshotPct}
-                    onChange={(e) => setHeadshotPct(e.target.value)}
-                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">UR Win Rate % (0 - 100)</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    max="100"
-                    value={winRate}
-                    onChange={(e) => setWinRate(e.target.value)}
-                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
-                    required
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">UR Matches Played</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={matchesPlayed}
-                    onChange={(e) => setMatchesPlayed(e.target.value)}
-                    className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">UR Rank Tier</label>
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Competitive Tier / Experience Level</label>
                   <select
                     value={urRank}
                     onChange={(e) => setUrRank(e.target.value)}
                     className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none transition"
                   >
-                    {UR_RANKS.map((tier) => (
-                      <option key={tier} value={tier}>
-                        {tier}
-                      </option>
-                    ))}
+                    <option value="Vanguard">Amateur</option>
+                    <option value="Exceed">Semi-Pro</option>
+                    <option value="Supreme">Tier-3 Pro</option>
+                    <option value="Peerless">Tier-2 Pro</option>
+                    <option value="Legend">Tier-1 Pro</option>
                   </select>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Season Points</label>
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Season Point Equivalent</label>
                   <input
                     type="number"
                     min="0"
                     value={urPoints}
                     onChange={(e) => setUrPoints(e.target.value)}
-                    className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
                     required
                   />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Competitive Team History / Former Orgs</label>
+                <input
+                  type="text"
+                  value={teamHistory}
+                  onChange={(e) => setTeamHistory(e.target.value)}
+                  placeholder="e.g. Nova Esports, Alpha Team, Free Agent"
+                  className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Tournament Achievements & Highlights</label>
+                <textarea
+                  value={achievements}
+                  onChange={(e) => setAchievements(e.target.value)}
+                  placeholder="e.g. 1st Place PMCO 2025, MVP PMSL Season 2"
+                  rows={2}
+                  className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition resize-none"
+                />
+              </div>
+
+              {/* Collapsible baseline stats */}
+              <div className="border-t border-gaming-gray/30 pt-3">
+                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-2">In-Game Stats Baseline (Optional Validation)</h4>
+                <div className="grid grid-cols-4 gap-2">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[8px] font-bold text-gray-600 uppercase">K/D Ratio</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="15"
+                      value={kdRatio}
+                      onChange={(e) => setKdRatio(e.target.value)}
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-lg px-2 py-1 text-[10px] text-white focus:outline-none transition"
+                      required
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[8px] font-bold text-gray-600 uppercase">HS %</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="100"
+                      value={headshotPct}
+                      onChange={(e) => setHeadshotPct(e.target.value)}
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-lg px-2 py-1 text-[10px] text-white focus:outline-none transition"
+                      required
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[8px] font-bold text-gray-600 uppercase">Win Rate %</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="100"
+                      value={winRate}
+                      onChange={(e) => setWinRate(e.target.value)}
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-lg px-2 py-1 text-[10px] text-white focus:outline-none transition"
+                      required
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[8px] font-bold text-gray-600 uppercase">Matches</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={matchesPlayed}
+                      onChange={(e) => setMatchesPlayed(e.target.value)}
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-lg px-2 py-1 text-[10px] text-white focus:outline-none transition"
+                      required
+                    />
+                  </div>
                 </div>
               </div>
             </div>
