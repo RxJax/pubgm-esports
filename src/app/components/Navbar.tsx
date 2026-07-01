@@ -101,11 +101,11 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId }: NavbarProps)
 
       {/* Mobile Dropdown Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[#0D0E12] border-b border-gaming-gray px-4 pt-2 pb-4 flex flex-col gap-3.5 shadow-2xl animate-fade-in">
+        <div className="md:hidden bg-[#0D0E12]/95 backdrop-blur-md border-b-2 border-gaming-gray px-6 py-3 flex flex-col gap-1.5 shadow-2xl animate-fade-in">
           <Link
             href="/"
             onClick={() => setMobileMenuOpen(false)}
-            className="text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white py-1 transition"
+            className="text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white min-h-[48px] flex items-center border-b border-gaming-gray/30 transition"
           >
             Discovery Feed
           </Link>
@@ -115,7 +115,7 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId }: NavbarProps)
               <Link
                 href="/dashboard"
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-xs font-black uppercase tracking-widest text-digital-yellow hover:text-amber-400 py-1 transition"
+                className="text-xs font-black uppercase tracking-widest text-digital-yellow hover:text-amber-400 min-h-[48px] flex items-center border-b border-gaming-gray/30 transition"
               >
                 🎮 PROFILE
               </Link>
@@ -124,7 +124,7 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId }: NavbarProps)
                   setMobileMenuOpen(false);
                   handleLogout();
                 }}
-                className="text-xs font-black uppercase tracking-widest text-airdrop-red hover:text-red-500 py-1 text-left transition cursor-pointer"
+                className="text-xs font-black uppercase tracking-widest text-airdrop-red hover:text-red-500 min-h-[48px] flex items-center py-1 text-left transition cursor-pointer"
               >
                 Log Out
               </button>
@@ -134,14 +134,14 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId }: NavbarProps)
               <Link
                 href="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white py-1 transition"
+                className="text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white min-h-[48px] flex items-center border-b border-gaming-gray/30 transition"
               >
                 Sign In
               </Link>
               <Link
                 href="/register"
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-center bg-transparent border-2 border-digital-yellow text-digital-yellow font-black text-xs px-4 py-2.5 rounded-xl uppercase tracking-widest transition"
+                className="text-center bg-transparent border-2 border-digital-yellow text-digital-yellow font-black text-xs min-h-[48px] flex items-center justify-center rounded-xl uppercase tracking-widest transition mt-2"
               >
                 Create Profile
               </Link>

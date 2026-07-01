@@ -188,7 +188,7 @@ export default function DiscoveryClient({
       {/* Discovery Hub Banner */}
       <header className="relative py-8 px-6 bg-gradient-to-r from-[#0d0e12] to-[#151720] border border-gaming-gray rounded-3xl mb-8 max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4 overflow-hidden">
         {/* Background Trophies SVG */}
-        <div className="absolute right-24 bottom-0 hidden lg:block">
+        <div className="absolute right-24 bottom-0 hidden md:block">
           <svg width="320" height="160" viewBox="0 0 400 200" fill="none">
             <style>
               {`
@@ -342,7 +342,7 @@ export default function DiscoveryClient({
           <span className="text-[9px] font-black uppercase bg-digital-yellow/15 text-digital-yellow border border-digital-yellow/20 px-2.5 py-0.5 rounded tracking-wider">
             COMPETITIVE ROSTER PORTAL
           </span>
-          <h1 className="text-2xl md:text-3xl font-black tracking-wider bg-gradient-to-r from-airdrop-red to-digital-yellow bg-clip-text text-transparent uppercase mt-2">
+          <h1 className="text-2xl md:text-4xl font-black tracking-wider bg-gradient-to-r from-airdrop-red to-digital-yellow bg-clip-text text-transparent uppercase mt-2">
             PRO ESPORTS RECRUITMENT PORTAL
           </h1>
           <p className="text-gray-400 text-xs mt-1 max-w-xl">
@@ -362,7 +362,7 @@ export default function DiscoveryClient({
             <span className="text-[10px] text-gray-500 font-black uppercase tracking-wider hidden sm:inline">COMPETITIVE EXPERIENCE &ge; SEMI-PRO</span>
           </div>
 
-          <div className="flex overflow-x-auto pb-4 gap-5 scrollbar-thin scrollbar-thumb-gaming-gray scrollbar-track-transparent -mx-4 px-4 sm:mx-0 sm:px-0 w-full">
+          <div className="flex overflow-x-auto pb-4 gap-5 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gaming-gray scrollbar-track-transparent -mx-4 px-4 sm:mx-0 sm:px-0 w-full">
             {topRisingFraggers.length === 0 ? (
               <div className="w-full bg-[#111827]/10 border border-gaming-gray rounded-2xl p-8 text-center flex flex-col items-center justify-center gap-2">
                 <span className="text-2xl">🔥</span>
@@ -382,7 +382,7 @@ export default function DiscoveryClient({
                   <Link
                     href={`/players/${player.id}`}
                     key={player.id}
-                    className={`group flex-none w-[340px] bg-gradient-to-br from-gaming-gray/30 to-[#0c0d12] hover:from-gaming-gray/50 hover:to-[#0c0d12] border-2 rounded-2xl p-5 transition-all duration-300 relative overflow-hidden shadow-lg ${borderGlowClass}`}
+                    className={`group flex-none w-[85vw] sm:w-[340px] snap-center snap-always bg-gradient-to-br from-gaming-gray/30 to-[#0c0d12] hover:from-gaming-gray/50 hover:to-[#0c0d12] border-2 rounded-2xl p-5 transition-all duration-300 relative overflow-hidden shadow-lg ${borderGlowClass}`}
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex items-center gap-3">
@@ -469,20 +469,66 @@ export default function DiscoveryClient({
 
         {/* ================= SECTION 2: FEATURED ESPORTS ROSTERS ================= */}
         <section className="flex flex-col gap-4">
-          <h2 className="text-lg font-black uppercase tracking-wider text-digital-yellow flex items-center gap-2">
-            <span className="text-xl">⭐</span> FEATURED ESPORTS ROSTERS
-          </h2>
-          
-          <div className="bg-[#0d0e12] border-2 border-dashed border-gaming-gray/60 rounded-3xl p-10 text-center flex flex-col items-center justify-center gap-3.5 shadow-lg relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-digital-yellow/[0.01] rounded-full blur-xl" />
-            <span className="text-3xl filter drop-shadow-[0_0_8px_rgba(255,189,3,0.3)]">🔒</span>
-            <h3 className="text-sm font-black text-white uppercase tracking-widest">
-              FEATURED ROSTERS LOCKED
-            </h3>
-            <p className="text-gray-400 text-xs max-w-md leading-relaxed">
-              Only system developers can add and configure official competitive esports rosters. 
-              Please contact the platform administrator to register team slots.
-            </p>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-black uppercase tracking-wider text-digital-yellow flex items-center gap-2">
+              <span className="text-xl">⭐</span> FEATURED ESPORTS ROSTERS
+            </h2>
+            <span className="text-[10px] text-gray-500 font-black uppercase tracking-wider hidden sm:inline">OFFICIAL LINEUPS</span>
+          </div>
+
+          <div className="bg-[#0d0e12] border border-gaming-gray rounded-3xl p-6 shadow-lg relative overflow-hidden flex flex-col gap-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-gaming-gray/30 pb-4">
+              <div>
+                <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                  🏆 TEAM RXJAX OFFICIAL LINEUP
+                </h3>
+                <p className="text-gray-500 text-[10px] mt-0.5 font-medium">CURRENT REGISTRATION ACTIVE • S-TIER DIRECTORY</p>
+              </div>
+              <span className="text-[9px] font-black uppercase bg-digital-yellow/10 border border-[#FFBD03]/20 text-[#FFBD03] px-2.5 py-1 rounded">
+                🔒 ROSTER LOCK ACTIVE
+              </span>
+            </div>
+
+            {/* Lineup Grid: 2x2 grid on mobile, 4 columns on desktop */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { role: "IGL", label: "In-Game Leader", icon: "👑" },
+                { role: "Entry Fragger", label: "Entry Fragger", icon: "⚔️" },
+                { role: "Support", label: "Support", icon: "🛡️" },
+                { role: "Sniper", label: "Sniper / Marksman", icon: "🎯" },
+              ].map((pos) => {
+                // Find a featured player with this role
+                const player = featuredProfiles.find(p => p.role === pos.role);
+                return (
+                  <div key={pos.role} className="bg-gaming-black/60 border border-gaming-gray rounded-2xl p-4 flex flex-col items-center text-center relative group hover:border-[#FFBD03]/40 transition">
+                    <span className="absolute top-2 left-2 text-[8px] font-bold text-gray-500 uppercase tracking-widest">{pos.icon} {pos.role}</span>
+                    <div className="w-12 h-12 rounded-full bg-gaming-black border border-gaming-gray overflow-hidden flex items-center justify-center mt-4 mb-2 relative shrink-0">
+                      {player?.avatarUrl ? (
+                        <img src={player.avatarUrl} className="w-full h-full object-cover" alt="" />
+                      ) : (
+                        <svg viewBox="0 0 100 100" className="w-6 h-6 text-gray-700">
+                          <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
+                          <path d="M15,85 C15,60 30,55 50,55 C70,55 85,60 85,85 Z" fill="currentColor" opacity="0.6" />
+                        </svg>
+                      )}
+                    </div>
+                    {player ? (
+                      <>
+                        <Link href={`/players/${player.id}`} className="font-extrabold text-white text-xs uppercase tracking-wide hover:text-digital-yellow transition truncate max-w-full block">
+                          {player.ign}
+                        </Link>
+                        <span className="text-[8px] text-[#10B981] font-black uppercase mt-1">SIGNED</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="font-bold text-gray-600 text-[10px] uppercase tracking-wide">VACANT SLOT</span>
+                        <span className="text-[8px] text-gray-500 font-bold uppercase mt-1">RECRUITING</span>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </section>
 
@@ -750,10 +796,10 @@ export default function DiscoveryClient({
                     <Link
                       href={`/players/${player.id}`}
                       key={player.id}
-                      className="grid grid-cols-1 sm:grid-cols-5 gap-3 sm:gap-4 items-center px-5 py-4 bg-[#0d0e12] hover:bg-[#15161c] border border-gaming-gray/60 hover:border-digital-yellow/30 rounded-2xl transition duration-150 shadow-md"
+                      className="flex flex-col sm:grid sm:grid-cols-5 gap-3.5 sm:gap-4 items-start sm:items-center px-5 py-4 bg-[#0d0e12] hover:bg-[#15161c] border border-gaming-gray/60 hover:border-digital-yellow/30 rounded-2xl transition duration-150 shadow-md w-full"
                     >
                       {/* PROFILE column */}
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 w-full sm:w-auto">
                         <div className="w-9 h-9 rounded-full bg-gaming-black border border-gaming-gray overflow-hidden flex items-center justify-center shrink-0 relative">
                           {player.avatarUrl ? (
                             <img src={player.avatarUrl} className="w-full h-full object-cover" alt="" />
@@ -775,44 +821,56 @@ export default function DiscoveryClient({
                       </div>
 
                       {/* ROLE column */}
-                      <div className="text-xs font-semibold text-gray-300 flex items-center gap-2">
-                        <span className="text-digital-yellow text-xs">🎯</span>
-                        <span>{player.profileType === "Coach" ? "PRO COACH" : player.role}</span>
+                      <div className="text-xs font-semibold text-gray-300 flex items-center gap-2 w-full sm:w-auto">
+                        <span className="text-gray-500 text-[9px] uppercase font-black tracking-wider sm:hidden w-16 shrink-0">Role:</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-digital-yellow text-xs">🎯</span>
+                          <span>{player.profileType === "Coach" ? "PRO COACH" : player.role}</span>
+                        </div>
                       </div>
 
                       {/* FILTER TAGS column */}
-                      <div className="flex flex-wrap gap-1.5">
-                        <span className="bg-gaming-gray/40 text-gray-400 text-[8px] px-1.5 py-0.5 rounded font-black uppercase">
-                          {player.region}
-                        </span>
-                        {player.profileType === "Coach" ? (
-                          <span className="bg-digital-yellow/10 text-digital-yellow border border-digital-yellow/20 text-[8px] px-1.5 py-0.5 rounded font-black uppercase">
-                            👑 {player.coachingYears} Years Exp
+                      <div className="flex items-center sm:block gap-2 w-full sm:w-auto">
+                        <span className="text-gray-500 text-[9px] uppercase font-black tracking-wider sm:hidden w-16 shrink-0">Tags:</span>
+                        <div className="flex flex-wrap gap-1.5">
+                          <span className="bg-gaming-gray/40 text-gray-400 text-[8px] px-1.5 py-0.5 rounded font-black uppercase">
+                            {player.region}
                           </span>
-                        ) : (
-                          <span className="bg-digital-yellow/10 text-digital-yellow border border-digital-yellow/20 text-[8px] px-1.5 py-0.5 rounded font-black uppercase">
-                            {player.urRank === "Legend" ? "Tier-1 Pro" : player.urRank === "Peerless" ? "Tier-2 Pro" : player.urRank === "Supreme" ? "Tier-3 Pro" : player.urRank === "Exceed" ? "Semi-Pro" : "Amateur"}
-                          </span>
-                        )}
+                          {player.profileType === "Coach" ? (
+                            <span className="bg-digital-yellow/10 text-digital-yellow border border-digital-yellow/20 text-[8px] px-1.5 py-0.5 rounded font-black uppercase">
+                              👑 {player.coachingYears} Years Exp
+                            </span>
+                          ) : (
+                            <span className="bg-digital-yellow/10 text-digital-yellow border border-digital-yellow/20 text-[8px] px-1.5 py-0.5 rounded font-black uppercase">
+                              {player.urRank === "Legend" ? "Tier-1 Pro" : player.urRank === "Peerless" ? "Tier-2 Pro" : player.urRank === "Supreme" ? "Tier-3 Pro" : player.urRank === "Exceed" ? "Semi-Pro" : "Amateur"}
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       {/* SORT / STATS column */}
-                      {player.profileType === "Coach" ? (
-                        <div className="flex flex-col text-[10px] font-bold text-gray-400 font-mono">
-                          <div>Type: <span className="text-digital-yellow font-black">Coach</span></div>
-                          <div className="text-[8px] text-gray-500 truncate max-w-[120px]">{player.specialties || "Generalist"}</div>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col text-[10px] font-bold text-gray-400 font-mono">
-                          <div>Rating: <span className="text-airdrop-red font-black">{getEsportsRating(player.highestTier)}</span></div>
-                          <div className="text-[8px] text-gray-500">Tier: {player.highestTier || "None"}</div>
-                        </div>
-                      )}
+                      <div className="flex items-center sm:block gap-2 w-full sm:w-auto">
+                        <span className="text-gray-500 text-[9px] uppercase font-black tracking-wider sm:hidden w-16 shrink-0">Standing:</span>
+                        {player.profileType === "Coach" ? (
+                          <div className="flex flex-col text-[10px] font-bold text-gray-400 font-mono">
+                            <div>Type: <span className="text-digital-yellow font-black">Coach</span></div>
+                            <div className="text-[8px] text-gray-500 truncate max-w-[120px]">{player.specialties || "Generalist"}</div>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col text-[10px] font-bold text-gray-400 font-mono">
+                            <div>Rating: <span className="text-airdrop-red font-black">{getEsportsRating(player.highestTier)}</span></div>
+                            <div className="text-[8px] text-gray-500">Tier: {player.highestTier || "None"}</div>
+                          </div>
+                        )}
+                      </div>
 
                       {/* SORTED / ACTIVE column */}
-                      <div className="sm:text-right text-[10px] text-gray-500 font-mono flex flex-col sm:items-end justify-center">
-                        <span className="text-green-500 font-black">Active now</span>
-                        <span className="text-[8px] text-gray-600">Updated recently</span>
+                      <div className="flex items-center sm:items-end justify-start sm:justify-center sm:text-right text-[10px] text-gray-500 font-mono gap-2 w-full border-t border-gaming-gray/30 pt-3 sm:border-0 sm:pt-0">
+                        <span className="text-gray-500 text-[9px] uppercase font-black tracking-wider sm:hidden w-16 shrink-0">Status:</span>
+                        <div className="flex flex-col sm:items-end">
+                          <span className="text-green-500 font-black">Active now</span>
+                          <span className="text-[8px] text-gray-600">Updated recently</span>
+                        </div>
                       </div>
                     </Link>
                   ))}

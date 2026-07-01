@@ -587,11 +587,11 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
               </button>
 
               {showShareMenu && (
-                <div className="absolute right-0 bottom-full mb-2 w-44 bg-[#0d0e12] border-2 border-gaming-gray rounded-xl shadow-2xl overflow-hidden z-30 animate-fade-in">
+                <div className="absolute right-0 bottom-full mb-2 w-52 bg-[#0d0e12] border-2 border-gaming-gray rounded-xl shadow-2xl overflow-hidden z-30 animate-fade-in">
                   <button
                     type="button"
                     onClick={handleExportImage}
-                    className="w-full text-left px-3 py-2 text-[10px] font-black uppercase text-gray-300 hover:text-white hover:bg-gaming-gray/30 transition flex items-center gap-2 border-b border-gaming-gray/40 cursor-pointer"
+                    className="w-full text-left px-4 py-3 min-h-[48px] text-[10.5px] font-black uppercase text-gray-300 hover:text-white hover:bg-gaming-gray/30 transition flex items-center gap-2.5 border-b border-gaming-gray/40 cursor-pointer"
                   >
                     <span>💾</span> Save as Image
                   </button>
@@ -600,7 +600,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => setShowShareMenu(false)}
-                    className="w-full text-left px-3 py-2 text-[10px] font-black uppercase text-gray-300 hover:text-white hover:bg-gaming-gray/30 transition flex items-center gap-2 border-b border-gaming-gray/40 block"
+                    className="w-full text-left px-4 py-3 min-h-[48px] text-[10.5px] font-black uppercase text-gray-300 hover:text-white hover:bg-gaming-gray/30 transition flex items-center gap-2.5 border-b border-gaming-gray/40 flex"
                   >
                     <span>👥</span> Share on Facebook
                   </a>
@@ -615,7 +615,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                       }
                       setShowShareMenu(false);
                     }}
-                    className="w-full text-left px-3 py-2 text-[10px] font-black uppercase text-gray-300 hover:text-white hover:bg-gaming-gray/30 transition flex items-center gap-2 border-b border-gaming-gray/40 block"
+                    className="w-full text-left px-4 py-3 min-h-[48px] text-[10.5px] font-black uppercase text-gray-300 hover:text-white hover:bg-gaming-gray/30 transition flex items-center gap-2.5 border-b border-gaming-gray/40 flex"
                   >
                     <span>📸</span> Share on Instagram
                   </a>
@@ -628,7 +628,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                       }
                       setShowShareMenu(false);
                     }}
-                    className="w-full text-left px-3 py-2 text-[10px] font-black uppercase text-gray-300 hover:text-white hover:bg-gaming-gray/30 transition flex items-center gap-2 cursor-pointer"
+                    className="w-full text-left px-4 py-3 min-h-[48px] text-[10.5px] font-black uppercase text-gray-300 hover:text-white hover:bg-gaming-gray/30 transition flex items-center gap-2.5 cursor-pointer"
                   >
                     <span>🔗</span> Copy Profile Link
                   </button>
