@@ -144,9 +144,9 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId, isAdmin }: Nav
                 {isAdmin && (
                   <Link
                     href="/admin/moderation"
-                    className="text-xs font-black uppercase tracking-widest text-[#ef4444] hover:text-white transition"
+                    className="text-[10px] font-black uppercase tracking-widest text-[#FFBD03] hover:text-white border border-[#FFBD03]/30 hover:border-[#FFBD03] bg-[#FFBD03]/5 px-3 py-1.5 rounded-xl transition shadow-[0_0_8px_rgba(255,189,3,0.15)] hover:shadow-[0_0_12px_rgba(255,189,3,0.35)] shrink-0"
                   >
-                    🛡️ MODERATION
+                    🛠️ ADMIN PANEL
                   </Link>
                 )}
                 <Link
@@ -263,9 +263,9 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId, isAdmin }: Nav
                 <Link
                   href="/admin/moderation"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-xs font-black uppercase tracking-widest text-airdrop-red hover:text-white min-h-[48px] flex items-center border-b border-gaming-gray/30 transition gap-2"
+                  className="text-xs font-black uppercase tracking-widest text-[#FFBD03] hover:text-white min-h-[48px] flex items-center gap-2 border-b border-gaming-gray/30 transition"
                 >
-                  🛡️ MODERATION
+                  🛠️ ADMIN PANEL
                 </Link>
               )}
               <Link
