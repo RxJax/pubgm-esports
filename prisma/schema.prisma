@@ -57,6 +57,7 @@ model Player {
   highlights   Highlight[]
   
   isFeatured   Boolean               @default(false) @map("is_featured")
+  isVerified   Boolean               @default(false) @map("is_verified")
   
   teamHistory  String?               @map("team_history")
   achievements String?               @map("achievements")

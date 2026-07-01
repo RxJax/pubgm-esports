@@ -31,6 +31,7 @@ interface Player {
   urPoints: number;
   team: Team | null;
   isFeatured?: boolean;
+  isVerified?: boolean;
   teamHistory?: string | null;
   achievements?: string | null;
   highestTier?: string;
@@ -430,8 +431,20 @@ export default function DiscoveryClient({
                             )}
                           </div>
                           <div>
-                            <h3 className="font-extrabold text-white text-base group-hover:text-digital-yellow transition uppercase tracking-wide">
-                              {player.ign}
+                            <h3 className="font-extrabold text-white text-base group-hover:text-digital-yellow transition uppercase tracking-wide flex items-center gap-1.5">
+                              <span>{player.ign}</span>
+                              {(player.isVerified || player.isFeatured) && (
+                                <span className="relative group/tooltip inline-flex items-center shrink-0 align-middle">
+                                  <span className="inline-flex items-center justify-center w-[14px] h-[14px] rounded-full bg-[#1877F2] text-white select-none pointer-events-auto" style={{ filter: 'drop-shadow(0 0 6px rgba(0, 112, 243, 0.7))' }}>
+                                    <svg className="w-[8.5px] h-[8.5px] text-white stroke-[3.5] stroke-current" fill="none" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                  </span>
+                                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-white bg-black border border-gaming-gray rounded-lg opacity-0 group-hover/tooltip:opacity-100 group-focus/tooltip:opacity-100 pointer-events-none transition-all duration-150 whitespace-nowrap z-50 shadow-xl">
+                                    Verified Pro
+                                  </span>
+                                </span>
+                              )}
                             </h3>
                             <p className="text-[9px] text-gray-400 font-black uppercase tracking-wider">
                               {player.status === "Signed" ? (player.team?.name || "Not Available") : (player.team?.name || "Free Agent")}
@@ -599,8 +612,20 @@ export default function DiscoveryClient({
                             )}
                           </div>
                           <div className="truncate">
-                            <h4 className="font-extrabold text-white text-sm uppercase tracking-wide group-hover:text-digital-yellow transition truncate">
-                              {player.ign}
+                            <h4 className="font-extrabold text-white text-sm uppercase tracking-wide group-hover:text-digital-yellow transition truncate flex items-center gap-1.5">
+                              <span className="truncate">{player.ign}</span>
+                              {(player.isVerified || player.isFeatured) && (
+                                <span className="relative group/tooltip inline-flex items-center shrink-0 align-middle">
+                                  <span className="inline-flex items-center justify-center w-[13px] h-[13px] rounded-full bg-[#1877F2] text-white select-none pointer-events-auto" style={{ filter: 'drop-shadow(0 0 6px rgba(0, 112, 243, 0.7))' }}>
+                                    <svg className="w-[8px] h-[8px] text-white stroke-[3.5] stroke-current" fill="none" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                  </span>
+                                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-white bg-black border border-gaming-gray rounded-lg opacity-0 group-hover/tooltip:opacity-100 group-focus/tooltip:opacity-100 pointer-events-none transition-all duration-150 whitespace-nowrap z-50 shadow-xl font-sans">
+                                    Verified Pro
+                                  </span>
+                                </span>
+                              )}
                             </h4>
                             <p className="text-[9px] text-gray-500 uppercase truncate">
                               {player.status === "Signed" ? (player.team?.name || "Not Available") : (player.team?.name || "Free Agent")}

@@ -71,6 +71,8 @@ interface Player {
   team: Team | null;
   placements: Placement[];
   highlights: Highlight[];
+  isVerified?: boolean;
+  isFeatured?: boolean;
 }
 
 interface PlayerPortfolioClientProps {
@@ -583,7 +585,19 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
 
               {/* IGN */}
               <h1 className="text-3xl md:text-4xl font-black text-white uppercase tracking-wider flex items-center justify-center sm:justify-start gap-3">
-                {player.ign}
+                <span>{player.ign}</span>
+                {(player.isVerified || player.isFeatured) && (
+                  <span className="relative group/tooltip inline-flex items-center shrink-0 align-middle">
+                    <span className="inline-flex items-center justify-center w-[16px] h-[16px] rounded-full bg-[#1877F2] text-white select-none pointer-events-auto" style={{ filter: 'drop-shadow(0 0 6px rgba(0, 112, 243, 0.7))' }}>
+                      <svg className="w-[10px] h-[10px] text-white stroke-[3.5] stroke-current" fill="none" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </span>
+                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-white bg-black border border-gaming-gray rounded-lg opacity-0 group-hover/tooltip:opacity-100 group-focus/tooltip:opacity-100 pointer-events-none transition-all duration-150 whitespace-nowrap z-50 shadow-xl normal-case font-sans">
+                      Verified Pro
+                    </span>
+                  </span>
+                )}
               </h1>
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-1 font-mono">
                 <span className="text-gray-500 text-xs">UID: {player.characterId}</span>
