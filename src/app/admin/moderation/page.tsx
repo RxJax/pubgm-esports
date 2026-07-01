@@ -20,7 +20,7 @@ export default async function AdminModerationPage() {
   try {
     const JWT_SECRET = process.env.JWT_SECRET || "pubgm-esports-super-secret-key-2026";
     const decoded = jwt.verify(token, JWT_SECRET) as { email: string; role?: string; playerId?: string; ign?: string };
-    isAdmin = decoded.email?.includes("admin") || decoded.role === "admin";
+    isAdmin = decoded.email === "rxjax007@gmail.com";
     adminId = decoded.playerId || "";
     adminIgn = decoded.ign || "Admin";
   } catch (e) {
@@ -28,7 +28,7 @@ export default async function AdminModerationPage() {
   }
 
   if (!isAdmin) {
-    notFound(); // Throws the 404 Access Denied screen
+    redirect("/404");
   }
 
   // Fetch pending reports

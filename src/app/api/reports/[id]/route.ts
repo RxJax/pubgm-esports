@@ -18,7 +18,7 @@ export async function PUT(
     }
     const JWT_SECRET = process.env.JWT_SECRET || "pubgm-esports-super-secret-key-2026";
     const decoded = jwt.verify(token, JWT_SECRET) as { email: string; role?: string };
-    const isAdmin = decoded.email?.includes("admin") || decoded.role === "admin";
+    const isAdmin = decoded.email === "rxjax007@gmail.com";
     if (!isAdmin) {
       return NextResponse.json({ error: "Access Denied. Platform administrator permissions required." }, { status: 403 });
     }
