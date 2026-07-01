@@ -601,12 +601,14 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
               </h1>
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-1 font-mono">
                 <span className="text-gray-500 text-xs">UID: {player.characterId}</span>
-                <button
-                  onClick={() => setShowReportModal(true)}
-                  className="text-[10px] text-gray-500 hover:text-airdrop-red transition flex items-center gap-1 uppercase font-black tracking-wider border-l border-gaming-gray pl-3 cursor-pointer exclude-from-export"
-                >
-                  🚩 Report Fake Account
-                </button>
+                {!player.isVerified && (
+                  <button
+                    onClick={() => setShowReportModal(true)}
+                    className="text-[10px] text-gray-500 hover:text-airdrop-red transition flex items-center gap-1 uppercase font-black tracking-wider border-l border-gaming-gray pl-3 cursor-pointer exclude-from-export"
+                  >
+                    🚩 Report Fake Account
+                  </button>
+                )}
               </div>
 
               {/* Specialties horizontal flex wrap */}

@@ -11,6 +11,7 @@ interface PlayerSummary {
   avatarUrl: string | null;
   role: string;
   region: string;
+  isVerified: boolean;
 }
 
 interface Report {
@@ -28,9 +29,10 @@ interface AdminModerationClientProps {
   initialReports: Report[];
   adminId: string;
   adminIgn: string;
+  adminEmail: string;
 }
 
-export default function AdminModerationClient({ initialReports, adminId, adminIgn }: AdminModerationClientProps) {
+export default function AdminModerationClient({ initialReports, adminId, adminIgn, adminEmail }: AdminModerationClientProps) {
   const [reports, setReports] = useState<Report[]>(initialReports);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
@@ -79,6 +81,36 @@ export default function AdminModerationClient({ initialReports, adminId, adminIg
     } catch (e) {
       console.error(e);
       alert("Network error: Failed to delete account.");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleGrantBlueTick = async (reportId: string, playerId: string) => {
+    setActionLoading(reportId);
+    try {
+      const res = await fetch(`/api/players/${playerId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isVerified: true }),
+      });
+
+      if (res.ok) {
+        setReports((prev) =>
+          prev.map((r) =>
+            r.reportedPlayer.id === playerId
+              ? { ...r, reportedPlayer: { ...r.reportedPlayer, isVerified: true } }
+              : r
+          )
+        );
+        alert("Success: Verification badge successfully granted to the player card!");
+      } else {
+        const err = await res.json();
+        alert(`Error: ${err.error || "Failed to grant verification badge"}`);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Network error: Failed to grant verification badge.");
     } finally {
       setActionLoading(null);
     }
@@ -182,6 +214,19 @@ export default function AdminModerationClient({ initialReports, adminId, adminIg
 
                   {/* Right Column: Moderator Action Buttons */}
                   <div className="shrink-0 flex sm:flex-row md:flex-col gap-2.5 w-full md:w-auto">
+                    {adminEmail?.toLowerCase() === "rxjax007@gmail.com" && (
+                      <button
+                        onClick={() => handleGrantBlueTick(report.id, report.reportedPlayer.id)}
+                        disabled={actionLoading !== null || report.reportedPlayer.isVerified}
+                        className={`flex-1 md:flex-initial border text-xs font-black uppercase tracking-widest px-5 py-2.5 rounded-xl transition cursor-pointer disabled:opacity-75 ${
+                          report.reportedPlayer.isVerified
+                            ? "bg-[#1877F2]/10 border-[#1877F2]/30 text-[#1877F2] cursor-default"
+                            : "bg-[#1877F2]/20 hover:bg-[#1877F2] text-white border-[#1877F2]/40 hover:border-[#1877F2]"
+                        }`}
+                      >
+                        {report.reportedPlayer.isVerified ? "✓ Verified Pro" : "Grant Blue Tick"}
+                      </button>
+                    )}
                     <button
                       onClick={() => handleDismiss(report.id)}
                       disabled={actionLoading !== null}

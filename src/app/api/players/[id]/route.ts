@@ -59,10 +59,25 @@ export async function PUT(
   try {
     const { id } = await params;
     
-    // Strict Owner Authorization Check (Row-Level Security)
-    const session = getSession(request);
-    if (!session || session.playerId !== id) {
-      return NextResponse.json({ error: "Unauthorized. You are not the owner of this profile." }, { status: 401 });
+    // Strict Owner or Admin Authorization Check (Row-Level Security)
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth-token")?.value;
+    let isAdmin = false;
+    let isOwner = false;
+
+    if (token) {
+      try {
+        const JWT_SECRET = process.env.JWT_SECRET || "pubgm-esports-super-secret-key-2026";
+        const decoded = jwt.verify(token, JWT_SECRET) as { email: string; role?: string; playerId?: string };
+        isAdmin = decoded.email === "rxjax007@gmail.com";
+        isOwner = decoded.playerId === id;
+      } catch (e) {
+        // invalid token
+      }
+    }
+
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json({ error: "Unauthorized. You do not have permissions to edit this profile." }, { status: 401 });
     }
 
     const body = await request.json();
@@ -98,6 +113,7 @@ export async function PUT(
       underContract,
       contractStartDate,
       contractEndDate,
+      isVerified,
     } = body;
 
     // Validate characterId (UID) if provided
@@ -150,6 +166,7 @@ export async function PUT(
         underContract: underContract !== undefined ? Boolean(underContract) : undefined,
         contractStartDate: contractStartDate !== undefined ? (contractStartDate ? new Date(contractStartDate) : null) : undefined,
         contractEndDate: contractEndDate !== undefined ? (contractEndDate ? new Date(contractEndDate) : null) : undefined,
+        isVerified: isAdmin && isVerified !== undefined ? Boolean(isVerified) : undefined,
       },
     });
 
