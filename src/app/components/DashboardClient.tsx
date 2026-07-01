@@ -215,33 +215,71 @@ export default function DashboardClient({ player }: DashboardClientProps) {
       };
     }
 
-    try {
-      const res = await fetch(`/api/players/${player.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+    // Save current values to restore in case of failure
+    const originalPlayer = { ...player };
 
-      if (res.ok) {
-        setSaveSuccess("Portfolio successfully saved!");
-        setTrophyName("");
-        setTrophyPlacement("1");
-        setTrophyDate("");
-        
-        router.refresh();
-        setTimeout(() => {
+    // Update local player fields immediately for instant feedback
+    player.ign = ign;
+    player.characterId = characterId;
+    player.status = status;
+    player.avatarUrl = avatarUrl || null;
+    player.role = role;
+    player.region = region;
+    player.kdRatio = parseFloat(kdRatio) || 0;
+    player.headshotPct = parseFloat(headshotPct) || 0;
+    player.winRate = parseFloat(winRate) || 0;
+    player.matchesPlayed = parseInt(matchesPlayed) || 0;
+    player.urRank = urRank;
+    player.urPoints = parseInt(urPoints) || 0;
+    player.device = device;
+    player.controlSetup = controlSetup;
+    player.bio = bio;
+    player.facebook = facebook || null;
+    player.instagram = instagram || null;
+    player.discord = discord || null;
+    player.teamHistory = teamHistory || null;
+    player.achievements = achievements || null;
+    player.highestTier = highestTier;
+    player.profileType = profileType;
+    player.coachingYears = parseInt(coachingYears) || 0;
+    player.coachingHistory = coachingHistory || null;
+    player.specialties = specialties.join(",") || null;
+    player.underContract = underContract;
+    player.contractStartDate = underContract && contractStartDate ? contractStartDate : null;
+    player.contractEndDate = underContract && contractEndDate ? contractEndDate : null;
+
+    setSaveSuccess("Portfolio successfully saved!");
+
+    fetch(`/api/players/${player.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then(async (res) => {
+        if (res.ok) {
+          setTrophyName("");
+          setTrophyPlacement("1");
+          setTrophyDate("");
+          router.refresh();
+          setTimeout(() => {
+            setSaveSuccess("");
+          }, 3000);
+        } else {
+          Object.assign(player, originalPlayer);
+          const err = await res.json();
+          alert(`Error: ${err.error || "Update failed"}`);
           setSaveSuccess("");
-        }, 3000);
-      } else {
-        const err = await res.json();
-        alert(`Error: ${err.error || "Update failed"}`);
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Failed to update profile due to connection error.");
-    } finally {
-      setSaving(false);
-    }
+        }
+      })
+      .catch((err) => {
+        Object.assign(player, originalPlayer);
+        console.error(err);
+        alert("Failed to update profile due to connection error.");
+        setSaveSuccess("");
+      })
+      .finally(() => {
+        setSaving(false);
+      });
   };
 
   return (

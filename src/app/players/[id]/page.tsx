@@ -2,7 +2,15 @@ import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
-import PlayerPortfolioClient from "@/app/components/PlayerPortfolioClient";
+import dynamic from "next/dynamic";
+
+const PlayerPortfolioClient = dynamic(() => import("@/app/components/PlayerPortfolioClient"), {
+  loading: () => (
+    <div className="min-h-screen bg-gaming-black flex items-center justify-center text-xs font-black text-gray-500 uppercase tracking-widest">
+      Loading Portfolio...
+    </div>
+  ),
+});
 
 // Configure ISR cache revalidation of 60 seconds
 export const revalidate = 60;

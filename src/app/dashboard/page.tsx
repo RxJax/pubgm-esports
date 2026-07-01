@@ -2,7 +2,15 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import jwt from "jsonwebtoken";
 import { prisma } from "@/lib/db";
-import DashboardClient from "@/app/components/DashboardClient";
+import dynamic from "next/dynamic";
+
+const DashboardClient = dynamic(() => import("@/app/components/DashboardClient"), {
+  loading: () => (
+    <div className="min-h-screen bg-gaming-black flex items-center justify-center text-xs font-black text-gray-500 uppercase tracking-widest">
+      Loading Control Center...
+    </div>
+  ),
+});
 
 export const revalidate = 0;
 

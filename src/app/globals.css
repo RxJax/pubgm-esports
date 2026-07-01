@@ -16,6 +16,20 @@
   --color-digital-yellow: #FFBD03;
   --color-gaming-black: #0B0C10;
   --color-gaming-gray: #1F2833;
+
+  /* Hardware-accelerated CSS animations */
+  --animate-fade-in: fade-in 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+      transform: translateY(2px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 body {

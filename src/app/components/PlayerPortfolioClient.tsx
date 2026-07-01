@@ -385,38 +385,75 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
       };
     }
 
-    try {
-      const res = await fetch(`/api/players/${player.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+    // Save current values to restore in case of failure
+    const originalPlayer = { ...player };
 
-      if (res.ok) {
-        setSaveSuccess("Profile Successfully Updated!");
-        // Clear new trophy inputs
-        setNewTrophyName("");
-        setNewTrophyPlacement("1");
-        setNewTrophyDate("");
-        
-        // Refresh server component data
-        router.refresh();
-        
-        // Delay tab swap to let user see success message
-        setTimeout(() => {
+    // Update local player fields immediately for instant feedback
+    player.ign = editIgn;
+    player.characterId = editCharacterId;
+    player.status = editStatus;
+    player.avatarUrl = editAvatarUrl || null;
+    player.role = editRole;
+    player.region = editRegion;
+    player.kdRatio = parseFloat(editKd) || 0;
+    player.headshotPct = parseFloat(editHs) || 0;
+    player.winRate = parseFloat(editWr) || 0;
+    player.matchesPlayed = parseInt(editMatches) || 0;
+    player.urRank = editUrRank;
+    player.urPoints = parseInt(editUrPoints) || 0;
+    player.device = editDevice;
+    player.controlSetup = editSetup;
+    player.bio = editBio;
+    player.facebook = editFacebook || null;
+    player.instagram = editInstagram || null;
+    player.discord = editDiscord || null;
+    player.teamHistory = editTeamHistory || null;
+    player.achievements = editAchievements || null;
+    player.highestTier = editHighestTier;
+    player.profileType = editProfileType;
+    player.coachingYears = parseInt(editCoachingYears) || 0;
+    player.coachingHistory = editCoachingHistory || null;
+    player.specialties = editSpecialties.join(",") || null;
+    player.underContract = editUnderContract;
+    player.contractStartDate = editUnderContract && editContractStartDate ? editContractStartDate : null;
+    player.contractEndDate = editUnderContract && editContractEndDate ? editContractEndDate : null;
+
+    setSaveSuccess("Profile Successfully Updated!");
+    setActiveTab("stats");
+
+    fetch(`/api/players/${player.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then(async (res) => {
+        if (res.ok) {
+          // Clear new trophy inputs
+          setNewTrophyName("");
+          setNewTrophyPlacement("1");
+          setNewTrophyDate("");
+          router.refresh();
+          setTimeout(() => {
+            setSaveSuccess("");
+          }, 1200);
+        } else {
+          Object.assign(player, originalPlayer);
+          const errData = await res.json();
+          alert(`Error: ${errData.error || "Failed to update profile"}`);
+          setActiveTab("edit");
           setSaveSuccess("");
-          setActiveTab("stats");
-        }, 1200);
-      } else {
-        const errData = await res.json();
-        alert(`Error: ${errData.error || "Failed to update profile"}`);
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Failed to update profile due to a network error.");
-    } finally {
-      setSaving(false);
-    }
+        }
+      })
+      .catch((err) => {
+        Object.assign(player, originalPlayer);
+        console.error(err);
+        alert("Failed to update profile due to a network error.");
+        setActiveTab("edit");
+        setSaveSuccess("");
+      })
+      .finally(() => {
+        setSaving(false);
+      });
   };
 
   // Timeline placement styling helper
