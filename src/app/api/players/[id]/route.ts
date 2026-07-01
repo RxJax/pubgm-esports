@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
 
 // Fetch player details
 export async function GET(
@@ -188,5 +190,39 @@ export async function PUT(
       }
     }
     return NextResponse.json({ error: "Failed to update player details" }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    // Validate admin or owner access
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth-token")?.value;
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const JWT_SECRET = process.env.JWT_SECRET || "pubgm-esports-super-secret-key-2026";
+    const decoded = jwt.verify(token, JWT_SECRET) as { email: string; role?: string; playerId: string };
+    const isAdmin = decoded.email?.includes("admin") || decoded.role === "admin";
+    
+    const isOwner = decoded.playerId === id;
+    if (!isAdmin && !isOwner) {
+      return NextResponse.json({ error: "Access Denied. Platform administrator permissions required." }, { status: 403 });
+    }
+
+    // Delete the player from database
+    await prisma.player.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ success: true, message: "Account deleted successfully." });
+  } catch (error: any) {
+    console.error("API DELETE player error:", error);
+    return NextResponse.json({ error: "Failed to delete player account." }, { status: 500 });
   }
 }
