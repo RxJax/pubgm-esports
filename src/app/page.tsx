@@ -39,9 +39,11 @@ export default async function Home() {
       },
     });
 
-    // 2. Top Rising Prospects (all registered competitors sorted by K/D, limit 4)
+    // 2. Top Rising Prospects (only registered profiles marked with 'Tier-1 Pro' status, sorted by K/D, limit 4)
     risingPlayers = await prisma.player.findMany({
-      where: {},
+      where: {
+        urRank: "Legend",
+      },
       include: {
         team: true,
       },

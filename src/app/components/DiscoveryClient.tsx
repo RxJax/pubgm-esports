@@ -182,7 +182,7 @@ export default function DiscoveryClient({
   }, [debouncedSearch, selectedRole, selectedRegion, selectedStatus, minRating, deviceType, gyro, selectedUrRank]);
 
   // Curated lists from live database queries
-  const topRisingFraggers = initialRising;
+  const topRisingFraggers = useMemo(() => initialRising.filter(p => p.urRank === "Legend"), [initialRising]);
   const featuredProfiles = initialFeatured;
 
   // Count active filters
@@ -378,7 +378,8 @@ export default function DiscoveryClient({
             <span className="text-[10px] text-gray-500 font-black uppercase tracking-wider hidden sm:inline">COMPETITIVE EXPERIENCE &ge; SEMI-PRO</span>
           </div>
 
-          <div className="flex overflow-x-auto pb-4 gap-5 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gaming-gray scrollbar-track-transparent -mx-4 px-4 sm:mx-0 sm:px-0 w-full">
+          <div className="bg-[#0c0e12] border border-gaming-gray rounded-3xl p-5 shadow-[0_0_20px_rgba(255,189,3,0.02)]">
+            <div className="flex overflow-x-auto pb-2 gap-5 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gaming-gray scrollbar-track-transparent w-full">
             {topRisingFraggers.length === 0 ? (
               <div className="w-full bg-[#111827]/10 border border-gaming-gray rounded-2xl p-8 text-center flex flex-col items-center justify-center gap-2">
                 <span className="text-2xl">🔥</span>
@@ -480,6 +481,7 @@ export default function DiscoveryClient({
                 );
               })
             )}
+            </div>
           </div>
         </section>
 
@@ -504,21 +506,15 @@ export default function DiscoveryClient({
           </div>
 
           {/* RIGHT COLUMN: Candidate Pool Feed */}
-          <div ref={feedRef} className="xl:col-span-7 flex flex-col gap-6 w-full xl:max-h-[85vh] xl:overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gaming-gray scrollbar-track-transparent border-t xl:border-t-0 border-gaming-gray pt-8 xl:pt-0">
-            {/* ================= SECTION 3: SCOUT DISCOVERY HUB SEARCH GRID ================= */}
-            <section className="flex flex-col gap-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-black uppercase tracking-wider text-airdrop-red flex items-center gap-2">
-                  <svg className="w-5 h-5 text-airdrop-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  Candidate Pool Feed
-                </h2>
-              </div>
+          <div ref={feedRef} className="xl:col-span-7 flex flex-col gap-4 w-full border-t xl:border-t-0 border-gaming-gray pt-8 xl:pt-0">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-black uppercase tracking-wider text-airdrop-red flex items-center gap-2">
+                <span className="text-lg">🔍</span> CANDIDATE POOL FEED
+              </h2>
+            </div>
 
-          <div className="w-full">
-            {/* Players Grid / Table */}
-            <div className="flex flex-col gap-4 w-full">
+            {/* Premium Cyberpunk Table Container */}
+            <div className="bg-[#0c0e12] border border-gaming-gray rounded-3xl p-5 flex flex-col gap-4 shadow-[0_0_20px_rgba(255,189,3,0.02)] min-h-[500px]">
               <div className="flex items-center justify-between text-[10px] text-gray-500 font-black uppercase tracking-wider px-1">
                 <div>
                   FEED RESULTS:{" "}
@@ -533,7 +529,9 @@ export default function DiscoveryClient({
                 )}
               </div>
 
-              {players.length === 0 ? (
+              {/* Table body wrapper for internal scrolling */}
+              <div className="flex-1 overflow-y-auto max-h-[600px] pr-2 scrollbar-thin scrollbar-thumb-gaming-gray scrollbar-track-transparent">
+                {players.length === 0 ? (
                 <div className="bg-[#111827]/10 border border-gaming-gray rounded-2xl p-12 text-center flex flex-col items-center gap-4">
                   <svg className="w-12 h-12 text-gaming-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -645,7 +643,6 @@ export default function DiscoveryClient({
               )}
             </div>
           </div>
-        </section>
           </div>
         </div>
       </main>
