@@ -55,6 +55,8 @@ model Player {
   placements   TournamentPlacement[]
   highlights   Highlight[]
   
+  isFeatured   Boolean               @default(false) @map("is_featured")
+  
   createdAt    DateTime              @default(now())
   updatedAt    DateTime              @updatedAt
 }

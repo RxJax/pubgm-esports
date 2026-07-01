@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -12,14 +14,36 @@ export async function GET(request: NextRequest) {
   const gyro = searchParams.get("gyro") || "";
   const urRank = searchParams.get("urRank") || "";
 
+  // Check auth token from cookie to filter out the current user
+  const cookieStore = await cookies();
+  const token = cookieStore.get("auth-token")?.value;
+  let loggedInPlayerId: string | null = null;
+
+  if (token) {
+    try {
+      const JWT_SECRET = process.env.JWT_SECRET || "pubgm-esports-super-secret-key-2026";
+      const decoded = jwt.verify(token, JWT_SECRET) as { playerId: string };
+      loggedInPlayerId = decoded.playerId;
+    } catch (e) {
+      // ignore invalid token
+    }
+  }
+
   const where: any = {};
   const andConditions: any[] = [];
+
+  // Exclude current logged-in user
+  if (loggedInPlayerId) {
+    andConditions.push({
+      NOT: { id: loggedInPlayerId }
+    });
+  }
 
   // Text search on IGN or Character ID
   if (search) {
     andConditions.push({
       OR: [
-        { ign: { contains: search } },
+        { ign: { contains: search, mode: "insensitive" } },
         { characterId: { contains: search } },
       ],
     });
@@ -53,26 +77,26 @@ export async function GET(request: NextRequest) {
   if (deviceType === "tablet") {
     andConditions.push({
       OR: [
-        { device: { contains: "iPad" } },
-        { device: { contains: "Tablet" } },
+        { device: { contains: "iPad", mode: "insensitive" } },
+        { device: { contains: "Tablet", mode: "insensitive" } },
       ],
     });
   } else if (deviceType === "phone") {
     andConditions.push({
       NOT: [
-        { device: { contains: "iPad" } },
-        { device: { contains: "Tablet" } },
+        { device: { contains: "iPad", mode: "insensitive" } },
+        { device: { contains: "Tablet", mode: "insensitive" } },
       ],
     });
   }
 
   // Gyroscope profile filter (On vs Off)
   if (gyro === "on") {
-    where.controlSetup = { contains: "gyro" };
+    where.controlSetup = { contains: "gyro", mode: "insensitive" };
   } else if (gyro === "off") {
     andConditions.push({
       NOT: [
-        { controlSetup: { contains: "gyro" } },
+        { controlSetup: { contains: "gyro", mode: "insensitive" } },
       ],
     });
   }

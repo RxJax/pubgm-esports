@@ -28,11 +28,15 @@ interface Player {
   urRank: string;
   urPoints: number;
   team: Team | null;
+  isFeatured?: boolean;
 }
 
 interface DiscoveryClientProps {
   initialPlayers: Player[];
+  initialRising?: Player[];
+  initialFeatured?: Player[];
   initialError?: boolean;
+  loggedInPlayerId?: string | null;
 }
 
 const ROLES = ["All", "IGL", "Entry Fragger", "Support", "Sniper"];
@@ -40,9 +44,15 @@ const REGIONS = ["All", "Southeast Asia", "South Asia", "Europe", "North America
 const STATUSES = ["All", "Signed", "Looking For Team"];
 const UR_RANKS = ["All", "Vanguard", "Exceed", "Supreme", "Peerless", "Legend"];
 
-export default function DiscoveryClient({ initialPlayers, initialError = false }: DiscoveryClientProps) {
-  // Return elegant full-screen empty database state if no players exist
-  if (initialPlayers.length === 0) {
+export default function DiscoveryClient({
+  initialPlayers,
+  initialRising = [],
+  initialFeatured = [],
+  initialError = false,
+  loggedInPlayerId = null,
+}: DiscoveryClientProps) {
+  // Return elegant full-screen empty database state if no players exist and no user is logged in
+  if (initialPlayers.length === 0 && !loggedInPlayerId) {
     return (
       <div className="flex-1 bg-gaming-black text-gray-100 min-h-screen flex flex-col items-center justify-center px-6 py-12 text-center relative overflow-hidden">
         {/* Cyber grid bg */}
@@ -136,20 +146,9 @@ export default function DiscoveryClient({ initialPlayers, initialError = false }
     fetchPlayers();
   }, [debouncedSearch, selectedRole, selectedRegion, selectedStatus, minKd, deviceType, gyro, selectedUrRank]);
 
-  // Compute Static "Top Rising Fraggers" (K/D >= 6.0, sorted by K/D desc)
-  const topRisingFraggers = useMemo(() => {
-    return initialPlayers
-      .filter((p) => p.kdRatio >= 6.0)
-      .sort((a, b) => b.kdRatio - a.kdRatio)
-      .slice(0, 4);
-  }, [initialPlayers]);
-
-  // Compute Curated "Featured Profiles" (signed captains and star snipers)
-  const featuredProfiles = useMemo(() => {
-    return initialPlayers
-      .filter((p) => p.status === "Signed" && (p.role === "IGL" || p.role === "Sniper"))
-      .slice(0, 3);
-  }, [initialPlayers]);
+  // Curated lists from live database queries
+  const topRisingFraggers = initialRising;
+  const featuredProfiles = initialFeatured;
 
   // Count active filters
   const activeFiltersCount = useMemo(() => {
@@ -198,72 +197,25 @@ export default function DiscoveryClient({ initialPlayers, initialError = false }
             <span className="text-[10px] text-gray-500 font-black uppercase tracking-wider hidden sm:inline">UR K/D Ratio &ge; 6.0</span>
           </div>
 
-          <div className="flex overflow-x-auto pb-4 gap-5 scrollbar-thin scrollbar-thumb-gaming-gray scrollbar-track-transparent -mx-4 px-4 sm:mx-0 sm:px-0">
-            {topRisingFraggers.map((player) => (
-              <Link
-                href={`/players/${player.id}`}
-                key={player.id}
-                className="group flex-none w-[280px] bg-gradient-to-br from-gaming-gray/30 to-[#0c0d12] hover:from-gaming-gray/50 hover:to-[#0c0d12] border border-gaming-gray rounded-2xl p-5 transition-all duration-300 relative overflow-hidden shadow-lg shadow-black/40"
-              >
-                <div className="absolute top-4 right-4 text-[10px] font-black bg-airdrop-red/10 text-airdrop-red border border-airdrop-red/20 px-2 py-0.5 rounded">
-                  UR K/D: {player.kdRatio.toFixed(2)}
-                </div>
-
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-gaming-black border border-gaming-gray flex items-center justify-center shrink-0">
-                    {player.team?.logoUrl ? (
-                      <img src={player.team.logoUrl} className="w-full h-full object-cover" alt="" />
-                    ) : (
-                      <span className="text-xs font-black text-gray-600">FA</span>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-extrabold text-white text-base group-hover:text-digital-yellow transition">
-                      {player.ign}
-                    </h3>
-                    <p className="text-[9px] text-gray-400 font-black uppercase tracking-wider">
-                      {player.team?.name || "Free Agent"}
-                    </p>
-                  </div>
-                </div>
-
-                <p className="text-gray-400 text-xs line-clamp-2 leading-relaxed mb-4 italic">
-                  &ldquo;{player.bio}&rdquo;
+          <div className="flex overflow-x-auto pb-4 gap-5 scrollbar-thin scrollbar-thumb-gaming-gray scrollbar-track-transparent -mx-4 px-4 sm:mx-0 sm:px-0 w-full">
+            {topRisingFraggers.length === 0 ? (
+              <div className="w-full bg-[#111827]/10 border border-gaming-gray rounded-2xl p-8 text-center flex flex-col items-center justify-center gap-2">
+                <span className="text-2xl">🔥</span>
+                <p className="text-gray-400 text-xs sm:text-sm font-medium">
+                  No other verified competitors have registered yet. Share the portal link to start recruiting!
                 </p>
-
-                <div className="flex items-center justify-between text-[9px] bg-gaming-black border border-gaming-gray px-3 py-2 rounded-xl">
-                  <div>
-                    <span className="text-gray-500 block uppercase font-black">UR HS %</span>
-                    <span className="font-black text-gray-200">{player.headshotPct}%</span>
+              </div>
+            ) : (
+              topRisingFraggers.map((player) => (
+                <Link
+                  href={`/players/${player.id}`}
+                  key={player.id}
+                  className="group flex-none w-[280px] bg-gradient-to-br from-gaming-gray/30 to-[#0c0d12] hover:from-gaming-gray/50 hover:to-[#0c0d12] border border-gaming-gray rounded-2xl p-5 transition-all duration-300 relative overflow-hidden shadow-lg shadow-black/40"
+                >
+                  <div className="absolute top-4 right-4 text-[10px] font-black bg-airdrop-red/10 text-airdrop-red border border-airdrop-red/20 px-2 py-0.5 rounded">
+                    UR K/D: {player.kdRatio.toFixed(2)}
                   </div>
-                  <div className="text-right">
-                    <span className="text-gray-500 block uppercase font-black">Season Tier</span>
-                    <span className="font-black text-digital-yellow">{player.urRank}</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
 
-        {/* ================= SECTION 2: FEATURED PROFILES ================= */}
-        <section className="flex flex-col gap-4">
-          <h2 className="text-lg font-black uppercase tracking-wider text-digital-yellow flex items-center gap-2">
-            <span className="text-xl">⭐</span> Featured Roster Profiles
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {featuredProfiles.map((player) => (
-              <Link
-                href={`/players/${player.id}`}
-                key={player.id}
-                className="group bg-gaming-black border border-gaming-gray p-5 rounded-2xl transition-all duration-300 flex flex-col justify-between shadow-lg relative overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 w-24 h-24 bg-digital-yellow/[0.02] rounded-full blur-xl" />
-                <div className="absolute top-4 right-4 flex items-center gap-1 bg-digital-yellow/10 text-digital-yellow border border-digital-yellow/20 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider">
-                  ★ Featured
-                </div>
-
-                <div>
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 rounded-xl bg-gaming-black border border-gaming-gray flex items-center justify-center shrink-0">
                       {player.team?.logoUrl ? (
@@ -276,25 +228,90 @@ export default function DiscoveryClient({ initialPlayers, initialError = false }
                       <h3 className="font-extrabold text-white text-base group-hover:text-digital-yellow transition">
                         {player.ign}
                       </h3>
-                      <span className="inline-block text-[8px] bg-digital-yellow/10 text-digital-yellow border border-digital-yellow/20 px-2 py-0.2 rounded font-black uppercase">
-                        {player.role}
-                      </span>
+                      <p className="text-[9px] text-gray-400 font-black uppercase tracking-wider">
+                        {player.team?.name || "Free Agent"}
+                      </p>
                     </div>
                   </div>
 
-                  <p className="text-gray-400 text-xs italic line-clamp-2 leading-relaxed">
+                  <p className="text-gray-400 text-xs line-clamp-2 leading-relaxed mb-4 italic">
                     &ldquo;{player.bio}&rdquo;
                   </p>
-                </div>
 
-                <div className="mt-4 pt-3 border-t border-gaming-gray flex items-center justify-between text-xs">
-                  <span className="text-gray-500 font-bold uppercase text-[9px]">UR Points</span>
-                  <span className="text-digital-yellow font-black">
-                    {player.urRank} ({player.urPoints} pts)
-                  </span>
-                </div>
-              </Link>
-            ))}
+                  <div className="flex items-center justify-between text-[9px] bg-gaming-black border border-gaming-gray px-3 py-2 rounded-xl">
+                    <div>
+                      <span className="text-gray-500 block uppercase font-black">UR HS %</span>
+                      <span className="font-black text-gray-200">{player.headshotPct}%</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-gray-500 block uppercase font-black">Season Tier</span>
+                      <span className="font-black text-digital-yellow">{player.urRank}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))
+            )}
+          </div>
+        </section>
+
+        {/* ================= SECTION 2: FEATURED PROFILES ================= */}
+        <section className="flex flex-col gap-4">
+          <h2 className="text-lg font-black uppercase tracking-wider text-digital-yellow flex items-center gap-2">
+            <span className="text-xl">⭐</span> Featured Roster Profiles
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {featuredProfiles.length === 0 ? (
+              <div className="col-span-full bg-[#111827]/10 border border-gaming-gray rounded-2xl p-8 text-center flex flex-col items-center justify-center gap-2">
+                <span className="text-2xl">⭐</span>
+                <p className="text-gray-400 text-xs sm:text-sm font-medium">
+                  No other verified competitors have registered yet. Share the portal link to start recruiting!
+                </p>
+              </div>
+            ) : (
+              featuredProfiles.map((player) => (
+                <Link
+                  href={`/players/${player.id}`}
+                  key={player.id}
+                  className="group bg-gaming-black border border-gaming-gray p-5 rounded-2xl transition-all duration-300 flex flex-col justify-between shadow-lg relative overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-digital-yellow/[0.02] rounded-full blur-xl" />
+                  <div className="absolute top-4 right-4 flex items-center gap-1 bg-digital-yellow/10 text-digital-yellow border border-digital-yellow/20 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider">
+                    ★ Featured
+                  </div>
+
+                  <div>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-xl bg-gaming-black border border-gaming-gray flex items-center justify-center shrink-0">
+                        {player.team?.logoUrl ? (
+                          <img src={player.team.logoUrl} className="w-full h-full object-cover" alt="" />
+                        ) : (
+                          <span className="text-xs font-black text-gray-600">FA</span>
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="font-extrabold text-white text-base group-hover:text-digital-yellow transition">
+                          {player.ign}
+                        </h3>
+                        <span className="inline-block text-[8px] bg-digital-yellow/10 text-digital-yellow border border-digital-yellow/20 px-2 py-0.2 rounded font-black uppercase">
+                          {player.role}
+                        </span>
+                      </div>
+                    </div>
+
+                    <p className="text-gray-400 text-xs italic line-clamp-2 leading-relaxed">
+                      &ldquo;{player.bio}&rdquo;
+                    </p>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-gaming-gray flex items-center justify-between text-xs">
+                    <span className="text-gray-500 font-bold uppercase text-[9px]">UR Points</span>
+                    <span className="text-digital-yellow font-black">
+                      {player.urRank} ({player.urPoints} pts)
+                    </span>
+                  </div>
+                </Link>
+              ))
+            )}
           </div>
         </section>
 
@@ -532,9 +549,13 @@ export default function DiscoveryClient({ initialPlayers, initialError = false }
                   <svg className="w-12 h-12 text-gaming-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <h3 className="text-sm font-black text-gray-300 uppercase tracking-wider">No Candidates Match</h3>
+                  <h3 className="text-sm font-black text-gray-300 uppercase tracking-wider">
+                    {activeFiltersCount > 0 ? "No Candidates Match" : "Feed Empty"}
+                  </h3>
                   <p className="text-gray-500 text-xs max-w-xs leading-relaxed">
-                    Try broadening your filters or resetting query options.
+                    {activeFiltersCount > 0 
+                      ? "Try broadening your filters or resetting query options."
+                      : "No other verified competitors have registered yet. Share the portal link to start recruiting!"}
                   </p>
                 </div>
               ) : (
