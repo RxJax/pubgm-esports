@@ -473,7 +473,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                   </div>
 
                   <div>
-                    <span className="text-[9px] text-gray-500 font-black uppercase tracking-wider">Season Points</span>
+                    <span className="text-[9px] text-gray-500 font-black uppercase tracking-wider">Ultimate season points</span>
                     <div className="text-xl font-black text-white mt-1">
                       {player.urPoints} pts
                     </div>
@@ -743,7 +743,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                       </select>
                     </div>
                     <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Season Point Equivalent</label>
+                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Ultimate season points</label>
                       <input
                         type="number"
                         min="0"

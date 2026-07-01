@@ -166,7 +166,7 @@ export default function RegisterWizard() {
         return;
       }
       if (isNaN(points) || points < 0) {
-        setError("Season Points must be a positive integer.");
+        setError("Ultimate season points must be a positive integer.");
         return;
       }
     }
@@ -451,7 +451,7 @@ export default function RegisterWizard() {
                   </select>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Season Point Equivalent</label>
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Ultimate season points</label>
                   <input
                     type="number"
                     min="0"

@@ -241,7 +241,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                   </select>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Season Points</label>
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Ultimate season points</label>
                   <input
                     type="number"
                     min="0"
