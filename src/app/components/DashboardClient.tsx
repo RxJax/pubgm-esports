@@ -83,6 +83,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
   const [instagram, setInstagram] = useState(player.instagram || "");
   const [twitter, setTwitter] = useState(player.twitter || "");
   const [discord, setDiscord] = useState(player.discord || "");
+  const [characterId, setCharacterId] = useState(player.characterId);
 
   // New Trophy form states
   const [trophyName, setTrophyName] = useState("");
@@ -98,6 +99,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
 
     const payload: any = {
       ign,
+      characterId,
       status,
       kdRatio: parseFloat(kdRatio) || 0,
       headshotPct: parseFloat(headshotPct) || 0,
@@ -214,12 +216,13 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Character ID (Unchangeable)</label>
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">UID (In-Game ID)</label>
                   <input
                     type="text"
-                    value={player.characterId}
-                    className="bg-[#0b0f19]/40 border border-gaming-gray/30 rounded-xl px-3 py-2 text-xs text-gray-600 focus:outline-none font-mono cursor-not-allowed"
-                    disabled
+                    value={characterId}
+                    onChange={(e) => setCharacterId(e.target.value)}
+                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition font-mono"
+                    required
                   />
                 </div>
               </div>

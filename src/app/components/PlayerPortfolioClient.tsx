@@ -116,6 +116,8 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
   const [editBio, setEditBio] = useState(player.bio);
   const [editTeamHistory, setEditTeamHistory] = useState(player.teamHistory || "");
   const [editAchievements, setEditAchievements] = useState(player.achievements || "");
+  const [editIgn, setEditIgn] = useState(player.ign);
+  const [editCharacterId, setEditCharacterId] = useState(player.characterId);
 
   const [editFacebook, setEditFacebook] = useState(player.facebook || "");
   const [editInstagram, setEditInstagram] = useState(player.instagram || "");
@@ -143,6 +145,8 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
     setSaveSuccess("");
 
     const payload: any = {
+      ign: editIgn,
+      characterId: editCharacterId,
       status: editStatus,
       kdRatio: parseFloat(editKd) || 0,
       headshotPct: parseFloat(editHs) || 0,
@@ -276,7 +280,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
               <h1 className="text-3xl md:text-4xl font-black text-white uppercase tracking-wider flex items-center justify-center sm:justify-start gap-3">
                 {player.ign}
               </h1>
-              <p className="text-gray-500 text-xs mt-1 font-mono">Character ID: {player.characterId}</p>
+              <p className="text-gray-500 text-xs mt-1 font-mono">UID: {player.characterId}</p>
 
               {/* Bio */}
               <p className="text-gray-300 text-sm mt-3 max-w-xl leading-relaxed italic">
@@ -667,6 +671,30 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                         />
                         <span>Signed to Roster</span>
                       </label>
+                    </div>
+                  </div>
+
+                  {/* IGN & UID */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">In-Game Name (IGN)</label>
+                      <input
+                        type="text"
+                        value={editIgn}
+                        onChange={(e) => setEditIgn(e.target.value)}
+                        className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-1.5 text-xs text-white focus:border-digital-yellow focus:outline-none transition"
+                        required
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">UID (In-Game ID)</label>
+                      <input
+                        type="text"
+                        value={editCharacterId}
+                        onChange={(e) => setEditCharacterId(e.target.value)}
+                        className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-1.5 text-xs text-white focus:border-digital-yellow focus:outline-none transition font-mono"
+                        required
+                      />
                     </div>
                   </div>
 

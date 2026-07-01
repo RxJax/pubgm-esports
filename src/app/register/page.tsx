@@ -50,6 +50,13 @@ export default function RegisterWizard() {
   const [highlightTitle, setHighlightTitle] = useState("");
   const [highlightUrl, setHighlightUrl] = useState("");
 
+  // Google onboarding states
+  const [onboardingData, setOnboardingData] = useState<{ email: string; name: string } | null>(null);
+  const [tempCredential, setTempCredential] = useState("");
+  const [onboardIgn, setOnboardIgn] = useState("");
+  const [onboardUid, setOnboardUid] = useState("");
+  const [onboardLoading, setOnboardLoading] = useState(false);
+
   // Initialize and render the actual Google Sign-In button for Step 1
   useEffect(() => {
     if (step !== 1) return;
@@ -72,11 +79,18 @@ export default function RegisterWizard() {
                   body: JSON.stringify({ credential: response.credential }),
                 });
 
+                const data = await res.json();
                 if (res.ok) {
-                  router.push("/dashboard");
-                  router.refresh();
+                  if (data.onboardingRequired) {
+                    setOnboardingData({ email: data.email, name: data.name });
+                    setTempCredential(response.credential);
+                    // Prepopulate name
+                    setOnboardIgn(data.name ? data.name.replace(/\s+/g, "_") : "");
+                  } else {
+                    router.push("/dashboard");
+                    router.refresh();
+                  }
                 } else {
-                  const data = await res.json();
                   setError(data.error || "Google Sign-In failed validation.");
                 }
               } catch (err) {
@@ -115,7 +129,7 @@ export default function RegisterWizard() {
       }, 200);
       return () => clearInterval(interval);
     }
-  }, [step, router]);
+  }, [step, router, onboardingData]);
 
   // Move to next step with basic validation
   const nextStep = () => {
@@ -135,11 +149,11 @@ export default function RegisterWizard() {
       }
     } else if (step === 2) {
       if (!ign || !characterId || !device || !controlSetup) {
-        setError("Please fill out IGN, Character ID, Device, and Control Setup.");
+        setError("Please fill out IGN, UID, Device, and Control Setup.");
         return;
       }
       if (!/^\d{5,12}$/.test(characterId)) {
-        setError("Character ID must be a valid numeric ID (5 to 12 digits).");
+        setError("UID must be a valid numeric ID (5 to 12 digits).");
         return;
       }
     } else if (step === 3) {
@@ -236,7 +250,106 @@ export default function RegisterWizard() {
     }
   };
 
+  const handleOnboardSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setOnboardLoading(true);
+
+    try {
+      const res = await fetch("/api/auth/google/onboard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          credential: tempCredential,
+          ign: onboardIgn,
+          characterId: onboardUid,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        router.push("/dashboard");
+        router.refresh();
+      } else {
+        setError(data.error || "Registration failed. Please try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Connection error occurred. Please try again.");
+    } finally {
+      setOnboardLoading(false);
+    }
+  };
+
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+
+  if (onboardingData) {
+    return (
+      <div className="flex-1 bg-gaming-black flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
+        <div className="max-w-md w-full bg-gaming-black border-2 border-gaming-gray rounded-3xl p-6 md:p-8 shadow-2xl relative">
+          <div className="text-center mb-6">
+            <span className="text-[9px] font-black uppercase bg-digital-yellow/10 text-digital-yellow border border-digital-yellow/20 px-2.5 py-0.5 rounded-full tracking-widest">
+              Google Onboarding
+            </span>
+            <h2 className="text-2xl font-black text-white uppercase tracking-wider mt-3">
+              Set Your Identity
+            </h2>
+            <p className="text-xs text-gray-400 mt-1">
+              Select your IGN and UID for <span className="text-digital-yellow">{onboardingData.email}</span>
+            </p>
+          </div>
+
+          {error && (
+            <div className="bg-airdrop-red/10 border border-airdrop-red/30 text-airdrop-red text-xs font-black p-3 rounded-xl mb-4 text-center animate-pulse">
+              ⚠️ {error}
+            </div>
+          )}
+
+          <form onSubmit={handleOnboardSubmit} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">In-Game Name (IGN)</label>
+              <input
+                type="text"
+                placeholder="e.g. RX_JAX"
+                value={onboardIgn}
+                onChange={(e) => setOnboardIgn(e.target.value)}
+                className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                required
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">UID (In-Game ID)</label>
+              <input
+                type="text"
+                placeholder="e.g. 586856329"
+                value={onboardUid}
+                onChange={(e) => setOnboardUid(e.target.value)}
+                className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition font-mono"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={onboardLoading}
+              className="w-full mt-2 bg-[#FFBD03] hover:bg-amber-500 text-gaming-black font-black px-6 py-2.5 rounded-xl text-xs uppercase tracking-widest transition shadow-md shadow-amber-950/20 cursor-pointer"
+            >
+              {onboardLoading ? "Creating Profile..." : "Create Account"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setOnboardingData(null)}
+              className="w-full text-center text-xs font-semibold text-gray-500 hover:text-gray-300 uppercase tracking-wider mt-1"
+            >
+              Cancel
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 bg-gaming-black flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
@@ -351,7 +464,7 @@ export default function RegisterWizard() {
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Character ID (10 digits)</label>
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">UID (In-Game ID)</label>
                   <input
                     type="text"
                     placeholder="e.g. 5123984712"

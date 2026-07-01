@@ -43,49 +43,26 @@ export async function POST(request: NextRequest) {
 
     if (player) {
       console.log(`Google Login: Recovered profile card for existing player ${email} (IGN: ${player.ign})`);
+
+      // Generate JWT cookie session and return response
+      const response = NextResponse.json({
+        success: true,
+        player: { id: player.id, ign: player.ign, email: player.email },
+      });
+
+      return setAuthCookie(response, {
+        playerId: player.id,
+        email: player.email,
+        ign: player.ign,
+      });
     } else {
-      console.log(`Google Signup: Creating new player profile card for email ${email}`);
-      isNew = true;
-
-      // Create a clean new player profile card in the database
-      const dummyPassword = await bcrypt.hash(`google-oauth-dummy-pw-${Date.now()}`, 10);
-      const generatedIgn = name ? name.replace(/\s+/g, "_") : `Google_Player_${Math.floor(100 + Math.random() * 900)}`;
-      const randomCharId = `8${Math.floor(100000000 + Math.random() * 900000000)}`; // Random 10-digit number starting with 8
-
-      player = await prisma.player.create({
-        data: {
-          email,
-          password: dummyPassword,
-          ign: generatedIgn,
-          characterId: randomCharId,
-          region: "North America",
-          bio: "New player onboarded via Google login. Complete your portfolio details inside the dashboard.",
-          status: "Looking For Team",
-          role: "Entry Fragger",
-          device: "iPhone 15 Pro",
-          controlSetup: "4-finger claw, gyro always-on",
-          kdRatio: 0.0,
-          headshotPct: 0.0,
-          winRate: 0.0,
-          matchesPlayed: 0,
-          urRank: "Vanguard",
-          urPoints: 1000,
-        },
+      console.log(`Google Signup: Onboarding required for email ${email}`);
+      return NextResponse.json({
+        onboardingRequired: true,
+        email,
+        name,
       });
     }
-
-    // 4. Generate JWT cookie session and return response
-    const response = NextResponse.json({
-      success: true,
-      isNew,
-      player: { id: player.id, ign: player.ign, email: player.email },
-    });
-
-    return setAuthCookie(response, {
-      playerId: player.id,
-      email: player.email,
-      ign: player.ign,
-    });
   } catch (error: any) {
     console.error("Google Login API error:", error);
     return NextResponse.json({ error: "Google authentication failed. Internal server error." }, { status: 500 });

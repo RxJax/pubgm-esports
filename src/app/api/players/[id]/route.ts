@@ -83,7 +83,18 @@ export async function PUT(
       teamHistory,
       achievements,
       newTrophy,
+      characterId,
     } = body;
+
+    // Validate characterId (UID) if provided
+    let verifiedCharacterId = undefined;
+    if (characterId !== undefined && characterId !== null) {
+      const uidStr = characterId.toString().trim();
+      if (!/^\d{5,12}$/.test(uidStr)) {
+        return NextResponse.json({ error: "UID must be a valid numeric ID (5 to 12 digits)." }, { status: 400 });
+      }
+      verifiedCharacterId = uidStr;
+    }
 
     // Safety validation bounds on statistics
     const validatedKd = Math.max(0, Math.min(15, parseFloat(kdRatio) || 0));
@@ -97,6 +108,7 @@ export async function PUT(
       where: { id },
       data: {
         ign: ign || undefined,
+        characterId: verifiedCharacterId,
         status,
         kdRatio: validatedKd,
         headshotPct: validatedHs,
@@ -132,6 +144,15 @@ export async function PUT(
     return NextResponse.json({ success: true, player: updatedPlayer });
   } catch (error: any) {
     console.error("API PUT player error:", error);
+    if (error.code === "P2002") {
+      const target = error.meta?.target || [];
+      if (target.includes("characterId")) {
+        return NextResponse.json({ error: "This UID is already taken by another player." }, { status: 400 });
+      }
+      if (target.includes("ign")) {
+        return NextResponse.json({ error: "This In-Game Name (IGN) is already taken." }, { status: 400 });
+      }
+    }
     return NextResponse.json({ error: "Failed to update player details" }, { status: 500 });
   }
 }
