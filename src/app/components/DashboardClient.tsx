@@ -50,6 +50,10 @@ interface Player {
   teamHistory: string | null;
   achievements: string | null;
   highestTier: string;
+  profileType?: string;
+  coachingYears?: number;
+  coachingHistory?: string | null;
+  specialties?: string | null;
   placements: Placement[];
   highlights: Highlight[];
   team: Team | null;
@@ -83,8 +87,11 @@ export default function DashboardClient({ player }: DashboardClientProps) {
 
   const [facebook, setFacebook] = useState(player.facebook || "");
   const [instagram, setInstagram] = useState(player.instagram || "");
-  const [twitter, setTwitter] = useState(player.twitter || "");
   const [discord, setDiscord] = useState(player.discord || "");
+  const [profileType, setProfileType] = useState(player.profileType || "Player");
+  const [coachingYears, setCoachingYears] = useState(player.coachingYears?.toString() || "0");
+  const [coachingHistory, setCoachingHistory] = useState(player.coachingHistory || "");
+  const [specialties, setSpecialties] = useState<string[]>(player.specialties ? player.specialties.split(",") : []);
   const [characterId, setCharacterId] = useState(player.characterId);
   const [avatarUrl, setAvatarUrl] = useState(player.avatarUrl || "");
   const [role, setRole] = useState(player.role);
@@ -166,11 +173,15 @@ export default function DashboardClient({ player }: DashboardClientProps) {
       bio,
       facebook: facebook || null,
       instagram: instagram || null,
-      twitter: twitter || null,
+      twitter: null,
       discord: discord || null,
       teamHistory: teamHistory || null,
       achievements: achievements || null,
       highestTier,
+      profileType,
+      coachingYears: parseInt(coachingYears) || 0,
+      coachingHistory: coachingHistory || null,
+      specialties: specialties.join(",") || null,
     };
 
     // If new trophy filled, append it
@@ -258,6 +269,18 @@ export default function DashboardClient({ player }: DashboardClientProps) {
               <h3 className="text-xs font-black text-digital-yellow uppercase tracking-widest border-b border-gaming-gray pb-3 flex items-center gap-2">
                 <span className="w-1.5 h-3 bg-digital-yellow" /> Player Identity Details
               </h3>
+              {/* Profile Type Selector */}
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Profile Type</label>
+                <select
+                  value={profileType}
+                  onChange={(e) => setProfileType(e.target.value)}
+                  className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full"
+                >
+                  <option value="Player">Player</option>
+                  <option value="Coach">Coach</option>
+                </select>
+              </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1">
@@ -282,68 +305,149 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                 </div>
               </div>
 
-              {/* Role & Country Selectors */}
-              <div className="grid grid-cols-2 gap-4 border-t border-gaming-gray/40 pt-4">
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">In-Game Role</label>
-                  <select
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
-                  >
-                    <option value="IGL">IGL</option>
-                    <option value="Entry Fragger">Entry Fragger</option>
-                    <option value="Support">Support</option>
-                    <option value="Sniper">Sniper</option>
-                  </select>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Country / Region</label>
-                  <select
-                    value={region}
-                    onChange={(e) => setRegion(e.target.value)}
-                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
-                  >
-                    <option value="Southeast Asia">Southeast Asia</option>
-                    <option value="South Asia">South Asia</option>
-                    <option value="Europe">Europe</option>
-                    <option value="North America">North America</option>
-                    <option value="Middle East">Middle East</option>
-                  </select>
-                </div>
-              </div>
+              {profileType === "Coach" ? (
+                <>
+                  {/* Years of Experience & Region */}
+                  <div className="grid grid-cols-2 gap-4 border-t border-gaming-gray/40 pt-4">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Years of Experience</label>
+                      <select
+                        value={coachingYears}
+                        onChange={(e) => setCoachingYears(e.target.value)}
+                        className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                      >
+                        <option value="0">0 years</option>
+                        <option value="1">1 year</option>
+                        <option value="2">2 years</option>
+                        <option value="3">3 years</option>
+                        <option value="4">4 years</option>
+                        <option value="5">5+ years</option>
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Region</label>
+                      <select
+                        value={region}
+                        onChange={(e) => setRegion(e.target.value)}
+                        className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                      >
+                        <option value="Southeast Asia">Southeast Asia</option>
+                        <option value="South Asia">South Asia</option>
+                        <option value="Europe">Europe</option>
+                        <option value="North America">North America</option>
+                        <option value="Middle East">Middle East</option>
+                      </select>
+                    </div>
+                  </div>
 
-              {/* Highest Official Tournament Played */}
-              <div className="flex flex-col gap-1 border-t border-gaming-gray/40 pt-4">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Highest Official Tournament Played</label>
-                <select
-                  value={highestTier}
-                  onChange={(e) => setHighestTier(e.target.value)}
-                  className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full"
-                >
-                  <option value="None">None (0 rating)</option>
-                  <option value="S-Tier">S-Tier - PMGC, PMWC (150 rating)</option>
-                  <option value="A-Tier">A-Tier - PMPL, PMPS, PMSL, PMGO (110 rating)</option>
-                  <option value="B-Tier">B-Tier - PMNC, PMCC, PMBC, PMAC (70 rating)</option>
-                  <option value="C-Tier">C-Tier - Community & 3rd Party (35 rating)</option>
-                </select>
-              </div>
+                  {/* Teams Coached */}
+                  <div className="flex flex-col gap-1 border-t border-gaming-gray/40 pt-4">
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Teams Coached (comma-separated)</label>
+                    <input
+                      type="text"
+                      value={coachingHistory}
+                      onChange={(e) => setCoachingHistory(e.target.value)}
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none transition"
+                      placeholder="e.g. Nova Esports, Alpha Team, Apex Esports"
+                    />
+                  </div>
 
-              {/* Competitive Standing Tier Selector */}
-              <div className="flex flex-col gap-1 border-t border-gaming-gray/40 pt-4">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Competitive Tier / Experience</label>
-                <select
-                  value={urRank}
-                  onChange={(e) => setUrRank(e.target.value)}
-                  className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none transition w-full"
-                >
-                  <option value="Vanguard">Amateur</option>
-                  <option value="Exceed">Semi-Pro</option>
-                  <option value="Supreme">Tier-3 Pro</option>
-                  <option value="Peerless">Tier-2 Pro</option>
-                  <option value="Legend">Tier-1 Pro</option>
-                </select>
-              </div>
+                  {/* Specialties */}
+                  <div className="flex flex-col gap-1 border-t border-gaming-gray/40 pt-4">
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Core Specialties</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1">
+                      {["Analysis", "Tactics", "Strategy", "Training", "VOD Review", "In-Game Leading", "Macro Setup", "Scouting"].map((tag) => {
+                        const isSelected = specialties.includes(tag);
+                        return (
+                          <button
+                            type="button"
+                            key={tag}
+                            onClick={() => {
+                              if (isSelected) {
+                                setSpecialties(specialties.filter((s) => s !== tag));
+                              } else {
+                                setSpecialties([...specialties, tag]);
+                              }
+                            }}
+                            className={`px-2 py-1.5 rounded-lg border text-[9px] font-black tracking-wider uppercase transition text-center cursor-pointer ${
+                              isSelected
+                                ? "bg-digital-yellow border-digital-yellow text-gaming-black"
+                                : "bg-gaming-black border-gaming-gray text-gray-400 hover:border-gray-700"
+                            }`}
+                          >
+                            {tag}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Role & Country Selectors */}
+                  <div className="grid grid-cols-2 gap-4 border-t border-gaming-gray/40 pt-4">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">In-Game Role</label>
+                      <select
+                        value={role}
+                        onChange={(e) => setRole(e.target.value)}
+                        className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                      >
+                        <option value="IGL">IGL</option>
+                        <option value="Entry Fragger">Entry Fragger</option>
+                        <option value="Support">Support</option>
+                        <option value="Sniper">Sniper</option>
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Country / Region</label>
+                      <select
+                        value={region}
+                        onChange={(e) => setRegion(e.target.value)}
+                        className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                      >
+                        <option value="Southeast Asia">Southeast Asia</option>
+                        <option value="South Asia">South Asia</option>
+                        <option value="Europe">Europe</option>
+                        <option value="North America">North America</option>
+                        <option value="Middle East">Middle East</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Highest Official Tournament Played */}
+                  <div className="flex flex-col gap-1 border-t border-gaming-gray/40 pt-4">
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Highest Official Tournament Played</label>
+                    <select
+                      value={highestTier}
+                      onChange={(e) => setHighestTier(e.target.value)}
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full"
+                    >
+                      <option value="None">None (0 rating)</option>
+                      <option value="S-Tier">S-Tier - PMGC, PMWC (150 rating)</option>
+                      <option value="A-Tier">A-Tier - PMPL, PMPS, PMSL, PMGO (110 rating)</option>
+                      <option value="B-Tier">B-Tier - PMNC, PMCC, PMBC, PMAC (70 rating)</option>
+                      <option value="C-Tier">C-Tier - Community & 3rd Party (35 rating)</option>
+                    </select>
+                  </div>
+
+                  {/* Competitive Standing Tier Selector */}
+                  <div className="flex flex-col gap-1 border-t border-gaming-gray/40 pt-4">
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Competitive Tier / Experience</label>
+                    <select
+                      value={urRank}
+                      onChange={(e) => setUrRank(e.target.value)}
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none transition w-full"
+                    >
+                      <option value="Vanguard">Amateur</option>
+                      <option value="Exceed">Semi-Pro</option>
+                      <option value="Supreme">Tier-3 Pro</option>
+                      <option value="Peerless">Tier-2 Pro</option>
+                      <option value="Legend">Tier-1 Pro</option>
+                    </select>
+                  </div>
+                </>
+              )}
 
               {/* Competitive Team History & Roster Achievements Section */}
               <div className="flex flex-col gap-4 border-t border-gaming-gray/40 pt-4">
@@ -443,27 +547,31 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Gaming Device</label>
-                <input
-                  type="text"
-                  value={device}
-                  onChange={(e) => setDevice(e.target.value)}
-                  className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
-                  required
-                />
-              </div>
+              {profileType !== "Coach" && (
+                <>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Gaming Device</label>
+                    <input
+                      type="text"
+                      value={device}
+                      onChange={(e) => setDevice(e.target.value)}
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                      required={profileType !== "Coach"}
+                    />
+                  </div>
 
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Control Configuration</label>
-                <input
-                  type="text"
-                  value={controlSetup}
-                  onChange={(e) => setControlSetup(e.target.value)}
-                  className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
-                  required
-                />
-              </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Control Configuration</label>
+                    <input
+                      type="text"
+                      value={controlSetup}
+                      onChange={(e) => setControlSetup(e.target.value)}
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                      required={profileType !== "Coach"}
+                    />
+                  </div>
+                </>
+              )}
 
               <div className="flex flex-col gap-1">
                 <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Bio Narrative</label>
@@ -489,16 +597,6 @@ export default function DashboardClient({ player }: DashboardClientProps) {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
               <div className="flex flex-col gap-1">
-                <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Twitter / X Handle</label>
-                <input
-                  type="text"
-                  placeholder="e.g. twitter.com/username"
-                  value={twitter}
-                  onChange={(e) => setTwitter(e.target.value)}
-                  className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-2 text-xs text-white focus:border-digital-yellow focus:outline-none"
-                />
-              </div>
-              <div className="flex flex-col gap-1">
                 <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Discord Tag</label>
                 <input
                   type="text"
@@ -508,9 +606,6 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                   className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-2 text-xs text-white focus:border-digital-yellow focus:outline-none"
                 />
               </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1">
                 <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Instagram Link</label>
                 <input
@@ -521,7 +616,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                   className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-2 text-xs text-white focus:border-digital-yellow focus:outline-none"
                 />
               </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 sm:col-span-2">
                 <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Facebook Link</label>
                 <input
                   type="text"
