@@ -469,66 +469,20 @@ export default function DiscoveryClient({
 
         {/* ================= SECTION 2: FEATURED ESPORTS ROSTERS ================= */}
         <section className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-black uppercase tracking-wider text-digital-yellow flex items-center gap-2">
-              <span className="text-xl">⭐</span> FEATURED ESPORTS ROSTERS
-            </h2>
-            <span className="text-[10px] text-gray-500 font-black uppercase tracking-wider hidden sm:inline">OFFICIAL LINEUPS</span>
-          </div>
-
-          <div className="bg-[#0d0e12] border border-gaming-gray rounded-3xl p-6 shadow-lg relative overflow-hidden flex flex-col gap-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-gaming-gray/30 pb-4">
-              <div>
-                <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
-                  🏆 TEAM RXJAX OFFICIAL LINEUP
-                </h3>
-                <p className="text-gray-500 text-[10px] mt-0.5 font-medium">CURRENT REGISTRATION ACTIVE • S-TIER DIRECTORY</p>
-              </div>
-              <span className="text-[9px] font-black uppercase bg-digital-yellow/10 border border-[#FFBD03]/20 text-[#FFBD03] px-2.5 py-1 rounded">
-                🔒 ROSTER LOCK ACTIVE
-              </span>
-            </div>
-
-            {/* Lineup Grid: 2x2 grid on mobile, 4 columns on desktop */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { role: "IGL", label: "In-Game Leader", icon: "👑" },
-                { role: "Entry Fragger", label: "Entry Fragger", icon: "⚔️" },
-                { role: "Support", label: "Support", icon: "🛡️" },
-                { role: "Sniper", label: "Sniper / Marksman", icon: "🎯" },
-              ].map((pos) => {
-                // Find a featured player with this role
-                const player = featuredProfiles.find(p => p.role === pos.role);
-                return (
-                  <div key={pos.role} className="bg-gaming-black/60 border border-gaming-gray rounded-2xl p-4 flex flex-col items-center text-center relative group hover:border-[#FFBD03]/40 transition">
-                    <span className="absolute top-2 left-2 text-[8px] font-bold text-gray-500 uppercase tracking-widest">{pos.icon} {pos.role}</span>
-                    <div className="w-12 h-12 rounded-full bg-gaming-black border border-gaming-gray overflow-hidden flex items-center justify-center mt-4 mb-2 relative shrink-0">
-                      {player?.avatarUrl ? (
-                        <img src={player.avatarUrl} className="w-full h-full object-cover" alt="" />
-                      ) : (
-                        <svg viewBox="0 0 100 100" className="w-6 h-6 text-gray-700">
-                          <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
-                          <path d="M15,85 C15,60 30,55 50,55 C70,55 85,60 85,85 Z" fill="currentColor" opacity="0.6" />
-                        </svg>
-                      )}
-                    </div>
-                    {player ? (
-                      <>
-                        <Link href={`/players/${player.id}`} className="font-extrabold text-white text-xs uppercase tracking-wide hover:text-digital-yellow transition truncate max-w-full block">
-                          {player.ign}
-                        </Link>
-                        <span className="text-[8px] text-[#10B981] font-black uppercase mt-1">SIGNED</span>
-                      </>
-                    ) : (
-                      <>
-                        <span className="font-bold text-gray-600 text-[10px] uppercase tracking-wide">VACANT SLOT</span>
-                        <span className="text-[8px] text-gray-500 font-bold uppercase mt-1">RECRUITING</span>
-                      </>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+          <h2 className="text-lg font-black uppercase tracking-wider text-digital-yellow flex items-center gap-2">
+            <span className="text-xl">⭐</span> FEATURED ESPORTS ROSTERS
+          </h2>
+          
+          <div className="bg-[#0d0e12] border-2 border-dashed border-gaming-gray/60 rounded-3xl p-10 text-center flex flex-col items-center justify-center gap-3.5 shadow-lg relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-digital-yellow/[0.01] rounded-full blur-xl" />
+            <span className="text-3xl filter drop-shadow-[0_0_8px_rgba(255,189,3,0.3)]">🔒</span>
+            <h3 className="text-sm font-black text-white uppercase tracking-widest">
+              FEATURED ROSTERS LOCKED
+            </h3>
+            <p className="text-gray-400 text-xs max-w-md leading-relaxed">
+              Only system developers can add and configure official competitive esports rosters. 
+              Please contact the platform administrator to register team slots.
+            </p>
           </div>
         </section>
 
