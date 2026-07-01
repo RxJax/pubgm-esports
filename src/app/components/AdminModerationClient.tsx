@@ -36,6 +36,70 @@ export default function AdminModerationClient({ initialReports, adminId, adminIg
   const [reports, setReports] = useState<Report[]>(initialReports);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
+  // Direct Player Verification Search States
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<{ id: string; ign: string; email: string; avatarUrl: string | null; status: string; isVerified: boolean }[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+
+  const executeSearch = async (val: string) => {
+    if (!val.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    setSearchLoading(true);
+    try {
+      const res = await fetch(`/api/admin/players?q=${encodeURIComponent(val)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setSearchResults(data);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  const handleToggleVerification = async (playerId: string, currentStatus: boolean) => {
+    setActionLoading(`verify-${playerId}`);
+    try {
+      const res = await fetch(`/api/players/${playerId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isVerified: !currentStatus }),
+      });
+
+      if (res.ok) {
+        const nextStatus = !currentStatus;
+        // Update search results list
+        setSearchResults((prev) =>
+          prev.map((p) => (p.id === playerId ? { ...p, isVerified: nextStatus } : p))
+        );
+        // Synchronize with pending reports Accused Players list
+        setReports((prev) =>
+          prev.map((r) =>
+            r.reportedPlayer.id === playerId
+              ? { ...r, reportedPlayer: { ...r.reportedPlayer, isVerified: nextStatus } }
+              : r
+          )
+        );
+        alert(
+          nextStatus
+            ? "Success: Verification badge successfully granted to the player card!"
+            : "Success: Verification badge successfully revoked from the player card!"
+        );
+      } else {
+        const err = await res.json();
+        alert(`Error: ${err.error || "Failed to toggle verification"}`);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Network error: Failed to toggle verification.");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const handleDismiss = async (reportId: string) => {
     setActionLoading(reportId);
     try {
@@ -86,35 +150,7 @@ export default function AdminModerationClient({ initialReports, adminId, adminIg
     }
   };
 
-  const handleGrantBlueTick = async (reportId: string, playerId: string) => {
-    setActionLoading(reportId);
-    try {
-      const res = await fetch(`/api/players/${playerId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isVerified: true }),
-      });
 
-      if (res.ok) {
-        setReports((prev) =>
-          prev.map((r) =>
-            r.reportedPlayer.id === playerId
-              ? { ...r, reportedPlayer: { ...r.reportedPlayer, isVerified: true } }
-              : r
-          )
-        );
-        alert("Success: Verification badge successfully granted to the player card!");
-      } else {
-        const err = await res.json();
-        alert(`Error: ${err.error || "Failed to grant verification badge"}`);
-      }
-    } catch (e) {
-      console.error(e);
-      alert("Network error: Failed to grant verification badge.");
-    } finally {
-      setActionLoading(null);
-    }
-  };
 
   return (
     <div className="flex-1 flex flex-col bg-gaming-black">
@@ -140,6 +176,100 @@ export default function AdminModerationClient({ initialReports, adminId, adminIg
             Review incoming fake account flags, impersonation claims, and profile violations submitted by community members. Exercise platform removal authority when required.
           </p>
         </div>
+
+        {/* Admin Player Search Panel (Master Admin Only) */}
+        {adminEmail?.toLowerCase() === "rxjax007@gmail.com" && (
+          <div className="bg-[#0d0e12] border border-gaming-gray rounded-3xl p-6 mb-8 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-digital-yellow/5 rounded-full blur-3xl pointer-events-none" />
+            <h2 className="text-xs font-black text-digital-yellow uppercase tracking-widest flex items-center gap-2 mb-3">
+              <span className="w-1.5 h-3 bg-digital-yellow" /> Direct Player Verification Search
+            </h2>
+            <p className="text-gray-400 text-xs mb-4">
+              Search all registered players by IGN or email address to instantly grant or revoke their glowing Facebook-style blue tick verification badges.
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  executeSearch(e.target.value);
+                }}
+                placeholder="Enter IGN or email..."
+                className="flex-1 min-h-[48px] bg-gaming-black border border-gaming-gray focus:border-digital-yellow rounded-xl px-4 text-xs font-semibold text-white tracking-wide placeholder-gray-500 focus:outline-none transition"
+              />
+              <button
+                type="button"
+                onClick={() => executeSearch(searchQuery)}
+                className="bg-digital-yellow hover:bg-amber-400 text-gaming-black text-xs font-black px-6 rounded-xl uppercase tracking-widest transition cursor-pointer"
+              >
+                Search
+              </button>
+            </div>
+
+            {/* Compact Search Results List */}
+            {searchResults.length > 0 && (
+              <div className="mt-6 border-t border-gaming-gray/50 pt-5 flex flex-col gap-3">
+                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Search Results ({searchResults.length})</span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                  {searchResults.map((p) => (
+                    <div
+                      key={p.id}
+                      className="bg-gaming-black/80 border border-gaming-gray/60 rounded-2xl p-3 flex items-center justify-between gap-3"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-9 h-9 rounded-full bg-gaming-black border border-gaming-gray overflow-hidden flex items-center justify-center shrink-0">
+                          {p.avatarUrl ? (
+                            <img src={p.avatarUrl} className="w-full h-full object-cover" alt="" />
+                          ) : (
+                            <svg viewBox="0 0 100 100" className="w-full h-full text-gray-600 bg-[#1c1f26]">
+                              <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
+                              <path d="M15,85 C15,60 30,55 50,55 C70,55 85,60 85,85 Z" fill="currentColor" opacity="0.6" />
+                            </svg>
+                          )}
+                        </div>
+                        <div className="truncate text-left">
+                          <div className="flex items-center gap-1.5 justify-start">
+                            <h4 className="font-extrabold text-white text-xs uppercase tracking-wide truncate">
+                              {p.ign}
+                            </h4>
+                            {p.isVerified && (
+                              <span className="inline-flex items-center justify-center w-[12px] h-[12px] rounded-full bg-[#1877F2] text-white shrink-0">
+                                <svg className="w-[8px] h-[8px] text-white" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[9px] text-gray-500 font-mono truncate">{p.email}</p>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleToggleVerification(p.id, p.isVerified)}
+                        disabled={actionLoading === `verify-${p.id}`}
+                        className={`text-[9px] font-black uppercase tracking-widest px-3.5 py-2 rounded-lg border transition cursor-pointer shrink-0 ${
+                          p.isVerified
+                            ? "bg-airdrop-red/10 border-airdrop-red/30 hover:border-airdrop-red text-airdrop-red hover:bg-airdrop-red/20"
+                            : "bg-[#1877F2]/10 border-[#1877F2]/30 hover:border-[#1877F2] text-[#1877F2] hover:bg-[#1877F2]/20"
+                        }`}
+                      >
+                        {p.isVerified ? "Revoke Blue Tick" : "Grant Blue Tick"}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {searchQuery && searchResults.length === 0 && !searchLoading && (
+              <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-4">
+                No users found matching "{searchQuery}"
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Reports Section */}
         <div className="flex flex-col gap-6">
@@ -216,7 +346,7 @@ export default function AdminModerationClient({ initialReports, adminId, adminIg
                   <div className="shrink-0 flex sm:flex-row md:flex-col gap-2.5 w-full md:w-auto">
                     {adminEmail?.toLowerCase() === "rxjax007@gmail.com" && (
                       <button
-                        onClick={() => handleGrantBlueTick(report.id, report.reportedPlayer.id)}
+                        onClick={() => handleToggleVerification(report.reportedPlayer.id, report.reportedPlayer.isVerified)}
                         disabled={actionLoading !== null || report.reportedPlayer.isVerified}
                         className={`flex-1 md:flex-initial border text-xs font-black uppercase tracking-widest px-5 py-2.5 rounded-xl transition cursor-pointer disabled:opacity-75 ${
                           report.reportedPlayer.isVerified
