@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface NavbarProps {
   isLoggedIn: boolean;
@@ -25,38 +25,52 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId, isAdmin }: Nav
     setSearchVal(searchParams.get("search") || "");
   }, [searchParams]);
 
+  const debouncedSetUrl = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (debouncedSetUrl.current) clearTimeout(debouncedSetUrl.current);
+    };
+  }, []);
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setSearchVal(val);
 
-    const cleanVal = val.trim();
-    // If it's a numeric character ID (typically 5 to 15 digits), check if we can redirect immediately
-    if (/^\d{5,15}$/.test(cleanVal)) {
-      fetch(`/api/players?search=${encodeURIComponent(cleanVal)}`)
-        .then((res) => (res.ok ? res.json() : []))
-        .then((data) => {
-          const match = data.find((p: any) => p.characterId === cleanVal);
-          if (match) {
-            router.push(`/players/${match.id}`);
-            if (showMobileSearch) setShowMobileSearch(false);
-            setMobileMenuOpen(false);
-          }
-        })
-        .catch((err) => console.error("Error matching character ID:", err));
+    if (debouncedSetUrl.current) {
+      clearTimeout(debouncedSetUrl.current);
     }
 
-    const params = new URLSearchParams(searchParams.toString());
-    if (val) {
-      params.set("search", val);
-    } else {
-      params.delete("search");
-    }
+    debouncedSetUrl.current = setTimeout(() => {
+      const cleanVal = val.trim();
+      // If it's a numeric character ID (typically 5 to 15 digits), check if we can redirect immediately
+      if (/^\d{5,15}$/.test(cleanVal)) {
+        fetch(`/api/players?search=${encodeURIComponent(cleanVal)}`)
+          .then((res) => (res.ok ? res.json() : []))
+          .then((data) => {
+            const match = data.find((p: any) => p.characterId === cleanVal);
+            if (match) {
+              router.push(`/players/${match.id}`);
+              if (showMobileSearch) setShowMobileSearch(false);
+              setMobileMenuOpen(false);
+            }
+          })
+          .catch((err) => console.error("Error matching character ID:", err));
+      }
 
-    if (pathname !== "/") {
-      router.push(`/?${params.toString()}`);
-    } else {
-      router.replace(`/?${params.toString()}`);
-    }
+      const params = new URLSearchParams(searchParams.toString());
+      if (val) {
+        params.set("search", val);
+      } else {
+        params.delete("search");
+      }
+
+      if (pathname !== "/") {
+        router.push(`/?${params.toString()}`);
+      } else {
+        router.replace(`/?${params.toString()}`);
+      }
+    }, 150);
   };
 
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {

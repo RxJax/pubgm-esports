@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, memo } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
@@ -77,6 +77,218 @@ const getEsportsRating = (tier?: string | null) => {
   return 0;
 };
 
+const PlayerCarouselCard = memo(({ player }: { player: Player }) => {
+  const borderGlowClass = 
+    player.urRank === "Legend" ? "border-[#FFBD03] hover:shadow-[0_0_15px_rgba(255,189,3,0.3)] shadow-black/80" :
+    player.urRank === "Peerless" ? "border-purple-500 hover:shadow-[0_0_15px_rgba(168,85,247,0.3)] shadow-black/80" :
+    player.urRank === "Supreme" ? "border-green-500 hover:shadow-[0_0_15px_rgba(34,197,94,0.3)] shadow-black/80" :
+    "border-gaming-gray hover:border-digital-yellow/40";
+
+  return (
+    <Link
+      href={`/players/${player.id}`}
+      className={`group flex-none w-[85vw] sm:w-[340px] snap-center snap-always bg-gradient-to-br from-gaming-gray/30 to-[#0c0d12] hover:from-gaming-gray/50 hover:to-[#0c0d12] border-2 rounded-2xl p-5 transition-all duration-300 relative overflow-hidden shadow-lg ${borderGlowClass}`}
+    >
+      <div className="flex justify-between items-start mb-2">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-15 rounded-lg bg-gaming-black border border-gaming-gray overflow-hidden shrink-0 relative flex items-center justify-center">
+            {player.avatarUrl ? (
+              <img src={player.avatarUrl} className="w-full h-full object-cover" alt="" />
+            ) : (
+              <svg viewBox="0 0 100 100" className="w-full h-full text-gray-500 bg-gradient-to-t from-[#15161c] to-[#252836]">
+                <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
+                <path d="M15,85 C15,60 30,55 50,55 C70,55 85,60 85,85 Z" fill="currentColor" opacity="0.6" />
+              </svg>
+            )}
+          </div>
+          <div>
+            <h3 className="font-extrabold text-white text-base group-hover:text-digital-yellow transition uppercase tracking-wide flex items-center gap-1.5 text-left justify-start">
+              <span>{player.ign}</span>
+              {(player.isVerified || player.isFeatured) && (
+                <span className="relative group/tooltip inline-flex items-center shrink-0 align-middle cursor-pointer" tabIndex={0}>
+                  <span className="inline-flex items-center justify-center w-[14px] h-[14px] rounded-full bg-[#1877F2] text-white select-none pointer-events-auto shrink-0" style={{ filter: 'drop-shadow(0 0 6px rgba(0, 112, 243, 0.7))' }}>
+                    <svg className="w-[9.5px] h-[9.5px] text-white" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </span>
+                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-white bg-black border border-gaming-gray rounded-lg opacity-0 group-hover/tooltip:opacity-100 group-focus/tooltip:opacity-100 pointer-events-none transition-all duration-150 whitespace-nowrap z-50 shadow-xl font-sans normal-case">
+                    Verified Pro
+                  </span>
+                </span>
+              )}
+            </h3>
+            <p className="text-[9px] text-gray-400 font-black uppercase tracking-wider text-left">
+              {player.status === "Signed" ? (player.team?.name || "Not Available") : (player.team?.name || "Free Agent")}
+            </p>
+            {player.status !== "Looking For Team" && player.status !== "Free Agent" && player.underContract && player.contractStartDate && player.contractEndDate && (
+              <div className="mt-1 inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-airdrop-red/30 bg-airdrop-red/10 text-[8px] font-black text-airdrop-red uppercase tracking-wider animate-pulse w-fit">
+                🔒 {getContractDurationText(player)}
+              </div>
+            )}
+            <span className="inline-block text-[8px] bg-digital-yellow/15 text-digital-yellow border border-digital-yellow/20 px-2 py-0.2 rounded font-black uppercase mt-1 block w-fit">
+              🎯 {player.role}
+            </span>
+          </div>
+        </div>
+        <div className="text-[9px] font-black bg-airdrop-red/10 text-airdrop-red border border-airdrop-red/20 px-2 py-0.5 rounded">
+          {player.urRank === "Legend" ? "Tier-1 Pro" : player.urRank === "Peerless" ? "Tier-2 Pro" : player.urRank === "Supreme" ? "Tier-3 Pro" : player.urRank === "Exceed" ? "Semi-Pro" : "Amateur"}
+        </div>
+      </div>
+
+      <p className="text-gray-400 text-xs italic mb-2 line-clamp-1 mt-1 text-left">
+        &ldquo;{player.bio}&rdquo;
+      </p>
+
+      {/* Chart and Heatmap block */}
+      <div className="flex gap-3 mt-3 border-t border-gaming-gray/30 pt-3">
+        <div>
+          <span className="text-[8px] text-gray-500 font-bold block uppercase text-left">Recent Tourney</span>
+          <div className="flex items-center gap-1.5 mt-1">
+            <svg width="65" height="24" className="text-digital-yellow">
+              <path d="M0,20 L15,12 L30,18 L45,5 L60,10" fill="none" stroke="currentColor" strokeWidth="1.5" />
+              <circle cx="60" cy="10" r="2" fill="currentColor" />
+            </svg>
+          </div>
+        </div>
+        <div className="border-l border-gaming-gray/30 pl-3">
+          <span className="text-[8px] text-gray-500 font-bold block uppercase text-left">Heat Map</span>
+          <div className="grid grid-cols-5 gap-[1px] mt-1.5 w-12 h-6 bg-gaming-black/60 p-[1px] rounded border border-gaming-gray/30">
+            {Array.from({ length: 10 }).map((_, idx) => {
+              const opacity = [0.1, 0.4, 0.8, 0.2, 0.9, 0.3, 0.7, 0.5, 0.9, 0.2][(idx + Math.round(player.kdRatio)) % 10];
+              return (
+                <div
+                  key={idx}
+                  className="rounded-[1px]"
+                  style={{
+                    backgroundColor: `rgba(255, 189, 3, ${opacity})`
+                  }}
+                />
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Status Footer */}
+      <div className="mt-3.5 pt-2.5 border-t border-gaming-gray/40 flex items-center justify-between">
+        <span className="text-[8px] text-gray-500 font-black uppercase tracking-wider">Live Recruitment Status</span>
+        {player.status === "Looking For Team" || player.status === "Free Agent" ? (
+          <span className="text-[9px] font-black bg-[#10B981] text-white px-2.5 py-1 rounded-lg uppercase tracking-wider shadow-sm shadow-[#10B981]/20">
+            OPEN FOR OFFERS
+          </span>
+        ) : (
+          <span className="text-[9px] font-black bg-airdrop-red/10 text-airdrop-red border border-airdrop-red/30 px-2.5 py-1 rounded-lg uppercase tracking-wider">
+            NOT AVAILABLE
+          </span>
+        )}
+      </div>
+    </Link>
+  );
+});
+PlayerCarouselCard.displayName = "PlayerCarouselCard";
+
+const CandidateRow = memo(({ player }: { player: Player }) => {
+  return (
+    <Link
+      href={`/players/${player.id}`}
+      className="flex flex-col sm:grid sm:grid-cols-5 gap-3.5 sm:gap-4 items-start sm:items-center px-5 py-4 bg-[#0d0e12] hover:bg-[#15161c] border border-gaming-gray/60 hover:border-digital-yellow/30 rounded-2xl transition duration-150 shadow-md w-full"
+    >
+      {/* PROFILE column */}
+      <div className="flex items-center gap-3 w-full sm:w-auto">
+        <div className="w-9 h-9 rounded-full bg-gaming-black border border-gaming-gray overflow-hidden flex items-center justify-center shrink-0 relative">
+          {player.avatarUrl ? (
+            <img src={player.avatarUrl} className="w-full h-full object-cover" alt="" />
+          ) : (
+            <svg viewBox="0 0 100 100" className="w-full h-full text-gray-600 bg-[#1c1f26]">
+              <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
+              <path d="M15,85 C15,60 30,55 50,55 C70,55 85,60 85,85 Z" fill="currentColor" opacity="0.6" />
+            </svg>
+          )}
+        </div>
+        <div className="truncate text-left">
+          <div className="flex items-center gap-1.5 justify-start">
+            <span className="truncate">{player.ign}</span>
+            {(player.isVerified || player.isFeatured) && (
+              <span className="relative group/tooltip inline-flex items-center shrink-0 align-middle cursor-pointer" tabIndex={0}>
+                <span className="inline-flex items-center justify-center w-[13px] h-[13px] rounded-full bg-[#1877F2] text-white select-none pointer-events-auto shrink-0" style={{ filter: 'drop-shadow(0 0 6px rgba(0, 112, 243, 0.7))' }}>
+                  <svg className="w-[8.5px] h-[8.5px] text-white" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </span>
+                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-white bg-black border border-gaming-gray rounded-lg opacity-0 group-hover/tooltip:opacity-100 group-focus/tooltip:opacity-100 pointer-events-none transition-all duration-150 whitespace-nowrap z-50 shadow-xl font-sans normal-case">
+                  Verified Pro
+                </span>
+              </span>
+            )}
+          </div>
+          <p className="text-[9px] text-gray-500 uppercase truncate">
+            {player.status === "Signed" ? (player.team?.name || "Not Available") : (player.team?.name || "Free Agent")}
+          </p>
+          {player.status !== "Looking For Team" && player.status !== "Free Agent" && player.underContract && player.contractStartDate && player.contractEndDate && (
+            <div className="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-airdrop-red/30 bg-airdrop-red/10 text-[7px] font-bold text-airdrop-red uppercase tracking-wider block w-fit">
+              🔒 {getContractDurationText(player)}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ROLE column */}
+      <div className="text-xs font-semibold text-gray-300 flex items-center gap-2 w-full sm:w-auto text-left">
+        <span className="text-gray-500 text-[9px] uppercase font-black tracking-wider sm:hidden w-16 shrink-0">Role:</span>
+        <div className="flex items-center gap-1.5 justify-start">
+          <span className="text-digital-yellow text-xs">🎯</span>
+          <span>{player.profileType === "Coach" ? "PRO COACH" : player.role}</span>
+        </div>
+      </div>
+
+      {/* FILTER TAGS column */}
+      <div className="flex items-center sm:block gap-2 w-full sm:w-auto text-left">
+        <span className="text-gray-500 text-[9px] uppercase font-black tracking-wider sm:hidden w-16 shrink-0">Tags:</span>
+        <div className="flex flex-wrap gap-1.5 justify-start">
+          <span className="bg-gaming-gray/40 text-gray-400 text-[8px] px-1.5 py-0.5 rounded font-black uppercase">
+            {player.region}
+          </span>
+          {player.profileType === "Coach" ? (
+            <span className="bg-digital-yellow/10 text-digital-yellow border border-digital-yellow/20 text-[8px] px-1.5 py-0.5 rounded font-black uppercase">
+              👑 {player.coachingYears} Years Exp
+            </span>
+          ) : (
+            <span className="bg-digital-yellow/10 text-digital-yellow border border-digital-yellow/20 text-[8px] px-1.5 py-0.5 rounded font-black uppercase">
+              {player.urRank === "Legend" ? "Tier-1 Pro" : player.urRank === "Peerless" ? "Tier-2 Pro" : player.urRank === "Supreme" ? "Tier-3 Pro" : player.urRank === "Exceed" ? "Semi-Pro" : "Amateur"}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* SORT / STATS column */}
+      <div className="flex items-center sm:block gap-2 w-full sm:w-auto text-left">
+        <span className="text-gray-500 text-[9px] uppercase font-black tracking-wider sm:hidden w-16 shrink-0">Standing:</span>
+        {player.profileType === "Coach" ? (
+          <div className="flex flex-col text-[10px] font-bold text-gray-400 font-mono text-left">
+            <div>Type: <span className="text-digital-yellow font-black">Coach</span></div>
+            <div className="text-[8px] text-gray-500 truncate max-w-[120px]">{player.specialties || "Generalist"}</div>
+          </div>
+        ) : (
+          <div className="flex flex-col text-[10px] font-bold text-gray-400 font-mono text-left">
+            <div>Rating: <span className="text-airdrop-red font-black">{getEsportsRating(player.highestTier)}</span></div>
+            <div className="text-[8px] text-gray-500">Tier: {player.highestTier || "None"}</div>
+          </div>
+        )}
+      </div>
+
+      {/* SORTED / ACTIVE column */}
+      <div className="flex items-center sm:items-end justify-start sm:justify-center sm:text-right text-[10px] text-gray-500 font-mono gap-2 w-full border-t border-gaming-gray/30 pt-3 sm:border-0 sm:pt-0">
+        <span className="text-gray-500 text-[9px] uppercase font-black tracking-wider sm:hidden w-16 shrink-0">Status:</span>
+        <div className="flex flex-col sm:items-end text-left sm:text-right">
+          <span className="text-green-500 font-black">Active now</span>
+          <span className="text-[8px] text-gray-600">Updated recently</span>
+        </div>
+      </div>
+    </Link>
+  );
+});
+CandidateRow.displayName = "CandidateRow";
+
 export default function DiscoveryClient({
   initialPlayers,
   initialRising = [],
@@ -128,10 +340,15 @@ export default function DiscoveryClient({
   }
 
   // Real-time backend query states
+  const [allPlayersCache, setAllPlayersCache] = useState<Player[]>(initialPlayers);
   const [players, setPlayers] = useState<Player[]>(initialPlayers);
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
   const feedRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setAllPlayersCache(initialPlayers);
+  }, [initialPlayers]);
   
   useEffect(() => {
     const urlSearch = searchParams.get("search") || "";
@@ -167,35 +384,69 @@ export default function DiscoveryClient({
     return () => clearTimeout(handler);
   }, [search]);
 
-  // Real-time API query fetcher
+  // In-Memory search & filter execution
   useEffect(() => {
-    async function fetchPlayers() {
-      setLoading(true);
-      try {
-        const queryParams = new URLSearchParams();
-        if (debouncedSearch) queryParams.append("search", debouncedSearch);
-        if (selectedRole && selectedRole !== "All") queryParams.append("role", selectedRole);
-        if (selectedRegion && selectedRegion !== "All") queryParams.append("region", selectedRegion);
-        if (selectedStatus && selectedStatus !== "All") queryParams.append("status", selectedStatus);
-        if (minRating > 0) queryParams.append("minRating", minRating.toString());
-        if (deviceType && deviceType !== "All") queryParams.append("deviceType", deviceType);
-        if (gyro && gyro !== "All") queryParams.append("gyro", gyro);
-        if (selectedUrRank && selectedUrRank !== "All") queryParams.append("urRank", selectedUrRank);
+    let filtered = [...allPlayersCache];
 
-        const res = await fetch(`/api/players?${queryParams.toString()}`);
-        if (res.ok) {
-          const data = await res.json();
-          setPlayers(data);
-        }
-      } catch (err) {
-        console.error("Error fetching filtered players:", err);
-      } finally {
-        setLoading(false);
+    if (debouncedSearch) {
+      const s = debouncedSearch.toLowerCase().trim();
+      filtered = filtered.filter(
+        (p) => p.ign.toLowerCase().includes(s) || p.characterId.includes(s)
+      );
+    }
+
+    if (selectedRole && selectedRole !== "All") {
+      if (selectedRole === "Coach") {
+        filtered = filtered.filter((p) => p.profileType === "Coach");
+      } else {
+        filtered = filtered.filter((p) => p.role === selectedRole && p.profileType !== "Coach");
       }
     }
 
-    fetchPlayers();
-  }, [debouncedSearch, selectedRole, selectedRegion, selectedStatus, minRating, deviceType, gyro, selectedUrRank]);
+    if (selectedRegion && selectedRegion !== "All") {
+      filtered = filtered.filter((p) => p.region === selectedRegion);
+    }
+
+    if (selectedStatus && selectedStatus !== "All") {
+      filtered = filtered.filter((p) => p.status === selectedStatus);
+    }
+
+    if (selectedUrRank && selectedUrRank !== "All") {
+      filtered = filtered.filter((p) => p.urRank === selectedUrRank);
+    }
+
+    if (minRating > 0) {
+      const allowedTiers = ["S-Tier"];
+      if (minRating <= 110) allowedTiers.push("A-Tier");
+      if (minRating <= 70) allowedTiers.push("B-Tier");
+      if (minRating <= 35) allowedTiers.push("C-Tier");
+      filtered = filtered.filter((p) => allowedTiers.includes(p.highestTier || ""));
+    }
+
+    if (deviceType === "tablet") {
+      filtered = filtered.filter(
+        (p) =>
+          p.device?.toLowerCase().includes("ipad") ||
+          p.device?.toLowerCase().includes("tablet")
+      );
+    } else if (deviceType === "phone") {
+      filtered = filtered.filter(
+        (p) =>
+          !(
+            p.device?.toLowerCase().includes("ipad") ||
+            p.device?.toLowerCase().includes("tablet")
+          )
+      );
+    }
+
+    if (gyro === "on") {
+      filtered = filtered.filter((p) => p.controlSetup?.toLowerCase().includes("gyro"));
+    } else if (gyro === "off") {
+      filtered = filtered.filter((p) => !p.controlSetup?.toLowerCase().includes("gyro"));
+    }
+
+    setPlayers(filtered);
+  }, [allPlayersCache, debouncedSearch, selectedRole, selectedRegion, selectedStatus, minRating, deviceType, gyro, selectedUrRank]);
 
   // Curated lists from live database queries
   const topRisingFraggers = useMemo(() => initialRising.filter(p => p.urRank === "Legend"), [initialRising]);
@@ -404,117 +655,9 @@ export default function DiscoveryClient({
                 </p>
               </div>
             ) : (
-              useMemo(() => {
-                return topRisingFraggers.map((player) => {
-                  const borderGlowClass = 
-                    player.urRank === "Legend" ? "border-[#FFBD03] hover:shadow-[0_0_15px_rgba(255,189,3,0.3)] shadow-black/80" :
-                    player.urRank === "Peerless" ? "border-purple-500 hover:shadow-[0_0_15px_rgba(168,85,247,0.3)] shadow-black/80" :
-                    player.urRank === "Supreme" ? "border-green-500 hover:shadow-[0_0_15px_rgba(34,197,94,0.3)] shadow-black/80" :
-                    "border-gaming-gray hover:border-digital-yellow/40";
-
-                  return (
-                    <Link
-                      href={`/players/${player.id}`}
-                      key={player.id}
-                      className={`group flex-none w-[85vw] sm:w-[340px] snap-center snap-always bg-gradient-to-br from-gaming-gray/30 to-[#0c0d12] hover:from-gaming-gray/50 hover:to-[#0c0d12] border-2 rounded-2xl p-5 transition-all duration-300 relative overflow-hidden shadow-lg ${borderGlowClass}`}
-                    >
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-15 rounded-lg bg-gaming-black border border-gaming-gray overflow-hidden shrink-0 relative flex items-center justify-center">
-                            {player.avatarUrl ? (
-                              <img src={player.avatarUrl} className="w-full h-full object-cover" alt="" />
-                            ) : (
-                              <svg viewBox="0 0 100 100" className="w-full h-full text-gray-500 bg-gradient-to-t from-[#15161c] to-[#252836]">
-                                <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
-                                <path d="M15,85 C15,60 30,55 50,55 C70,55 85,60 85,85 Z" fill="currentColor" opacity="0.6" />
-                              </svg>
-                            )}
-                          </div>
-                          <div>
-                            <h3 className="font-extrabold text-white text-base group-hover:text-digital-yellow transition uppercase tracking-wide flex items-center gap-1.5">
-                              <span>{player.ign}</span>
-                              {(player.isVerified || player.isFeatured) && (
-                                <span className="relative group/tooltip inline-flex items-center shrink-0 align-middle cursor-pointer" tabIndex={0}>
-                                  <span className="inline-flex items-center justify-center w-[14px] h-[14px] rounded-full bg-[#1877F2] text-white select-none pointer-events-auto shrink-0" style={{ filter: 'drop-shadow(0 0 6px rgba(0, 112, 243, 0.7))' }}>
-                                    <svg className="w-[9.5px] h-[9.5px] text-white" viewBox="0 0 20 20" fill="currentColor">
-                                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                    </svg>
-                                  </span>
-                                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-white bg-black border border-gaming-gray rounded-lg opacity-0 group-hover/tooltip:opacity-100 group-focus/tooltip:opacity-100 pointer-events-none transition-all duration-150 whitespace-nowrap z-50 shadow-xl font-sans normal-case">
-                                    Verified Pro
-                                  </span>
-                                </span>
-                              )}
-                            </h3>
-                            <p className="text-[9px] text-gray-400 font-black uppercase tracking-wider">
-                              {player.status === "Signed" ? (player.team?.name || "Not Available") : (player.team?.name || "Free Agent")}
-                            </p>
-                            {player.status !== "Looking For Team" && player.status !== "Free Agent" && player.underContract && player.contractStartDate && player.contractEndDate && (
-                              <div className="mt-1 inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-airdrop-red/30 bg-airdrop-red/10 text-[8px] font-black text-airdrop-red uppercase tracking-wider animate-pulse">
-                                🔒 {getContractDurationText(player)}
-                              </div>
-                            )}
-                            <span className="inline-block text-[8px] bg-digital-yellow/15 text-digital-yellow border border-digital-yellow/20 px-2 py-0.2 rounded font-black uppercase mt-1 block w-fit">
-                              🎯 {player.role}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="text-[9px] font-black bg-airdrop-red/10 text-airdrop-red border border-airdrop-red/20 px-2 py-0.5 rounded">
-                          {player.urRank === "Legend" ? "Tier-1 Pro" : player.urRank === "Peerless" ? "Tier-2 Pro" : player.urRank === "Supreme" ? "Tier-3 Pro" : player.urRank === "Exceed" ? "Semi-Pro" : "Amateur"}
-                        </div>
-                      </div>
-
-                      <p className="text-gray-400 text-xs italic mb-2 line-clamp-1 mt-1">
-                        &ldquo;{player.bio}&rdquo;
-                      </p>
-
-                      {/* Chart and Heatmap block */}
-                      <div className="flex gap-3 mt-3 border-t border-gaming-gray/30 pt-3">
-                        <div>
-                          <span className="text-[8px] text-gray-500 font-bold block uppercase">Recent Tourney</span>
-                          <div className="flex items-center gap-1.5 mt-1">
-                            <svg width="65" height="24" className="text-digital-yellow">
-                              <path d="M0,20 L15,12 L30,18 L45,5 L60,10" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                              <circle cx="60" cy="10" r="2" fill="currentColor" />
-                            </svg>
-                          </div>
-                        </div>
-                        <div className="border-l border-gaming-gray/30 pl-3">
-                          <span className="text-[8px] text-gray-500 font-bold block uppercase">Heat Map</span>
-                          <div className="grid grid-cols-5 gap-[1px] mt-1.5 w-12 h-6 bg-gaming-black/60 p-[1px] rounded border border-gaming-gray/30">
-                            {Array.from({ length: 10 }).map((_, idx) => {
-                              const opacity = [0.1, 0.4, 0.8, 0.2, 0.9, 0.3, 0.7, 0.5, 0.9, 0.2][(idx + Math.round(player.kdRatio)) % 10];
-                              return (
-                                <div
-                                  key={idx}
-                                  className="rounded-[1px]"
-                                  style={{
-                                    backgroundColor: `rgba(255, 189, 3, ${opacity})`
-                                  }}
-                                />
-                              );
-                            })}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Status Footer */}
-                      <div className="mt-3.5 pt-2.5 border-t border-gaming-gray/40 flex items-center justify-between">
-                        <span className="text-[8px] text-gray-500 font-black uppercase tracking-wider">Live Recruitment Status</span>
-                        {player.status === "Looking For Team" || player.status === "Free Agent" ? (
-                          <span className="text-[9px] font-black bg-[#10B981] text-white px-2.5 py-1 rounded-lg uppercase tracking-wider shadow-sm shadow-[#10B981]/20">
-                            OPEN FOR OFFERS
-                          </span>
-                        ) : (
-                          <span className="text-[9px] font-black bg-airdrop-red/10 text-airdrop-red border border-airdrop-red/30 px-2.5 py-1 rounded-lg uppercase tracking-wider">
-                            NOT AVAILABLE
-                          </span>
-                        )}
-                      </div>
-                    </Link>
-                  );
-                });
-              }, [topRisingFraggers])
+              topRisingFraggers.map((player) => (
+                <PlayerCarouselCard key={player.id} player={player} />
+              ))
             )}
             </div>
           </div>
@@ -592,107 +735,9 @@ export default function DiscoveryClient({
                   </div>
 
                   {/* Table Rows */}
-                  {useMemo(() => {
-                    return players.map((player) => (
-                      <Link
-                        href={`/players/${player.id}`}
-                        key={player.id}
-                        className="flex flex-col sm:grid sm:grid-cols-5 gap-3.5 sm:gap-4 items-start sm:items-center px-5 py-4 bg-[#0d0e12] hover:bg-[#15161c] border border-gaming-gray/60 hover:border-digital-yellow/30 rounded-2xl transition duration-150 shadow-md w-full"
-                      >
-                        {/* PROFILE column */}
-                        <div className="flex items-center gap-3 w-full sm:w-auto">
-                          <div className="w-9 h-9 rounded-full bg-gaming-black border border-gaming-gray overflow-hidden flex items-center justify-center shrink-0 relative">
-                            {player.avatarUrl ? (
-                              <img src={player.avatarUrl} className="w-full h-full object-cover" alt="" />
-                            ) : (
-                              <svg viewBox="0 0 100 100" className="w-full h-full text-gray-600 bg-[#1c1f26]">
-                                <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
-                                <path d="M15,85 C15,60 30,55 50,55 C70,55 85,60 85,85 Z" fill="currentColor" opacity="0.6" />
-                              </svg>
-                            )}
-                          </div>
-                          <div className="truncate">
-                            <h4 className="font-extrabold text-white text-sm uppercase tracking-wide group-hover:text-digital-yellow transition truncate flex items-center gap-1.5">
-                              <span className="truncate">{player.ign}</span>
-                              {(player.isVerified || player.isFeatured) && (
-                                <span className="relative group/tooltip inline-flex items-center shrink-0 align-middle cursor-pointer" tabIndex={0}>
-                                  <span className="inline-flex items-center justify-center w-[13px] h-[13px] rounded-full bg-[#1877F2] text-white select-none pointer-events-auto shrink-0" style={{ filter: 'drop-shadow(0 0 6px rgba(0, 112, 243, 0.7))' }}>
-                                    <svg className="w-[8.5px] h-[8.5px] text-white" viewBox="0 0 20 20" fill="currentColor">
-                                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                    </svg>
-                                  </span>
-                                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-white bg-black border border-gaming-gray rounded-lg opacity-0 group-hover/tooltip:opacity-100 group-focus/tooltip:opacity-100 pointer-events-none transition-all duration-150 whitespace-nowrap z-50 shadow-xl font-sans normal-case">
-                                    Verified Pro
-                                  </span>
-                                </span>
-                              )}
-                            </h4>
-                            <p className="text-[9px] text-gray-500 uppercase truncate">
-                              {player.status === "Signed" ? (player.team?.name || "Not Available") : (player.team?.name || "Free Agent")}
-                            </p>
-                            {player.status !== "Looking For Team" && player.status !== "Free Agent" && player.underContract && player.contractStartDate && player.contractEndDate && (
-                              <div className="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-airdrop-red/30 bg-airdrop-red/10 text-[7px] font-bold text-airdrop-red uppercase tracking-wider block w-fit">
-                                🔒 {getContractDurationText(player)}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* ROLE column */}
-                        <div className="text-xs font-semibold text-gray-300 flex items-center gap-2 w-full sm:w-auto">
-                          <span className="text-gray-500 text-[9px] uppercase font-black tracking-wider sm:hidden w-16 shrink-0">Role:</span>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-digital-yellow text-xs">🎯</span>
-                            <span>{player.profileType === "Coach" ? "PRO COACH" : player.role}</span>
-                          </div>
-                        </div>
-
-                        {/* FILTER TAGS column */}
-                        <div className="flex items-center sm:block gap-2 w-full sm:w-auto">
-                          <span className="text-gray-500 text-[9px] uppercase font-black tracking-wider sm:hidden w-16 shrink-0">Tags:</span>
-                          <div className="flex flex-wrap gap-1.5">
-                            <span className="bg-gaming-gray/40 text-gray-400 text-[8px] px-1.5 py-0.5 rounded font-black uppercase">
-                              {player.region}
-                            </span>
-                            {player.profileType === "Coach" ? (
-                              <span className="bg-digital-yellow/10 text-digital-yellow border border-digital-yellow/20 text-[8px] px-1.5 py-0.5 rounded font-black uppercase">
-                                👑 {player.coachingYears} Years Exp
-                              </span>
-                            ) : (
-                              <span className="bg-digital-yellow/10 text-digital-yellow border border-digital-yellow/20 text-[8px] px-1.5 py-0.5 rounded font-black uppercase">
-                                {player.urRank === "Legend" ? "Tier-1 Pro" : player.urRank === "Peerless" ? "Tier-2 Pro" : player.urRank === "Supreme" ? "Tier-3 Pro" : player.urRank === "Exceed" ? "Semi-Pro" : "Amateur"}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* SORT / STATS column */}
-                        <div className="flex items-center sm:block gap-2 w-full sm:w-auto">
-                          <span className="text-gray-500 text-[9px] uppercase font-black tracking-wider sm:hidden w-16 shrink-0">Standing:</span>
-                          {player.profileType === "Coach" ? (
-                            <div className="flex flex-col text-[10px] font-bold text-gray-400 font-mono">
-                              <div>Type: <span className="text-digital-yellow font-black">Coach</span></div>
-                              <div className="text-[8px] text-gray-500 truncate max-w-[120px]">{player.specialties || "Generalist"}</div>
-                            </div>
-                          ) : (
-                            <div className="flex flex-col text-[10px] font-bold text-gray-400 font-mono">
-                              <div>Rating: <span className="text-airdrop-red font-black">{getEsportsRating(player.highestTier)}</span></div>
-                              <div className="text-[8px] text-gray-500">Tier: {player.highestTier || "None"}</div>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* SORTED / ACTIVE column */}
-                        <div className="flex items-center sm:items-end justify-start sm:justify-center sm:text-right text-[10px] text-gray-500 font-mono gap-2 w-full border-t border-gaming-gray/30 pt-3 sm:border-0 sm:pt-0">
-                          <span className="text-gray-500 text-[9px] uppercase font-black tracking-wider sm:hidden w-16 shrink-0">Status:</span>
-                          <div className="flex flex-col sm:items-end">
-                            <span className="text-green-500 font-black">Active now</span>
-                            <span className="text-[8px] text-gray-600">Updated recently</span>
-                          </div>
-                        </div>
-                      </Link>
-                    ));
-                  }, [players])}
+                  {players.map((player) => (
+                    <CandidateRow key={player.id} player={player} />
+                  ))}
                 </div>
               )}
             </div>

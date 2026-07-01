@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, memo } from "react";
 import Link from "next/link";
 import Navbar from "./Navbar";
 
@@ -31,6 +31,71 @@ interface AdminModerationClientProps {
   adminIgn: string;
   adminEmail: string;
 }
+
+interface SearchResultPlayer {
+  id: string;
+  ign: string;
+  email: string;
+  avatarUrl: string | null;
+  status: string;
+  isVerified: boolean;
+}
+
+const AdminSearchResultRow = memo(({
+  player,
+  actionLoading,
+  handleToggleVerification,
+}: {
+  player: SearchResultPlayer;
+  actionLoading: string | null;
+  handleToggleVerification: (id: string, isVerified: boolean) => void;
+}) => {
+  return (
+    <div className="bg-gaming-black/80 border border-gaming-gray/60 rounded-2xl p-3 flex items-center justify-between gap-3">
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="w-9 h-9 rounded-full bg-gaming-black border border-gaming-gray overflow-hidden flex items-center justify-center shrink-0">
+          {player.avatarUrl ? (
+            <img src={player.avatarUrl} className="w-full h-full object-cover" alt="" />
+          ) : (
+            <svg viewBox="0 0 100 100" className="w-full h-full text-gray-600 bg-[#1c1f26]">
+              <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
+              <path d="M15,85 C15,60 30,55 50,55 C70,55 85,60 85,85 Z" fill="currentColor" opacity="0.6" />
+            </svg>
+          )}
+        </div>
+        <div className="truncate text-left">
+          <div className="flex items-center gap-1.5 justify-start">
+            <h4 className="font-extrabold text-white text-xs uppercase tracking-wide truncate">
+              {player.ign}
+            </h4>
+            {player.isVerified && (
+              <span className="inline-flex items-center justify-center w-[12px] h-[12px] rounded-full bg-[#1877F2] text-white shrink-0">
+                <svg className="w-[8px] h-[8px] text-white" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </span>
+            )}
+          </div>
+          <p className="text-[9px] text-gray-500 font-mono truncate">{player.email}</p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => handleToggleVerification(player.id, player.isVerified)}
+        disabled={actionLoading === `verify-${player.id}`}
+        className={`text-[9px] font-black uppercase tracking-widest px-3.5 py-2 rounded-lg border transition cursor-pointer shrink-0 ${
+          player.isVerified
+            ? "bg-airdrop-red/10 border-airdrop-red/30 hover:border-airdrop-red text-airdrop-red hover:bg-airdrop-red/20"
+            : "bg-[#1877F2]/10 border-[#1877F2]/30 hover:border-[#1877F2] text-[#1877F2] hover:bg-[#1877F2]/20"
+        }`}
+      >
+        {player.isVerified ? "Revoke Blue Tick" : "Grant Blue Tick"}
+      </button>
+    </div>
+  );
+});
+AdminSearchResultRow.displayName = "AdminSearchResultRow";
 
 export default function AdminModerationClient({ initialReports, adminId, adminIgn, adminEmail }: AdminModerationClientProps) {
   const [reports, setReports] = useState<Report[]>(initialReports);
@@ -213,51 +278,12 @@ export default function AdminModerationClient({ initialReports, adminId, adminIg
                 <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Search Results ({searchResults.length})</span>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                   {searchResults.map((p) => (
-                    <div
+                    <AdminSearchResultRow
                       key={p.id}
-                      className="bg-gaming-black/80 border border-gaming-gray/60 rounded-2xl p-3 flex items-center justify-between gap-3"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-9 h-9 rounded-full bg-gaming-black border border-gaming-gray overflow-hidden flex items-center justify-center shrink-0">
-                          {p.avatarUrl ? (
-                            <img src={p.avatarUrl} className="w-full h-full object-cover" alt="" />
-                          ) : (
-                            <svg viewBox="0 0 100 100" className="w-full h-full text-gray-600 bg-[#1c1f26]">
-                              <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
-                              <path d="M15,85 C15,60 30,55 50,55 C70,55 85,60 85,85 Z" fill="currentColor" opacity="0.6" />
-                            </svg>
-                          )}
-                        </div>
-                        <div className="truncate text-left">
-                          <div className="flex items-center gap-1.5 justify-start">
-                            <h4 className="font-extrabold text-white text-xs uppercase tracking-wide truncate">
-                              {p.ign}
-                            </h4>
-                            {p.isVerified && (
-                              <span className="inline-flex items-center justify-center w-[12px] h-[12px] rounded-full bg-[#1877F2] text-white shrink-0">
-                                <svg className="w-[8px] h-[8px] text-white" viewBox="0 0 20 20" fill="currentColor">
-                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                </svg>
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[9px] text-gray-500 font-mono truncate">{p.email}</p>
-                        </div>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => handleToggleVerification(p.id, p.isVerified)}
-                        disabled={actionLoading === `verify-${p.id}`}
-                        className={`text-[9px] font-black uppercase tracking-widest px-3.5 py-2 rounded-lg border transition cursor-pointer shrink-0 ${
-                          p.isVerified
-                            ? "bg-airdrop-red/10 border-airdrop-red/30 hover:border-airdrop-red text-airdrop-red hover:bg-airdrop-red/20"
-                            : "bg-[#1877F2]/10 border-[#1877F2]/30 hover:border-[#1877F2] text-[#1877F2] hover:bg-[#1877F2]/20"
-                        }`}
-                      >
-                        {p.isVerified ? "Revoke Blue Tick" : "Grant Blue Tick"}
-                      </button>
-                    </div>
+                      player={p}
+                      actionLoading={actionLoading}
+                      handleToggleVerification={handleToggleVerification}
+                    />
                   ))}
                 </div>
               </div>
