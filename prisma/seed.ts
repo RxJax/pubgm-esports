@@ -1,8 +1,13 @@
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 import bcrypt from "bcryptjs";
 
-// Initialize standard Prisma Client to connect dynamically to the target database
-const prisma = new PrismaClient();
+const dbUrl = process.env.DATABASE_URL || "";
+const pool = new Pool({ connectionString: dbUrl });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
+
 
 async function main() {
   console.log("Cleaning database...");
@@ -502,9 +507,11 @@ async function main() {
 main()
   .then(async () => {
     await prisma.$disconnect();
+    await pool.end();
   })
   .catch(async (e) => {
     console.error(e);
     await prisma.$disconnect();
+    await pool.end().catch(() => {});
     process.exit(1);
   });
