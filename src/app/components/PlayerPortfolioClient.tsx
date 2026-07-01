@@ -587,10 +587,10 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
               <h1 className="text-3xl md:text-4xl font-black text-white uppercase tracking-wider flex items-center justify-center sm:justify-start gap-3">
                 <span>{player.ign}</span>
                 {(player.isVerified || player.isFeatured) && (
-                  <span className="relative group/tooltip inline-flex items-center shrink-0 align-middle">
-                    <span className="inline-flex items-center justify-center w-[16px] h-[16px] rounded-full bg-[#1877F2] text-white select-none pointer-events-auto" style={{ filter: 'drop-shadow(0 0 6px rgba(0, 112, 243, 0.7))' }}>
-                      <svg className="w-[10px] h-[10px] text-white stroke-[3.5] stroke-current" fill="none" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  <span className="relative group/tooltip inline-flex items-center shrink-0 align-middle cursor-pointer" tabIndex={0}>
+                    <span className="inline-flex items-center justify-center w-[16px] h-[16px] rounded-full bg-[#1877F2] text-white select-none pointer-events-auto shrink-0" style={{ filter: 'drop-shadow(0 0 6px rgba(0, 112, 243, 0.7))' }}>
+                      <svg className="w-[10px] h-[10px] text-white" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
                     </span>
                     <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-white bg-black border border-gaming-gray rounded-lg opacity-0 group-hover/tooltip:opacity-100 group-focus/tooltip:opacity-100 pointer-events-none transition-all duration-150 whitespace-nowrap z-50 shadow-xl normal-case font-sans">

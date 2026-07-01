@@ -434,13 +434,13 @@ export default function DiscoveryClient({
                             <h3 className="font-extrabold text-white text-base group-hover:text-digital-yellow transition uppercase tracking-wide flex items-center gap-1.5">
                               <span>{player.ign}</span>
                               {(player.isVerified || player.isFeatured) && (
-                                <span className="relative group/tooltip inline-flex items-center shrink-0 align-middle">
-                                  <span className="inline-flex items-center justify-center w-[14px] h-[14px] rounded-full bg-[#1877F2] text-white select-none pointer-events-auto" style={{ filter: 'drop-shadow(0 0 6px rgba(0, 112, 243, 0.7))' }}>
-                                    <svg className="w-[8.5px] h-[8.5px] text-white stroke-[3.5] stroke-current" fill="none" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                <span className="relative group/tooltip inline-flex items-center shrink-0 align-middle cursor-pointer" tabIndex={0}>
+                                  <span className="inline-flex items-center justify-center w-[14px] h-[14px] rounded-full bg-[#1877F2] text-white select-none pointer-events-auto shrink-0" style={{ filter: 'drop-shadow(0 0 6px rgba(0, 112, 243, 0.7))' }}>
+                                    <svg className="w-[9.5px] h-[9.5px] text-white" viewBox="0 0 20 20" fill="currentColor">
+                                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                     </svg>
                                   </span>
-                                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-white bg-black border border-gaming-gray rounded-lg opacity-0 group-hover/tooltip:opacity-100 group-focus/tooltip:opacity-100 pointer-events-none transition-all duration-150 whitespace-nowrap z-50 shadow-xl">
+                                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-white bg-black border border-gaming-gray rounded-lg opacity-0 group-hover/tooltip:opacity-100 group-focus/tooltip:opacity-100 pointer-events-none transition-all duration-150 whitespace-nowrap z-50 shadow-xl font-sans normal-case">
                                     Verified Pro
                                   </span>
                                 </span>
@@ -615,13 +615,13 @@ export default function DiscoveryClient({
                             <h4 className="font-extrabold text-white text-sm uppercase tracking-wide group-hover:text-digital-yellow transition truncate flex items-center gap-1.5">
                               <span className="truncate">{player.ign}</span>
                               {(player.isVerified || player.isFeatured) && (
-                                <span className="relative group/tooltip inline-flex items-center shrink-0 align-middle">
-                                  <span className="inline-flex items-center justify-center w-[13px] h-[13px] rounded-full bg-[#1877F2] text-white select-none pointer-events-auto" style={{ filter: 'drop-shadow(0 0 6px rgba(0, 112, 243, 0.7))' }}>
-                                    <svg className="w-[8px] h-[8px] text-white stroke-[3.5] stroke-current" fill="none" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                <span className="relative group/tooltip inline-flex items-center shrink-0 align-middle cursor-pointer" tabIndex={0}>
+                                  <span className="inline-flex items-center justify-center w-[13px] h-[13px] rounded-full bg-[#1877F2] text-white select-none pointer-events-auto shrink-0" style={{ filter: 'drop-shadow(0 0 6px rgba(0, 112, 243, 0.7))' }}>
+                                    <svg className="w-[8.5px] h-[8.5px] text-white" viewBox="0 0 20 20" fill="currentColor">
+                                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                     </svg>
                                   </span>
-                                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-white bg-black border border-gaming-gray rounded-lg opacity-0 group-hover/tooltip:opacity-100 group-focus/tooltip:opacity-100 pointer-events-none transition-all duration-150 whitespace-nowrap z-50 shadow-xl font-sans">
+                                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-white bg-black border border-gaming-gray rounded-lg opacity-0 group-hover/tooltip:opacity-100 group-focus/tooltip:opacity-100 pointer-events-none transition-all duration-150 whitespace-nowrap z-50 shadow-xl font-sans normal-case">
                                     Verified Pro
                                   </span>
                                 </span>
