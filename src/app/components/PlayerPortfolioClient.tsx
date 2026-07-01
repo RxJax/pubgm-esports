@@ -603,7 +603,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                 <span className="text-gray-500 text-xs">UID: {player.characterId}</span>
                 <button
                   onClick={() => setShowReportModal(true)}
-                  className="text-[10px] text-gray-500 hover:text-airdrop-red transition flex items-center gap-1 uppercase font-black tracking-wider border-l border-gaming-gray pl-3 cursor-pointer"
+                  className="text-[10px] text-gray-500 hover:text-airdrop-red transition flex items-center gap-1 uppercase font-black tracking-wider border-l border-gaming-gray pl-3 cursor-pointer exclude-from-export"
                 >
                   🚩 Report Fake Account
                 </button>
@@ -627,7 +627,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
 
               {/* Recruitment Contacts panel */}
               {(player.discord || player.instagram || player.facebook) && (
-                <div className="flex flex-wrap gap-2.5 mt-4 relative z-25">
+                <div className="flex flex-wrap gap-2.5 mt-4 relative z-25 exclude-from-export">
                   {/* Discord Username (Copyable Badge) */}
                   {player.discord && (
                     <DiscordBadge username={player.discord} />
