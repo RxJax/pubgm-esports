@@ -105,6 +105,7 @@ export default function DiscoveryClient({
   // Real-time backend query states
   const [players, setPlayers] = useState<Player[]>(initialPlayers);
   const [loading, setLoading] = useState(false);
+  const [activeSection, setActiveSection] = useState<"pool" | "overview">("pool");
   
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -353,7 +354,35 @@ export default function DiscoveryClient({
       </header>
 
       <main className="max-w-7xl mx-auto flex flex-col gap-10">
-        {/* ================= SECTION 1: TIER-1 PROSPECTS ================= */}
+        {/* Roster & Candidate Feed Navigation Tab Bar */}
+        <div className="flex border-b border-gaming-gray gap-2 pb-1 relative z-20">
+          <button
+            type="button"
+            onClick={() => setActiveSection("pool")}
+            className={`px-4 py-3 text-xs font-black uppercase tracking-widest border-b-2 transition flex items-center gap-2 cursor-pointer ${
+              activeSection === "pool"
+                ? "border-digital-yellow text-white"
+                : "border-transparent text-gray-500 hover:text-gray-300"
+            }`}
+          >
+            🔍 Candidate Search Pool Feed
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveSection("overview")}
+            className={`px-4 py-3 text-xs font-black uppercase tracking-widest border-b-2 transition flex items-center gap-2 cursor-pointer ${
+              activeSection === "overview"
+                ? "border-digital-yellow text-white"
+                : "border-transparent text-gray-500 hover:text-gray-300"
+            }`}
+          >
+            🔥 Prospects & Featured Rosters
+          </button>
+        </div>
+
+        {activeSection === "overview" && (
+          <>
+            {/* ================= SECTION 1: TIER-1 PROSPECTS ================= */}
         <section className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-black uppercase tracking-wider text-airdrop-red flex items-center gap-2">
@@ -485,9 +514,12 @@ export default function DiscoveryClient({
             </p>
           </div>
         </section>
+          </>
+        )}
 
-        {/* ================= SECTION 3: SCOUT DISCOVERY HUB SEARCH GRID ================= */}
-        <section className="flex flex-col gap-6">
+        {activeSection === "pool" && (
+          /* ================= SECTION 3: SCOUT DISCOVERY HUB SEARCH GRID ================= */
+          <section className="flex flex-col gap-6">
           <div className="flex items-center justify-between border-t border-gaming-gray pt-8">
             <h2 className="text-lg font-black uppercase tracking-wider text-airdrop-red flex items-center gap-2">
               <svg className="w-5 h-5 text-airdrop-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -833,6 +865,7 @@ export default function DiscoveryClient({
             </div>
           </div>
         </section>
+        )}
       </main>
     </div>
   );
