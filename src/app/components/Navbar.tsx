@@ -84,12 +84,6 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId }: NavbarProps)
               />
             </div>
 
-            <Link
-              href="/?tab=pool"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gaming-gray hover:border-[#FFBD03]/30 bg-gaming-black/40 text-[10px] font-black text-gray-300 hover:text-white uppercase tracking-widest transition shrink-0"
-            >
-              🔍 Candidate Feed
-            </Link>
           </div>
 
           {/* Desktop Navigation Links */}

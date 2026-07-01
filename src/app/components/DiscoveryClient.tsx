@@ -355,9 +355,6 @@ export default function DiscoveryClient({
         </div>
 
         <div className="relative z-10">
-          <span className="text-[9px] font-black uppercase bg-digital-yellow/15 text-digital-yellow border border-digital-yellow/20 px-2.5 py-0.5 rounded tracking-wider">
-            COMPETITIVE ROSTER PORTAL
-          </span>
           <h1 className="text-2xl md:text-4xl font-black tracking-wider bg-gradient-to-r from-airdrop-red to-digital-yellow bg-clip-text text-transparent uppercase mt-2">
             PRO ESPORTS RECRUITMENT PORTAL
           </h1>
