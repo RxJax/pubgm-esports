@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
@@ -106,14 +106,19 @@ export default function DiscoveryClient({
   // Real-time backend query states
   const [players, setPlayers] = useState<Player[]>(initialPlayers);
   const [loading, setLoading] = useState(false);
-  const [activeSection, setActiveSection] = useState<"pool" | "overview">("pool");
-  
   const searchParams = useSearchParams();
+  const feedRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
+    const urlSearch = searchParams.get("search") || "";
+    setSearch(urlSearch);
+
+    // Auto-scroll to search feed on mobile/tablet viewports if requested
     const tab = searchParams.get("tab");
-    if (tab === "overview" || tab === "pool") {
-      setActiveSection(tab);
+    if (tab === "pool" && window.innerWidth < 1280) {
+      setTimeout(() => {
+        feedRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
     }
   }, [searchParams]);
   
@@ -363,35 +368,10 @@ export default function DiscoveryClient({
         
       </header>
 
-      <main className="max-w-7xl mx-auto flex flex-col gap-10">
-        {/* Roster & Candidate Feed Navigation Tab Bar */}
-        <div className="flex border-b border-gaming-gray gap-2 pb-1 relative z-20">
-          <button
-            type="button"
-            onClick={() => setActiveSection("pool")}
-            className={`px-4 py-3 text-xs font-black uppercase tracking-widest border-b-2 transition flex items-center gap-2 cursor-pointer ${
-              activeSection === "pool"
-                ? "border-digital-yellow text-white"
-                : "border-transparent text-gray-500 hover:text-gray-300"
-            }`}
-          >
-            🔍 Candidate Search Pool Feed
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveSection("overview")}
-            className={`px-4 py-3 text-xs font-black uppercase tracking-widest border-b-2 transition flex items-center gap-2 cursor-pointer ${
-              activeSection === "overview"
-                ? "border-digital-yellow text-white"
-                : "border-transparent text-gray-500 hover:text-gray-300"
-            }`}
-          >
-            🔥 Prospects & Featured Rosters
-          </button>
-        </div>
-
-        {activeSection === "overview" && (
-          <>
+      <main className="max-w-7xl mx-auto w-full flex flex-col gap-10">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start w-full">
+          {/* LEFT COLUMN: Prospects & Featured Rosters */}
+          <div className="xl:col-span-5 flex flex-col gap-8 w-full">
             {/* ================= SECTION 1: TIER-1 PROSPECTS ================= */}
         <section className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
@@ -524,20 +504,20 @@ export default function DiscoveryClient({
             </p>
           </div>
         </section>
-          </>
-        )}
-
-        {activeSection === "pool" && (
-          /* ================= SECTION 3: SCOUT DISCOVERY HUB SEARCH GRID ================= */
-          <section className="flex flex-col gap-6">
-          <div className="flex items-center justify-between border-t border-gaming-gray pt-8">
-            <h2 className="text-lg font-black uppercase tracking-wider text-airdrop-red flex items-center gap-2">
-              <svg className="w-5 h-5 text-airdrop-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              Candidate Pool Feed
-            </h2>
           </div>
+
+          {/* RIGHT COLUMN: Candidate Pool Feed */}
+          <div ref={feedRef} className="xl:col-span-7 flex flex-col gap-6 w-full xl:max-h-[85vh] xl:overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gaming-gray scrollbar-track-transparent border-t xl:border-t-0 border-gaming-gray pt-8 xl:pt-0">
+            {/* ================= SECTION 3: SCOUT DISCOVERY HUB SEARCH GRID ================= */}
+            <section className="flex flex-col gap-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-black uppercase tracking-wider text-airdrop-red flex items-center gap-2">
+                  <svg className="w-5 h-5 text-airdrop-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  Candidate Pool Feed
+                </h2>
+              </div>
 
           <div className="w-full">
             {/* Players Grid / Table */}
@@ -669,7 +649,8 @@ export default function DiscoveryClient({
             </div>
           </div>
         </section>
-        )}
+          </div>
+        </div>
       </main>
     </div>
   );
