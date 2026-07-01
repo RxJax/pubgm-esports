@@ -34,6 +34,10 @@ export async function POST(request: NextRequest) {
       trophyDate,
       highlightTitle,
       highlightUrl,
+      profileType,
+      coachingYears,
+      coachingHistory,
+      specialties,
     } = body;
 
     // Boundary validations
@@ -73,7 +77,7 @@ export async function POST(request: NextRequest) {
         ign,
         characterId,
         region,
-        bio: bio || `Tier-1 PUBG Mobile player representing ${region}.`,
+        bio: bio || `Professional esports profile representing ${region}.`,
         status: "Looking For Team", // Defaults to Free Agent LFT
         role,
         device,
@@ -90,6 +94,10 @@ export async function POST(request: NextRequest) {
         discord: discord || null,
         teamHistory: teamHistory || null,
         achievements: achievements || null,
+        profileType: profileType || "Player",
+        coachingYears: coachingYears !== undefined ? parseInt(coachingYears) || 0 : 0,
+        coachingHistory: coachingHistory || null,
+        specialties: specialties || null,
       },
     });
 

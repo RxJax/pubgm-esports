@@ -29,6 +29,7 @@ model Player {
   region       String
   bio          String
   status       String                // "Looking For Team" or "Signed"
+  avatarUrl    String?               // Esports profile image (URL or Base64)
   
   // Playstyle & Setup
   role         String                // "IGL", "Entry Fragger", "Support", "Sniper"
@@ -59,6 +60,13 @@ model Player {
   
   teamHistory  String?               @map("team_history")
   achievements String?               @map("achievements")
+  highestTier  String                @default("None")
+  
+  // Coaching extension fields
+  profileType     String               @default("Player") // "Player" or "Coach"
+  coachingYears   Int                  @default(0)
+  coachingHistory String?              // comma-separated past organizations/teams
+  specialties     String?              // comma-separated specialty tags
   
   createdAt    DateTime              @default(now())
   updatedAt    DateTime              @updatedAt

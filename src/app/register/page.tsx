@@ -8,6 +8,7 @@ import Script from "next/script";
 const REGIONS = ["Southeast Asia", "South Asia", "Europe", "North America", "Middle East"];
 const ROLES = ["IGL", "Entry Fragger", "Support", "Sniper"];
 const UR_RANKS = ["Vanguard", "Exceed", "Supreme", "Peerless", "Legend"];
+const SPECIALTIES = ["Analysis", "Tactics", "Strategy", "Training", "VOD Review", "In-Game Leading", "Macro Setup", "Scouting"];
 
 export default function RegisterWizard() {
   const router = useRouter();
@@ -33,14 +34,18 @@ export default function RegisterWizard() {
   const [winRate, setWinRate] = useState("20.0");
   const [matchesPlayed, setMatchesPlayed] = useState("100");
   const [urRank, setUrRank] = useState("Vanguard");
-  const [urPoints, setUrPoints] = useState("1200");
+  const [urPoints, setUrPoints] = useState("0");
   const [teamHistory, setTeamHistory] = useState("");
   const [achievements, setAchievements] = useState("");
 
   const [facebook, setFacebook] = useState("");
   const [instagram, setInstagram] = useState("");
-  const [twitter, setTwitter] = useState("");
   const [discord, setDiscord] = useState("");
+
+  const [profileType, setProfileType] = useState("Player");
+  const [coachingYears, setCoachingYears] = useState("0");
+  const [coachingHistory, setCoachingHistory] = useState("");
+  const [specialties, setSpecialties] = useState<string[]>([]);
 
   const [trophyName, setTrophyName] = useState("");
   const [trophyPlacement, setTrophyPlacement] = useState("1");
@@ -148,40 +153,45 @@ export default function RegisterWizard() {
         return;
       }
     } else if (step === 2) {
-      if (!ign || !characterId || !device || !controlSetup) {
-        setError("Please fill out IGN, UID, Device, and Control Setup.");
-        return;
+      if (profileType === "Coach") {
+        if (!ign || !characterId || !coachingHistory) {
+          setError("Please fill out IGN, UID, and Teams Coached.");
+          return;
+        }
+      } else {
+        if (!ign || !characterId || !device || !controlSetup) {
+          setError("Please fill out IGN, UID, Device, and Control Setup.");
+          return;
+        }
       }
       if (!/^\d{5,12}$/.test(characterId)) {
         setError("UID must be a valid numeric ID (5 to 12 digits).");
         return;
       }
     } else if (step === 3) {
-      if (!kdRatio || !headshotPct || !winRate || !matchesPlayed || !urRank || !urPoints) {
-        setError("Please fill out all competitive statistics.");
-        return;
-      }
-      const kd = parseFloat(kdRatio);
-      const hs = parseFloat(headshotPct);
-      const wr = parseFloat(winRate);
-      const matches = parseInt(matchesPlayed);
-      const points = parseInt(urPoints);
-      
-      if (isNaN(kd) || kd < 0 || kd > 15) {
-        setError("UR K/D Ratio must be a positive number up to 15.0.");
-        return;
-      }
-      if (isNaN(hs) || hs < 0 || hs > 100 || isNaN(wr) || wr < 0 || wr > 100) {
-        setError("Percentages must be numbers between 0 and 100.");
-        return;
-      }
-      if (isNaN(matches) || matches < 0) {
-        setError("Matches played must be a positive integer.");
-        return;
-      }
-      if (isNaN(points) || points < 0) {
-        setError("Ultimate season points must be a positive integer.");
-        return;
+      if (profileType !== "Coach") {
+        if (!kdRatio || !headshotPct || !winRate || !matchesPlayed || !urRank || !urPoints) {
+          setError("Please fill out all competitive statistics.");
+          return;
+        }
+        const kd = parseFloat(kdRatio);
+        const hs = parseFloat(headshotPct);
+        const wr = parseFloat(winRate);
+        const matches = parseInt(matchesPlayed);
+        const points = parseInt(urPoints);
+        
+        if (isNaN(kd) || kd < 0 || kd > 15) {
+          setError("UR K/D Ratio must be a positive number up to 15.0.");
+          return;
+        }
+        if (isNaN(hs) || hs < 0 || hs > 100 || isNaN(wr) || wr < 0 || wr > 100) {
+          setError("Percentages must be numbers between 0 and 100.");
+          return;
+        }
+        if (isNaN(matches) || matches < 0) {
+          setError("Matches played must be a positive integer.");
+          return;
+        }
       }
     }
     setStep((prev) => prev + 1);
@@ -216,7 +226,7 @@ export default function RegisterWizard() {
       urPoints: parseInt(urPoints) || 0,
       facebook: facebook || null,
       instagram: instagram || null,
-      twitter: twitter || null,
+      twitter: null,
       discord: discord || null,
       teamHistory: teamHistory || null,
       achievements: achievements || null,
@@ -226,6 +236,10 @@ export default function RegisterWizard() {
       trophyDate,
       highlightTitle,
       highlightUrl,
+      profileType,
+      coachingYears: parseInt(coachingYears) || 0,
+      coachingHistory: coachingHistory || null,
+      specialties: specialties.join(",") || null,
     };
 
     try {
@@ -448,9 +462,21 @@ export default function RegisterWizard() {
             </div>
           )}
 
-          {/* STEP 2: PUBG specifics */}
+          {/* STEP 2: Profile specifics */}
           {step === 2 && (
             <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Profile Type</label>
+                <select
+                  value={profileType}
+                  onChange={(e) => setProfileType(e.target.value)}
+                  className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none transition w-full"
+                >
+                  <option value="Player">Player</option>
+                  <option value="Coach">Coach</option>
+                </select>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1">
                   <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">In-Game Name (IGN)</label>
@@ -491,46 +517,110 @@ export default function RegisterWizard() {
                     ))}
                   </select>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Playstyle Role</label>
-                  <select
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none transition"
-                  >
-                    {ROLES.map((role) => (
-                      <option key={role} value={role}>
-                        {role}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+
+                {profileType === "Coach" ? (
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Years of Coaching Experience</label>
+                    <select
+                      value={coachingYears}
+                      onChange={(e) => setCoachingYears(e.target.value)}
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none transition w-full"
+                    >
+                      <option value="0">0 years</option>
+                      <option value="1">1 year</option>
+                      <option value="2">2 years</option>
+                      <option value="3">3 years</option>
+                      <option value="4">4 years</option>
+                      <option value="5">5+ years</option>
+                    </select>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Playstyle Role</label>
+                    <select
+                      value={role}
+                      onChange={(e) => setRole(e.target.value)}
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none transition"
+                    >
+                      {ROLES.map((role) => (
+                        <option key={role} value={role}>
+                          {role}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Gaming Device</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. iPhone 15 Pro Max"
-                    value={device}
-                    onChange={(e) => setDevice(e.target.value)}
-                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
-                    required
-                  />
+              {profileType === "Coach" ? (
+                <>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Teams Coached (comma-separated)</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Nova Esports, Alpha Team, Apex Esports"
+                      value={coachingHistory}
+                      onChange={(e) => setCoachingHistory(e.target.value)}
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                      required
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Core Specialties</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1">
+                      {SPECIALTIES.map((tag) => {
+                        const isSelected = specialties.includes(tag);
+                        return (
+                          <button
+                            type="button"
+                            key={tag}
+                            onClick={() => {
+                              if (isSelected) {
+                                setSpecialties(specialties.filter((s) => s !== tag));
+                              } else {
+                                setSpecialties([...specialties, tag]);
+                              }
+                            }}
+                            className={`px-3 py-1.5 rounded-lg border text-[10px] font-black tracking-wider uppercase transition text-center cursor-pointer ${
+                              isSelected
+                                ? "bg-digital-yellow border-digital-yellow text-gaming-black"
+                                : "bg-gaming-black border-gaming-gray text-gray-400 hover:border-gray-700"
+                            }`}
+                          >
+                            {tag}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Gaming Device</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. iPhone 15 Pro Max"
+                      value={device}
+                      onChange={(e) => setDevice(e.target.value)}
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                      required
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Control Setup</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 4-finger claw, gyro always-on"
+                      value={controlSetup}
+                      onChange={(e) => setControlSetup(e.target.value)}
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                      required
+                    />
+                  </div>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Control Setup</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. 4-finger claw, gyro always-on"
-                    value={controlSetup}
-                    onChange={(e) => setControlSetup(e.target.value)}
-                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
-                    required
-                  />
-                </div>
-              </div>
+              )}
 
               <div className="flex flex-col gap-1">
                 <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Bio description</label>
@@ -548,32 +638,19 @@ export default function RegisterWizard() {
           {/* STEP 3: Competitive Experience & Achievements */}
           {step === 3 && (
             <div className="flex flex-col gap-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Competitive Tier / Experience Level</label>
-                  <select
-                    value={urRank}
-                    onChange={(e) => setUrRank(e.target.value)}
-                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none transition"
-                  >
-                    <option value="Vanguard">Amateur</option>
-                    <option value="Exceed">Semi-Pro</option>
-                    <option value="Supreme">Tier-3 Pro</option>
-                    <option value="Peerless">Tier-2 Pro</option>
-                    <option value="Legend">Tier-1 Pro</option>
-                  </select>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Ultimate season points</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={urPoints}
-                    onChange={(e) => setUrPoints(e.target.value)}
-                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
-                    required
-                  />
-                </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Competitive Tier / Experience</label>
+                <select
+                  value={urRank}
+                  onChange={(e) => setUrRank(e.target.value)}
+                  className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none transition w-full"
+                >
+                  <option value="Vanguard">Amateur</option>
+                  <option value="Exceed">Semi-Pro</option>
+                  <option value="Supreme">Tier-3 Pro</option>
+                  <option value="Peerless">Tier-2 Pro</option>
+                  <option value="Legend">Tier-1 Pro</option>
+                </select>
               </div>
 
               <div className="flex flex-col gap-1">
@@ -598,62 +675,7 @@ export default function RegisterWizard() {
                 />
               </div>
 
-              {/* Collapsible baseline stats */}
-              <div className="border-t border-gaming-gray/30 pt-3">
-                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-2">In-Game Stats Baseline (Optional Validation)</h4>
-                <div className="grid grid-cols-4 gap-2">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[8px] font-bold text-gray-600 uppercase">K/D Ratio</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      max="15"
-                      value={kdRatio}
-                      onChange={(e) => setKdRatio(e.target.value)}
-                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-lg px-2 py-1 text-[10px] text-white focus:outline-none transition"
-                      required
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[8px] font-bold text-gray-600 uppercase">HS %</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      min="0"
-                      max="100"
-                      value={headshotPct}
-                      onChange={(e) => setHeadshotPct(e.target.value)}
-                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-lg px-2 py-1 text-[10px] text-white focus:outline-none transition"
-                      required
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[8px] font-bold text-gray-600 uppercase">Win Rate %</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      min="0"
-                      max="100"
-                      value={winRate}
-                      onChange={(e) => setWinRate(e.target.value)}
-                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-lg px-2 py-1 text-[10px] text-white focus:outline-none transition"
-                      required
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[8px] font-bold text-gray-600 uppercase">Matches</label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={matchesPlayed}
-                      onChange={(e) => setMatchesPlayed(e.target.value)}
-                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-lg px-2 py-1 text-[10px] text-white focus:outline-none transition"
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
+
             </div>
           )}
 
@@ -667,16 +689,6 @@ export default function RegisterWizard() {
                 </h4>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1">
-                    <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Twitter / X handle</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. twitter.com/name"
-                      value={twitter}
-                      onChange={(e) => setTwitter(e.target.value)}
-                      className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-digital-yellow"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
                     <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Discord username</label>
                     <input
                       type="text"
@@ -686,8 +698,6 @@ export default function RegisterWizard() {
                       className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-digital-yellow"
                     />
                   </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1">
                     <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Instagram link</label>
                     <input
@@ -698,7 +708,7 @@ export default function RegisterWizard() {
                       className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-digital-yellow"
                     />
                   </div>
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-1 col-span-2">
                     <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Facebook link</label>
                     <input
                       type="text"

@@ -67,6 +67,9 @@ export async function PUT(
     const {
       ign,
       status,
+      avatarUrl,
+      role,
+      region,
       kdRatio,
       headshotPct,
       winRate,
@@ -84,6 +87,12 @@ export async function PUT(
       achievements,
       newTrophy,
       characterId,
+      highestTier,
+      newHighlight,
+      profileType,
+      coachingYears,
+      coachingHistory,
+      specialties,
     } = body;
 
     // Validate characterId (UID) if provided
@@ -110,6 +119,9 @@ export async function PUT(
         ign: ign || undefined,
         characterId: verifiedCharacterId,
         status,
+        avatarUrl: avatarUrl !== undefined ? avatarUrl : undefined,
+        role: role !== undefined ? role : undefined,
+        region: region !== undefined ? region : undefined,
         kdRatio: validatedKd,
         headshotPct: validatedHs,
         winRate: validatedWr,
@@ -125,6 +137,11 @@ export async function PUT(
         discord: discord !== undefined ? discord : undefined,
         teamHistory: teamHistory !== undefined ? teamHistory : undefined,
         achievements: achievements !== undefined ? achievements : undefined,
+        highestTier: highestTier !== undefined ? highestTier : undefined,
+        profileType: profileType !== undefined ? profileType : undefined,
+        coachingYears: coachingYears !== undefined ? parseInt(coachingYears) || 0 : undefined,
+        coachingHistory: coachingHistory !== undefined ? coachingHistory : undefined,
+        specialties: specialties !== undefined ? specialties : undefined,
       },
     });
 
@@ -136,6 +153,17 @@ export async function PUT(
           tournamentName: newTrophy.tournamentName,
           teamRepresented: newTrophy.teamRepresented || "Free Agent",
           placement: parseInt(newTrophy.placement) || 1,
+          playerId: id,
+        },
+      });
+    }
+
+    // Handle adding a new highlight clip (video showcase)
+    if (newHighlight && newHighlight.videoUrl && newHighlight.title) {
+      await prisma.highlight.create({
+        data: {
+          title: newHighlight.title,
+          url: newHighlight.videoUrl,
           playerId: id,
         },
       });

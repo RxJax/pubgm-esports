@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import * as htmlToImage from "html-to-image";
 
 interface Teammate {
   id: string;
@@ -43,6 +44,7 @@ interface Player {
   region: string;
   bio: string;
   status: string;
+  avatarUrl?: string | null;
   role: string;
   device: string;
   controlSetup: string;
@@ -58,6 +60,11 @@ interface Player {
   discord: string | null;
   teamHistory: string | null;
   achievements: string | null;
+  highestTier: string;
+  profileType?: string;
+  coachingYears?: number;
+  coachingHistory?: string | null;
+  specialties?: string | null;
   team: Team | null;
   placements: Placement[];
   highlights: Highlight[];
@@ -102,6 +109,118 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>("stats");
   const [showRosterModal, setShowRosterModal] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const [showClipModal, setShowClipModal] = useState(false);
+  const [newClipTitle, setNewClipTitle] = useState("");
+  const [newClipUrl, setNewClipUrl] = useState("");
+  const [savingClip, setSavingClip] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+
+  const getEmbedUrl = (url: string): { type: "iframe" | "unsupported"; embedUrl: string } => {
+    if (!url) return { type: "unsupported", embedUrl: "" };
+
+    const ytWatchRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/;
+    const ytShortsRegex = /youtube\.com\/shorts\/([^"&?\/ ]{11})/;
+
+    const watchMatch = url.match(ytWatchRegex);
+    const shortsMatch = url.match(ytShortsRegex);
+
+    if (watchMatch) {
+      return { type: "iframe", embedUrl: `https://www.youtube.com/embed/${watchMatch[1]}` };
+    }
+    if (shortsMatch) {
+      return { type: "iframe", embedUrl: `https://www.youtube.com/embed/${shortsMatch[1]}` };
+    }
+
+    const tiktokRegex = /tiktok\.com\/@[^\/]+\/video\/(\d+)/;
+    const tiktokMatch = url.match(tiktokRegex);
+    if (tiktokMatch) {
+      return { type: "iframe", embedUrl: `https://www.tiktok.com/embed/v2/${tiktokMatch[1]}` };
+    }
+
+    const instaRegex = /instagram\.com\/(?:p|reel)\/([a-zA-Z0-9_-]+)/;
+    const instaMatch = url.match(instaRegex);
+    if (instaMatch) {
+      return { type: "iframe", embedUrl: `https://www.instagram.com/reel/${instaMatch[1]}/embed/captioned` };
+    }
+
+    if (url.includes("/embed/")) {
+      return { type: "iframe", embedUrl: url };
+    }
+
+    return { type: "unsupported", embedUrl: url };
+  };
+
+  const handleSaveClip = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newClipTitle.trim() || !newClipUrl.trim()) {
+      alert("Please enter a title and a valid link.");
+      return;
+    }
+    setSavingClip(true);
+    
+    const payload = {
+      newHighlight: {
+        title: newClipTitle.trim(),
+        videoUrl: newClipUrl.trim(),
+      }
+    };
+
+    try {
+      const res = await fetch(`/api/players/${player.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        setNewClipTitle("");
+        setNewClipUrl("");
+        setShowClipModal(false);
+        router.refresh();
+      } else {
+        const err = await res.json();
+        alert(`Error: ${err.error || "Failed to save clip"}`);
+      }
+    } catch (err) {
+      console.error("Save highlight error:", err);
+      alert("Failed to save clip due to network error.");
+    } finally {
+      setSavingClip(false);
+    }
+  };
+
+  const handleExportImage = async () => {
+    const card = document.getElementById("esports-player-card");
+    if (!card) return;
+    setIsExporting(true);
+    try {
+      const dataUrl = await htmlToImage.toPng(card, {
+        quality: 0.95,
+        pixelRatio: 2,
+        filter: (node) => {
+          if (node.classList?.contains("exclude-from-export")) {
+            return false;
+          }
+          return true;
+        }
+      });
+      const link = document.createElement("a");
+      link.download = player.profileType === "Coach"
+        ? `${player.ign.replace(/\s+/g, "_")}-Pro-Coach-Card.png`
+        : `${player.ign.replace(/\s+/g, "_")}-Esports-Card.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error("Export failed:", err);
+      alert("Failed to export player card as image.");
+    } finally {
+      setIsExporting(false);
+      setShowShareMenu(false);
+    }
+  };
 
   // Edit profile form states
   const [editStatus, setEditStatus] = useState(player.status);
@@ -121,8 +240,59 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
 
   const [editFacebook, setEditFacebook] = useState(player.facebook || "");
   const [editInstagram, setEditInstagram] = useState(player.instagram || "");
-  const [editTwitter, setEditTwitter] = useState(player.twitter || "");
   const [editDiscord, setEditDiscord] = useState(player.discord || "");
+  const [editAvatarUrl, setEditAvatarUrl] = useState(player.avatarUrl || "");
+  const [editRole, setEditRole] = useState(player.role);
+  const [editRegion, setEditRegion] = useState(player.region);
+  const [editHighestTier, setEditHighestTier] = useState(player.highestTier || "None");
+
+  const [editProfileType, setEditProfileType] = useState(player.profileType || "Player");
+  const [editCoachingYears, setEditCoachingYears] = useState(player.coachingYears?.toString() || "0");
+  const [editCoachingHistory, setEditCoachingHistory] = useState(player.coachingHistory || "");
+  const [editSpecialties, setEditSpecialties] = useState<string[]>(player.specialties ? player.specialties.split(",") : []);
+
+  // Compressed WebP Image handler for client-side upload
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          // Create canvas
+          const canvas = document.createElement("canvas");
+          let width = img.width;
+          let height = img.height;
+          
+          // Downscale to max dimensions of 256x256
+          const MAX_SIZE = 256;
+          if (width > height) {
+            if (width > MAX_SIZE) {
+              height *= MAX_SIZE / width;
+              width = MAX_SIZE;
+            }
+          } else {
+            if (height > MAX_SIZE) {
+              width *= MAX_SIZE / height;
+              height = MAX_SIZE;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            // Convert to webp with 0.75 quality compression (yielding ~15-30KB base64 string)
+            const webpDataUrl = canvas.toDataURL("image/webp", 0.75);
+            setEditAvatarUrl(webpDataUrl);
+          }
+        };
+        img.src = event.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // New Trophy form states
   const [newTrophyName, setNewTrophyName] = useState("");
@@ -148,6 +318,9 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
       ign: editIgn,
       characterId: editCharacterId,
       status: editStatus,
+      avatarUrl: editAvatarUrl || null,
+      role: editRole,
+      region: editRegion,
       kdRatio: parseFloat(editKd) || 0,
       headshotPct: parseFloat(editHs) || 0,
       winRate: parseFloat(editWr) || 0,
@@ -159,10 +332,15 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
       bio: editBio,
       facebook: editFacebook || null,
       instagram: editInstagram || null,
-      twitter: editTwitter || null,
+      twitter: null,
       discord: editDiscord || null,
       teamHistory: editTeamHistory || null,
       achievements: editAchievements || null,
+      highestTier: editHighestTier,
+      profileType: editProfileType,
+      coachingYears: parseInt(editCoachingYears) || 0,
+      coachingHistory: editCoachingHistory || null,
+      specialties: editSpecialties.join(",") || null,
     };
 
     // If new trophy fields are filled, append it
@@ -216,6 +394,21 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
     if (placement === 3) return { text: "3rd Place", border: "border-amber-700", bg: "bg-amber-700/10", textCol: "text-amber-500" };
     return { text: `${placement}th Place`, border: "border-gaming-gray", bg: "bg-gaming-gray/30", textCol: "text-gray-400" };
   };
+  const getEsportsRating = (tier: string = player.highestTier) => {
+    if (tier === "S-Tier") return 150;
+    if (tier === "A-Tier") return 110;
+    if (tier === "B-Tier") return 70;
+    if (tier === "C-Tier") return 35;
+    return 0;
+  };
+
+  const getEsportsRatingDetails = (tier: string = player.highestTier) => {
+    if (tier === "S-Tier") return "S-Tier (PMGC, PMWC)";
+    if (tier === "A-Tier") return "A-Tier (PMPL, PMPS, PMSL, PMGO)";
+    if (tier === "B-Tier") return "B-Tier (PMNC, PMCC, PMBC, PMAC)";
+    if (tier === "C-Tier") return "C-Tier (Community & 3rd Party)";
+    return "No Placements Registered";
+  };
 
   return (
     <div className="flex-1 w-full bg-gaming-black text-gray-100 min-h-screen py-10 px-4 md:px-8 relative">
@@ -239,7 +432,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
       </div>
 
       {/* ================= ESPORTS PLAYER CARD BANNER ================= */}
-      <div className="max-w-5xl mx-auto bg-gaming-black border-2 border-gaming-gray rounded-3xl overflow-hidden shadow-[0_0_20px_rgba(255,189,3,0.06)] mb-8">
+      <div id="esports-player-card" className="max-w-5xl mx-auto bg-gaming-black border-2 border-gaming-gray rounded-3xl overflow-hidden shadow-[0_0_20px_rgba(255,189,3,0.06)] mb-8">
         <div className="relative bg-gradient-to-r from-gaming-gray via-gaming-black to-[#050608] p-6 md:p-10 border-b-2 border-gaming-gray flex flex-col md:flex-row md:items-center justify-between gap-6">
           {/* Cybernetic grid bg */}
           <div className="absolute inset-0 bg-[linear-gradient(rgba(255,189,3,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,189,3,0.02)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
@@ -249,7 +442,9 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
             {/* Team Logo Avatar */}
             <div className="relative w-24 h-24 rounded-2xl bg-gaming-black border-2 border-gaming-gray flex items-center justify-center overflow-hidden shrink-0 shadow-lg">
               <div className="absolute inset-0 bg-gradient-to-t from-digital-yellow/10 to-transparent pointer-events-none" />
-              {player.team?.logoUrl ? (
+              {player.avatarUrl ? (
+                <img src={player.avatarUrl} alt={player.ign} className="w-full h-full object-cover" />
+              ) : player.team?.logoUrl ? (
                 <img src={player.team.logoUrl} alt="" className="w-full h-full object-cover" />
               ) : (
                 <span className="text-3xl font-black text-gaming-gray">FA</span>
@@ -262,18 +457,23 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                 <span
                   className={`text-[9px] uppercase font-black tracking-widest px-2.5 py-0.5 rounded border ${
                     player.status === "Signed"
-                      ? "bg-green-500/10 text-green-400 border-green-500/20"
-                      : "bg-airdrop-red/10 text-airdrop-red border-airdrop-red/30 animate-pulse"
+                      ? "bg-airdrop-red/10 text-airdrop-red border-airdrop-red/30"
+                      : "bg-green-500/10 text-green-400 border-green-500/20 animate-pulse"
                   }`}
                 >
-                  {player.status === "Signed" ? "Signed" : "LFT / Free Agent"}
+                  {player.status === "Signed" ? "Not Available" : "Free Agent"}
                 </span>
                 <span className="bg-gaming-gray text-gray-300 text-[9px] uppercase font-black tracking-widest px-2.5 py-0.5 rounded border border-gray-700">
-                  {player.role}
+                  {player.profileType === "Coach" ? "PRO COACH" : player.role}
                 </span>
                 <span className="bg-gaming-gray text-gray-300 text-[9px] font-black tracking-widest px-2.5 py-0.5 rounded border border-gray-700">
                   {player.region}
                 </span>
+                {player.profileType === "Coach" && (
+                  <span className="bg-digital-yellow/10 border border-digital-yellow/30 text-digital-yellow text-[9px] font-black tracking-widest px-2.5 py-0.5 rounded">
+                    👑 {player.coachingYears} Years Exp
+                  </span>
+                )}
               </div>
 
               {/* IGN */}
@@ -282,26 +482,25 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
               </h1>
               <p className="text-gray-500 text-xs mt-1 font-mono">UID: {player.characterId}</p>
 
+              {/* Specialties horizontal flex wrap */}
+              {player.profileType === "Coach" && player.specialties && (
+                <div className="flex flex-wrap gap-1.5 mt-3 justify-center sm:justify-start">
+                  {player.specialties.split(",").map((tag) => (
+                    <span key={tag} className="bg-gaming-gray/80 border border-gaming-gray text-gray-300 text-[9.5px] font-black uppercase tracking-widest px-2.5 py-1 rounded">
+                      🎯 {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+
               {/* Bio */}
               <p className="text-gray-300 text-sm mt-3 max-w-xl leading-relaxed italic">
                 &ldquo;{player.bio}&ldquo;
               </p>
 
               {/* Recruitment Contacts panel */}
-              {(player.twitter || player.discord || player.instagram || player.facebook) && (
+              {(player.discord || player.instagram || player.facebook) && (
                 <div className="flex flex-wrap gap-2.5 mt-4 relative z-25">
-                  {/* Twitter / X */}
-                  {player.twitter && (
-                    <a
-                      href={player.twitter.startsWith("http") ? player.twitter : `https://${player.twitter}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 bg-[#1da1f2]/10 hover:bg-[#1da1f2]/20 border border-[#1da1f2]/30 hover:border-[#1da1f2] text-[#1da1f2] text-[10px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-xl transition"
-                    >
-                      <span className="text-xs">𝕏</span> Twitter
-                    </a>
-                  )}
-
                   {/* Discord Username (Copyable Badge) */}
                   {player.discord && (
                     <DiscordBadge username={player.discord} />
@@ -337,7 +536,19 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
 
           {/* Right Action Info */}
           <div className="flex flex-col gap-3 shrink-0 relative z-10 min-w-[200px] w-full md:w-auto">
-            {player.team ? (
+            {/* Status box */}
+            <div className={`${player.status === "Looking For Team" || player.status === "Free Agent" ? "bg-green-500/5 border-green-500/20" : "bg-airdrop-red/5 border-airdrop-red/20"} border p-4 rounded-xl text-center`}>
+              <div className={`text-[9px] ${player.status === "Looking For Team" || player.status === "Free Agent" ? "text-green-400" : "text-airdrop-red"} font-black uppercase tracking-wider mb-1`}>Status</div>
+              <div className={`text-sm font-black ${player.status === "Looking For Team" || player.status === "Free Agent" ? "text-green-500" : "text-airdrop-red"} uppercase tracking-wider`}>
+                {player.status === "Looking For Team" || player.status === "Free Agent" ? "Free Agent" : "Not Available"}
+              </div>
+              <div className="text-[10px] text-gray-500 mt-1">
+                {player.status === "Looking For Team" || player.status === "Free Agent" ? "Available for active tryouts" : "Contracted to active roster"}
+              </div>
+            </div>
+
+            {/* Teammates box if signed */}
+            {player.team && (
               <div className="bg-gaming-black/90 border border-gaming-gray p-4 rounded-xl flex flex-col gap-2 shadow-inner">
                 <div className="text-[9px] text-gray-500 font-black uppercase tracking-wider">Teammates</div>
                 <div className="flex items-center gap-2">
@@ -346,23 +557,89 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                 </div>
                 <button
                   onClick={() => setShowRosterModal(true)}
-                  className="mt-2 text-center text-xs font-black text-digital-yellow hover:text-white border border-digital-yellow/30 hover:border-digital-yellow bg-digital-yellow/5 py-1.5 rounded-lg transition"
+                  className="mt-2 w-full text-center text-xs font-black text-digital-yellow hover:text-white border border-digital-yellow/30 hover:border-digital-yellow bg-digital-yellow/5 py-1.5 rounded-lg transition"
                 >
                   View Team Roster
                 </button>
               </div>
-            ) : (
-              <div className="bg-airdrop-red/5 border border-airdrop-red/20 p-4 rounded-xl text-center">
-                <div className="text-[9px] text-airdrop-red font-black uppercase tracking-wider mb-1">Status</div>
-                <div className="text-sm font-black text-airdrop-red uppercase tracking-wider">LFT</div>
-                <div className="text-[10px] text-gray-500 mt-1">Available for active tryouts</div>
-              </div>
             )}
+          </div>
+
+          {/* Export / Share Button */}
+          <div className="absolute right-4 bottom-4 z-20 exclude-from-export">
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowShareMenu(!showShareMenu)}
+                disabled={isExporting}
+                className="bg-gaming-black/80 hover:bg-gaming-black border border-gaming-gray hover:border-digital-yellow text-gray-300 hover:text-white px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition flex items-center gap-1.5 shadow-lg cursor-pointer"
+              >
+                {isExporting ? (
+                  <>
+                    <span className="w-2.5 h-2.5 border-2 border-digital-yellow border-t-transparent rounded-full animate-spin" />
+                    Exporting...
+                  </>
+                ) : (
+                  <>
+                    <span>📤</span> Export / Share
+                  </>
+                )}
+              </button>
+
+              {showShareMenu && (
+                <div className="absolute right-0 bottom-full mb-2 w-44 bg-[#0d0e12] border-2 border-gaming-gray rounded-xl shadow-2xl overflow-hidden z-30 animate-fade-in">
+                  <button
+                    type="button"
+                    onClick={handleExportImage}
+                    className="w-full text-left px-3 py-2 text-[10px] font-black uppercase text-gray-300 hover:text-white hover:bg-gaming-gray/30 transition flex items-center gap-2 border-b border-gaming-gray/40 cursor-pointer"
+                  >
+                    <span>💾</span> Save as Image
+                  </button>
+                  <a
+                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(typeof window !== "undefined" ? window.location.href : "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setShowShareMenu(false)}
+                    className="w-full text-left px-3 py-2 text-[10px] font-black uppercase text-gray-300 hover:text-white hover:bg-gaming-gray/30 transition flex items-center gap-2 border-b border-gaming-gray/40 block"
+                  >
+                    <span>👥</span> Share on Facebook
+                  </a>
+                  <a
+                    href="https://www.instagram.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => {
+                      if (typeof window !== "undefined") {
+                        navigator.clipboard.writeText(window.location.href);
+                        alert("Profile link copied! Paste it in your Instagram story or bio.");
+                      }
+                      setShowShareMenu(false);
+                    }}
+                    className="w-full text-left px-3 py-2 text-[10px] font-black uppercase text-gray-300 hover:text-white hover:bg-gaming-gray/30 transition flex items-center gap-2 border-b border-gaming-gray/40 block"
+                  >
+                    <span>📸</span> Share on Instagram
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof window !== "undefined") {
+                        navigator.clipboard.writeText(window.location.href);
+                        alert("Esports Profile Link Copied!");
+                      }
+                      setShowShareMenu(false);
+                    }}
+                    className="w-full text-left px-3 py-2 text-[10px] font-black uppercase text-gray-300 hover:text-white hover:bg-gaming-gray/30 transition flex items-center gap-2 cursor-pointer"
+                  >
+                    <span>🔗</span> Copy Profile Link
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Tab Controls */}
-        <div className="flex border-b border-gaming-gray bg-gaming-gray/20 overflow-x-auto whitespace-nowrap scrollbar-none">
+        <div className="flex border-b border-gaming-gray bg-gaming-gray/20 overflow-x-auto whitespace-nowrap scrollbar-none exclude-from-export">
           {[
             { id: "stats", label: "COMPETITIVE STANDING" },
             { id: "setup", label: "Control Setup" },
@@ -387,115 +664,141 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
         {/* ================= SCANNABLE BLOCKS ================= */}
         <div className="p-6 md:p-8 bg-[#0D0E12]">
           {/* TAB: Stats Snapshot Grid */}
-          {activeTab === "stats" && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Stats Block */}
-              <div className="md:col-span-2 bg-gaming-black/60 border border-gaming-gray p-6 rounded-2xl flex flex-col gap-6">
-                <h3 className="text-xs font-black text-digital-yellow uppercase tracking-widest border-b border-gaming-gray pb-3 flex items-center gap-2">
-                  <span className="w-1.5 h-3 bg-digital-yellow" /> COMPETITIVE CAREER & STANDING
-                </h3>
+          {(activeTab === "stats" || isExporting) && (
+            player.profileType === "Coach" ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in">
+                {/* Stats Block */}
+                <div className="md:col-span-2 bg-gaming-black/60 border border-gaming-gray p-6 rounded-2xl flex flex-col gap-6">
+                  <h3 className="text-xs font-black text-digital-yellow uppercase tracking-widest border-b border-gaming-gray pb-3 flex items-center gap-2">
+                    <span className="w-1.5 h-3 bg-digital-yellow" /> COACHING PORTFOLIO
+                  </h3>
 
-                {/* Competitive Portfolio Block */}
-                {(player.teamHistory || player.achievements) && (
-                  <div className="bg-gaming-black p-4 rounded-xl border border-gaming-gray flex flex-col gap-3 font-mono text-xs">
-                    {player.teamHistory && (
-                      <div>
-                        <span className="text-gray-500 block uppercase font-black text-[9px] mb-1">Competitive Team History / Former Orgs</span>
-                        <span className="text-gray-300 font-semibold">{player.teamHistory}</span>
+                  {/* Coaching Years of Experience */}
+                  <div className="bg-gaming-black p-4 rounded-xl border border-gaming-gray font-mono text-xs">
+                    <span className="text-gray-500 block uppercase font-black text-[9px] mb-1">Coaching Experience</span>
+                    <span className="text-digital-yellow font-black text-sm">👑 {player.coachingYears} Years of Esports Coaching</span>
+                  </div>
+
+                  {/* Specialties List */}
+                  {player.specialties && (
+                    <div className="bg-gaming-black p-4 rounded-xl border border-gaming-gray font-mono text-xs">
+                      <span className="text-gray-500 block uppercase font-black text-[9px] mb-2">Core Coaching Specialties</span>
+                      <div className="flex flex-wrap gap-2">
+                        {player.specialties.split(",").map(tag => (
+                          <span key={tag} className="bg-digital-yellow/10 border border-digital-yellow/20 text-digital-yellow text-[9px] uppercase font-black tracking-widest px-2.5 py-1 rounded">
+                            🎯 {tag}
+                          </span>
+                        ))}
                       </div>
-                    )}
+                    </div>
+                  )}
+
+                  {/* Teams Coached structured list */}
+                  {player.coachingHistory && (
+                    <div className="bg-gaming-black p-4 rounded-xl border border-gaming-gray font-mono text-xs">
+                      <span className="text-gray-500 block uppercase font-black text-[9px] mb-2">Teams Coached History</span>
+                      <div className="max-h-48 overflow-y-auto pr-2 flex flex-col gap-2 scrollbar-thin scrollbar-thumb-gaming-gray">
+                        {player.coachingHistory.split(",").map((team, idx) => (
+                          <div key={idx} className="flex items-center justify-between border-b border-gaming-gray/30 pb-2 last:border-0 last:pb-0">
+                            <span className="text-gray-300 font-bold uppercase tracking-wider">{team.trim()}</span>
+                            <span className="text-[10px] text-gray-500 font-black">FORMER ORG / TEAM</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Ranks Block */}
+                <div className="bg-gaming-black/60 border border-gaming-gray p-6 rounded-2xl flex flex-col gap-4">
+                  <h3 className="text-xs font-black text-digital-yellow uppercase tracking-widest border-b border-gaming-gray pb-3 flex items-center gap-2">
+                    <span className="w-1.5 h-3 bg-digital-yellow" /> Roster Standing
+                  </h3>
+
+                  <div className="flex flex-col gap-5">
+                    <div>
+                      <span className="text-[9px] text-gray-500 font-black uppercase tracking-wider">Profile Category</span>
+                      <div className="text-base font-black text-digital-yellow uppercase mt-1">
+                        🏆 Professional Coach
+                      </div>
+                    </div>
+
+                    <div>
+                      <span className="text-[9px] text-gray-500 font-black uppercase tracking-wider">Region</span>
+                      <div className="text-base font-black text-white uppercase mt-1">
+                        📍 {player.region}
+                      </div>
+                    </div>
+
                     {player.achievements && (
                       <div>
-                        <span className="text-gray-500 block uppercase font-black text-[9px] mb-1">Tournament Achievements</span>
-                        <span className="text-digital-yellow font-bold">🏆 {player.achievements}</span>
+                        <span className="text-[9px] text-gray-500 font-black uppercase tracking-wider">Achievements</span>
+                        <div className="text-xs text-gray-300 mt-1 font-mono leading-relaxed">
+                          🏆 {player.achievements}
+                        </div>
                       </div>
                     )}
                   </div>
-                )}
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Stats Block */}
+                <div className="md:col-span-2 bg-gaming-black/60 border border-gaming-gray p-6 rounded-2xl flex flex-col gap-6">
+                  <h3 className="text-xs font-black text-digital-yellow uppercase tracking-widest border-b border-gaming-gray pb-3 flex items-center gap-2">
+                    <span className="w-1.5 h-3 bg-digital-yellow" /> COMPETITIVE PORTFOLIO
+                  </h3>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <div className="bg-gaming-black p-4 rounded-xl border border-gaming-gray">
-                    <div className="text-gray-500 text-[9px] font-black uppercase tracking-wider">Official Matches</div>
-                    <div className="text-xl font-black text-white mt-1">{player.matchesPlayed}</div>
-                  </div>
-                  <div className="bg-gaming-black p-4 rounded-xl border border-gaming-gray">
-                    <div className="text-gray-500 text-[9px] font-black uppercase tracking-wider">Official K/D Ratio</div>
-                    <div className="text-xl font-black text-airdrop-red mt-1">{player.kdRatio.toFixed(2)}</div>
-                  </div>
-                  <div className="bg-gaming-black p-4 rounded-xl border border-gaming-gray">
-                    <div className="text-gray-500 text-[9px] font-black uppercase tracking-wider">Official HS %</div>
-                    <div className="text-xl font-black text-white mt-1">{player.headshotPct}%</div>
-                  </div>
-                  <div className="bg-gaming-black p-4 rounded-xl border border-gaming-gray">
-                    <div className="text-gray-500 text-[9px] font-black uppercase tracking-wider">Official Win Rate</div>
-                    <div className="text-xl font-black text-white mt-1">{player.winRate}%</div>
-                  </div>
+                  {/* Competitive Portfolio Block */}
+                  {(player.teamHistory || player.achievements) && (
+                    <div className="bg-gaming-black p-4 rounded-xl border border-gaming-gray flex flex-col gap-3 font-mono text-xs">
+                      {player.teamHistory && (
+                        <div>
+                          <span className="text-gray-500 block uppercase font-black text-[9px] mb-1">Competitive Team History / Former Orgs</span>
+                          <span className="text-gray-300 font-semibold">{player.teamHistory}</span>
+                        </div>
+                      )}
+                      {player.achievements && (
+                        <div>
+                          <span className="text-gray-500 block uppercase font-black text-[9px] mb-1">Tournament Achievements</span>
+                          <span className="text-digital-yellow font-bold">🏆 {player.achievements}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
-                {/* Progress bars */}
-                <div className="flex flex-col gap-5 mt-2">
-                  <div>
-                    <div className="flex justify-between text-xs font-bold text-gray-400 mb-1.5">
-                      <span>K/D Performance Ratio</span>
-                      <span className="font-black text-airdrop-red">{player.kdRatio.toFixed(2)}</span>
-                    </div>
-                    <div className="w-full bg-gaming-black h-2.5 rounded-full overflow-hidden border border-gaming-gray">
-                      <div
-                        className="bg-airdrop-red h-full rounded-full"
-                        style={{ width: `${Math.min(player.kdRatio * 12.5, 100)}%` }}
-                      />
-                    </div>
-                  </div>
+                {/* Ranks Block */}
+                <div className="bg-gaming-black/60 border border-gaming-gray p-6 rounded-2xl flex flex-col gap-4">
+                  <h3 className="text-xs font-black text-digital-yellow uppercase tracking-widest border-b border-gaming-gray pb-3 flex items-center gap-2">
+                    <span className="w-1.5 h-3 bg-digital-yellow" /> Roster Standing
+                  </h3>
 
-                  <div>
-                    <div className="flex justify-between text-xs font-bold text-gray-400 mb-1.5">
-                      <span>Headshot Accuracy</span>
-                      <span className="font-black text-digital-yellow">{player.headshotPct}%</span>
+                  <div className="flex flex-col gap-5">
+                    <div>
+                      <span className="text-[9px] text-gray-500 font-black uppercase tracking-wider">Tournament Tier</span>
+                      <div className="text-base font-black text-digital-yellow uppercase mt-1">
+                        👑 {player.urRank === "Legend" ? "Tier-1 Pro" : player.urRank === "Peerless" ? "Tier-2 Pro" : player.urRank === "Supreme" ? "Tier-3 Pro" : player.urRank === "Exceed" ? "Semi-Pro" : "Amateur"}
+                      </div>
                     </div>
-                    <div className="w-full bg-gaming-black h-2.5 rounded-full overflow-hidden border border-gaming-gray">
-                      <div
-                        className="bg-digital-yellow h-full rounded-full"
-                        style={{ width: `${(player.headshotPct / 50) * 100}%` }}
-                      />
+
+                    <div>
+                      <span className="text-[9px] text-gray-500 font-black uppercase tracking-wider">Esports Rating</span>
+                      <div className="text-2xl font-black text-airdrop-red mt-1">
+                        {getEsportsRating()} <span className="text-xs text-gray-500 font-normal">/ 150</span>
+                      </div>
+                      <div className="text-[9.5px] text-gray-400 mt-1 font-mono uppercase tracking-wide">
+                        Based on: {getEsportsRatingDetails()}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-
-              {/* Ranks Block */}
-              <div className="bg-gaming-black/60 border border-gaming-gray p-6 rounded-2xl flex flex-col gap-4">
-                <h3 className="text-xs font-black text-digital-yellow uppercase tracking-widest border-b border-gaming-gray pb-3 flex items-center gap-2">
-                  <span className="w-1.5 h-3 bg-digital-yellow" /> Roster Standing
-                </h3>
-
-                <div className="flex flex-col gap-5">
-                  <div>
-                    <span className="text-[9px] text-gray-500 font-black uppercase tracking-wider">Tournament Tier</span>
-                    <div className="text-base font-black text-digital-yellow uppercase mt-1">
-                      👑 {player.urRank === "Legend" ? "Tier-1 Pro" : player.urRank === "Peerless" ? "Tier-2 Pro" : player.urRank === "Supreme" ? "Tier-3 Pro" : player.urRank === "Exceed" ? "Semi-Pro" : "Amateur"}
-                    </div>
-                  </div>
-
-                  <div>
-                    <span className="text-[9px] text-gray-500 font-black uppercase tracking-wider">Ultimate season points</span>
-                    <div className="text-xl font-black text-white mt-1">
-                      {player.urPoints} pts
-                    </div>
-                  </div>
-
-                  <div>
-                    <span className="text-[9px] text-gray-500 font-black uppercase tracking-wider">Esports Rating</span>
-                    <div className="text-2xl font-black text-airdrop-red mt-1">
-                      {Math.round(player.kdRatio * 10 + player.winRate * 2)} <span className="text-xs text-gray-500 font-normal">/ 150</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            )
           )}
 
           {/* TAB: Control Setup */}
-          {activeTab === "setup" && (
+          {activeTab === "setup" && !isExporting && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Playstyle */}
               <div className="bg-gaming-black/60 border border-gaming-gray p-6 rounded-2xl">
@@ -542,7 +845,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
           )}
 
           {/* TAB: Trophy Room Timeline */}
-          {activeTab === "trophies" && (
+          {activeTab === "trophies" && !isExporting && (
             <div className="flex flex-col gap-6">
               <h3 className="text-xs font-black text-digital-yellow uppercase tracking-widest border-b border-gaming-gray pb-3 flex items-center gap-2">
                 <span className="w-1.5 h-3 bg-digital-yellow" /> Trophy Room Placements
@@ -596,39 +899,74 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
           )}
 
           {/* TAB: Highlights Reels */}
-          {activeTab === "highlights" && (
-            <div className="flex flex-col gap-6">
-              <h3 className="text-xs font-black text-digital-yellow uppercase tracking-widest border-b border-gaming-gray pb-3 flex items-center gap-2">
-                <span className="w-1.5 h-3 bg-digital-yellow" /> Video Showcase Reels
-              </h3>
+          {activeTab === "highlights" && !isExporting && (
+            <div className="flex flex-col gap-6 animate-fade-in">
+              <div className="flex items-center justify-between border-b border-gaming-gray pb-3">
+                <h3 className="text-xs font-black text-digital-yellow uppercase tracking-widest flex items-center gap-2">
+                  <span className="w-1.5 h-3 bg-digital-yellow" /> Video Showcase Reels
+                </h3>
+                {isOwner && player.highlights.length > 0 && (
+                  <button
+                    onClick={() => setShowClipModal(true)}
+                    className="bg-digital-yellow hover:bg-amber-500 text-gaming-black font-black px-4 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition cursor-pointer"
+                  >
+                    + Add Clip
+                  </button>
+                )}
+              </div>
 
               {player.highlights.length === 0 ? (
-                <div className="bg-gaming-black/30 border border-gaming-gray rounded-xl p-8 text-center text-gray-500 text-xs">
-                  No showcase clips recorded.
+                <div className="bg-gaming-black/30 border border-gaming-gray rounded-xl p-12 text-center flex flex-col items-center justify-center gap-4 text-gray-500 text-xs">
+                  <span>No showcase clips recorded.</span>
+                  {isOwner && (
+                    <button
+                      onClick={() => setShowClipModal(true)}
+                      className="bg-digital-yellow hover:bg-amber-500 text-gaming-black font-black px-6 py-2.5 rounded-xl text-xs uppercase tracking-widest transition shadow-lg shadow-amber-950/20 cursor-pointer"
+                    >
+                      Add Highlight Clip
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {player.highlights.map((hl) => (
-                    <div key={hl.id} className="flex flex-col gap-2">
-                      <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-gaming-gray bg-black shadow-lg">
-                        <iframe
-                          src={hl.url}
-                          title={hl.title}
-                          className="absolute inset-0 w-full h-full"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        />
+                  {player.highlights.map((hl) => {
+                    const embed = getEmbedUrl(hl.url);
+                    return (
+                      <div key={hl.id} className="flex flex-col gap-2">
+                        <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-gaming-gray bg-black shadow-lg">
+                          {embed.type === "iframe" ? (
+                            <iframe
+                              src={embed.embedUrl}
+                              title={hl.title}
+                              className="absolute inset-0 w-full h-full border-0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          ) : (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center text-xs text-gray-500 gap-2">
+                              <span>Unsupported embed link format.</span>
+                              <a
+                                href={hl.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-digital-yellow font-bold underline hover:text-white"
+                              >
+                                Open Video Directly ↗
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                        <span className="font-black text-xs text-gray-300 px-1">{hl.title}</span>
                       </div>
-                      <span className="font-black text-xs text-gray-300 px-1">{hl.title}</span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
           )}
 
           {/* TAB: Secure Edit Dashboard */}
-          {activeTab === "edit" && isOwner && (
+          {activeTab === "edit" && isOwner && !isExporting && (
             <form onSubmit={handleSaveProfile} className="flex flex-col gap-6 animate-fade-in">
               <div className="border-b border-gaming-gray pb-3 flex items-center justify-between">
                 <h3 className="text-xs font-black text-digital-yellow uppercase tracking-widest flex items-center gap-2">
@@ -659,7 +997,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                           onChange={() => setEditStatus("Looking For Team")}
                           className="accent-airdrop-red"
                         />
-                        <span>Looking For Team (LFT)</span>
+                        <span>Free Agent</span>
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer text-xs">
                         <input
@@ -669,7 +1007,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                           onChange={() => setEditStatus("Signed")}
                           className="accent-airdrop-red"
                         />
-                        <span>Signed to Roster</span>
+                        <span>Not Available</span>
                       </label>
                     </div>
                   </div>
@@ -698,90 +1036,161 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                     </div>
                   </div>
 
-                  {/* Numbers row */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">UR K/D Ratio (0-15)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        max="15"
-                        value={editKd}
-                        onChange={(e) => setEditKd(e.target.value)}
-                        className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-1.5 text-xs text-white focus:border-digital-yellow focus:outline-none transition"
-                        required
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">UR Headshot %</label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        min="0"
-                        max="100"
-                        value={editHs}
-                        onChange={(e) => setEditHs(e.target.value)}
-                        className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-1.5 text-xs text-white focus:border-digital-yellow focus:outline-none transition"
-                        required
-                      />
-                    </div>
+                  {/* Profile Type Selector */}
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Profile Type</label>
+                    <select
+                      value={editProfileType}
+                      onChange={(e) => setEditProfileType(e.target.value)}
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full"
+                    >
+                      <option value="Player">Player</option>
+                      <option value="Coach">Coach</option>
+                    </select>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">UR Win Rate %</label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        min="0"
-                        max="100"
-                        value={editWr}
-                        onChange={(e) => setEditWr(e.target.value)}
-                        className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-1.5 text-xs text-white focus:border-digital-yellow focus:outline-none transition"
-                        required
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">UR Matches</label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={editMatches}
-                        onChange={(e) => setEditMatches(e.target.value)}
-                        className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-1.5 text-xs text-white focus:border-digital-yellow focus:outline-none transition"
-                        required
-                      />
-                    </div>
-                  </div>
+                  {editProfileType === "Coach" ? (
+                    <>
+                      {/* Years of Experience & Region */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Years of Experience</label>
+                          <select
+                            value={editCoachingYears}
+                            onChange={(e) => setEditCoachingYears(e.target.value)}
+                            className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                          >
+                            <option value="0">0 years</option>
+                            <option value="1">1 year</option>
+                            <option value="2">2 years</option>
+                            <option value="3">3 years</option>
+                            <option value="4">4 years</option>
+                            <option value="5">5+ years</option>
+                          </select>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Region</label>
+                          <select
+                            value={editRegion}
+                            onChange={(e) => setEditRegion(e.target.value)}
+                            className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                          >
+                            <option value="Southeast Asia">Southeast Asia</option>
+                            <option value="South Asia">South Asia</option>
+                            <option value="Europe">Europe</option>
+                            <option value="North America">North America</option>
+                            <option value="Middle East">Middle East</option>
+                          </select>
+                        </div>
+                      </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Tournament Tier</label>
-                      <select
-                        value={editUrRank}
-                        onChange={(e) => setEditUrRank(e.target.value)}
-                        className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none transition"
-                      >
-                        <option value="Vanguard">Amateur</option>
-                        <option value="Exceed">Semi-Pro</option>
-                        <option value="Supreme">Tier-3 Pro</option>
-                        <option value="Peerless">Tier-2 Pro</option>
-                        <option value="Legend">Tier-1 Pro</option>
-                      </select>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Ultimate season points</label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={editUrPoints}
-                        onChange={(e) => setEditUrPoints(e.target.value)}
-                        className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-1.5 text-xs text-white focus:border-digital-yellow focus:outline-none transition"
-                        required
-                      />
-                    </div>
-                  </div>
+                      {/* Teams Coached */}
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Teams Coached (comma-separated)</label>
+                        <input
+                          type="text"
+                          value={editCoachingHistory}
+                          onChange={(e) => setEditCoachingHistory(e.target.value)}
+                          className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none transition"
+                          placeholder="e.g. Nova Esports, Alpha Team, Apex Esports"
+                        />
+                      </div>
+
+                      {/* Specialties */}
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Core Specialties</label>
+                        <div className="grid grid-cols-2 gap-2 mt-1">
+                          {["Analysis", "Tactics", "Strategy", "Training", "VOD Review", "In-Game Leading", "Macro Setup", "Scouting"].map((tag) => {
+                            const isSelected = editSpecialties.includes(tag);
+                            return (
+                              <button
+                                type="button"
+                                key={tag}
+                                onClick={() => {
+                                  if (isSelected) {
+                                    setEditSpecialties(editSpecialties.filter((s) => s !== tag));
+                                  } else {
+                                    setEditSpecialties([...editSpecialties, tag]);
+                                  }
+                                }}
+                                className={`px-2 py-1.5 rounded-lg border text-[9px] font-black tracking-wider uppercase transition text-center cursor-pointer ${
+                                  isSelected
+                                    ? "bg-digital-yellow border-digital-yellow text-gaming-black"
+                                    : "bg-gaming-black border-gaming-gray text-gray-400 hover:border-gray-700"
+                                }`}
+                              >
+                                {tag}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {/* Role & Country Selectors */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">In-Game Role</label>
+                          <select
+                            value={editRole}
+                            onChange={(e) => setEditRole(e.target.value)}
+                            className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                          >
+                            <option value="IGL">IGL</option>
+                            <option value="Entry Fragger">Entry Fragger</option>
+                            <option value="Support">Support</option>
+                            <option value="Sniper">Sniper</option>
+                          </select>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Country / Region</label>
+                          <select
+                            value={editRegion}
+                            onChange={(e) => setEditRegion(e.target.value)}
+                            className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                          >
+                            <option value="Southeast Asia">Southeast Asia</option>
+                            <option value="South Asia">South Asia</option>
+                            <option value="Europe">Europe</option>
+                            <option value="North America">North America</option>
+                            <option value="Middle East">Middle East</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Highest Official Tournament Played */}
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Highest Official Tournament Played</label>
+                        <select
+                          value={editHighestTier}
+                          onChange={(e) => setEditHighestTier(e.target.value)}
+                          className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full"
+                        >
+                          <option value="None">None (0 rating)</option>
+                          <option value="S-Tier">S-Tier - PMGC, PMWC (150 rating)</option>
+                          <option value="A-Tier">A-Tier - PMPL, PMPS, PMSL, PMGO (110 rating)</option>
+                          <option value="B-Tier">B-Tier - PMNC, PMCC, PMBC, PMAC (70 rating)</option>
+                          <option value="C-Tier">C-Tier - Community & 3rd Party (35 rating)</option>
+                        </select>
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Tournament Tier</label>
+                        <select
+                          value={editUrRank}
+                          onChange={(e) => setEditUrRank(e.target.value)}
+                          className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none transition w-full"
+                        >
+                          <option value="Vanguard">Amateur</option>
+                          <option value="Exceed">Semi-Pro</option>
+                          <option value="Supreme">Tier-3 Pro</option>
+                          <option value="Peerless">Tier-2 Pro</option>
+                          <option value="Legend">Tier-1 Pro</option>
+                        </select>
+                      </div>
+                    </>
+                  )}
 
                   <div className="flex flex-col gap-4 border-t border-gaming-gray/30 pt-3">
                     <div className="flex flex-col gap-1">
@@ -811,27 +1220,63 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                 <div className="flex flex-col gap-4 bg-gaming-black p-5 rounded-2xl border border-gaming-gray">
                   <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-2">Setup & Bio</h4>
 
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Gaming Device</label>
-                    <input
-                      type="text"
-                      value={editDevice}
-                      onChange={(e) => setEditDevice(e.target.value)}
-                      className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-1.5 text-xs text-white focus:border-digital-yellow focus:outline-none transition"
-                      required
-                    />
+                  <div className="flex flex-col gap-2 border-b border-gaming-gray/30 pb-3 mb-1">
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Esports Profile Image</label>
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-15 rounded-lg bg-gaming-black border border-gaming-gray overflow-hidden flex items-center justify-center shrink-0 relative">
+                        {editAvatarUrl ? (
+                          <img src={editAvatarUrl} className="w-full h-full object-cover" alt="Esports Preview" />
+                        ) : (
+                          <svg viewBox="0 0 100 100" className="w-6 h-6 text-gray-600">
+                            <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
+                            <path d="M15,85 C15,60 30,55 50,55 C70,55 85,60 85,85 Z" fill="currentColor" opacity="0.6" />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-1 flex-1 items-start">
+                        <button
+                          type="button"
+                          onClick={() => avatarInputRef.current?.click()}
+                          className="bg-digital-yellow/10 border border-digital-yellow/20 hover:bg-digital-yellow/20 text-digital-yellow font-black px-3 py-1.5 rounded-xl text-[10px] uppercase tracking-wider transition cursor-pointer"
+                        >
+                          Choose File
+                        </button>
+                        <input
+                          ref={avatarInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Control Setup</label>
-                    <input
-                      type="text"
-                      value={editSetup}
-                      onChange={(e) => setEditSetup(e.target.value)}
-                      className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-1.5 text-xs text-white focus:border-digital-yellow focus:outline-none transition"
-                      required
-                    />
-                  </div>
+                  {editProfileType !== "Coach" && (
+                    <>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Gaming Device</label>
+                        <input
+                          type="text"
+                          value={editDevice}
+                          onChange={(e) => setEditDevice(e.target.value)}
+                          className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-1.5 text-xs text-white focus:border-digital-yellow focus:outline-none transition"
+                          required={editProfileType !== "Coach"}
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Control Setup</label>
+                        <input
+                          type="text"
+                          value={editSetup}
+                          onChange={(e) => setEditSetup(e.target.value)}
+                          className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-1.5 text-xs text-white focus:border-digital-yellow focus:outline-none transition"
+                          required={editProfileType !== "Coach"}
+                        />
+                      </div>
+                    </>
+                  )}
 
                   <div className="flex flex-col gap-1">
                     <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Bio Narrative</label>
@@ -853,15 +1298,6 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1">
-                    <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Twitter / X handle</label>
-                    <input
-                      type="text"
-                      value={editTwitter}
-                      onChange={(e) => setEditTwitter(e.target.value)}
-                      className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-1.5 text-xs text-white focus:border-digital-yellow focus:outline-none"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
                     <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Discord tag</label>
                     <input
                       type="text"
@@ -870,8 +1306,6 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                       className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-1.5 text-xs text-white focus:border-digital-yellow focus:outline-none"
                     />
                   </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1">
                     <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Instagram link</label>
                     <input
@@ -881,7 +1315,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                       className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-1.5 text-xs text-white focus:border-digital-yellow focus:outline-none"
                     />
                   </div>
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-1 sm:col-span-2">
                     <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Facebook link</label>
                     <input
                       type="text"
@@ -1025,6 +1459,70 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                 Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Highlight Clip Modal */}
+      {showClipModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fade-in">
+          <div className="bg-gaming-black border-2 border-gaming-gray w-full max-w-md rounded-2xl overflow-hidden shadow-2xl">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gaming-gray bg-gaming-gray/20">
+              <h3 className="font-black text-xs text-white uppercase tracking-widest">Add Highlight Clip</h3>
+              <button onClick={() => setShowClipModal(false)} className="text-gray-400 hover:text-white transition">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <form onSubmit={handleSaveClip}>
+              <div className="p-4 flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Clip Title</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. 1v4 Squad Wipe - PMGC Finals"
+                    value={newClipTitle}
+                    onChange={(e) => setNewClipTitle(e.target.value)}
+                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Video Link (YouTube, TikTok, or Instagram Reels)</label>
+                  <input
+                    type="url"
+                    required
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    value={newClipUrl}
+                    onChange={(e) => setNewClipUrl(e.target.value)}
+                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full"
+                  />
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-4 border-t border-gaming-gray bg-gaming-gray/20 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowClipModal(false)}
+                  className="bg-gaming-gray hover:bg-gray-800 text-gray-200 font-bold px-4 py-2 rounded-xl text-[10px] uppercase tracking-wider transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingClip}
+                  className="bg-digital-yellow hover:bg-amber-500 text-gaming-black font-black px-4 py-2 rounded-xl text-[10px] uppercase tracking-wider transition shadow-md cursor-pointer"
+                >
+                  {savingClip ? "Saving..." : "Save Clip"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

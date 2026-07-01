@@ -31,10 +31,11 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId }: NavbarProps)
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo Branding */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-xl">🏆</span>
-            <span className="font-black text-sm sm:text-base uppercase tracking-widest text-white group-hover:text-digital-yellow transition">
-              PUBGM <span className="text-digital-yellow">Scout</span>
+          <Link href="/" className="relative flex items-center h-16 px-6 bg-gradient-to-b from-[#1c1f26] to-[#0A0D14] border-x-2 border-b-2 border-[#FFBD03]/50 rounded-b-2xl shadow-lg shadow-black/80 group">
+            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#FFBD03] to-transparent" />
+            <span className="text-lg mr-2 filter drop-shadow-[0_0_3px_rgba(255,189,3,0.5)]">🏆</span>
+            <span className="font-black text-sm uppercase tracking-widest text-white group-hover:text-digital-yellow transition">
+              PUBGM <span className="text-digital-yellow">SCOUT</span>
             </span>
           </Link>
 
@@ -44,22 +45,22 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId }: NavbarProps)
               href="/"
               className="text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white transition"
             >
-              Discovery Feed
+              DISCOVERY FEED
             </Link>
 
             {isLoggedIn ? (
               <>
                 <Link
                   href="/dashboard"
-                  className="text-xs font-black uppercase tracking-widest text-digital-yellow hover:text-amber-400 transition"
+                  className="text-xs font-black uppercase tracking-widest text-[#a855f7] hover:text-digital-yellow transition"
                 >
-                  🎮 Dashboard ({playerIgn})
+                  🎮 PROFILE
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="text-xs font-black uppercase tracking-widest text-airdrop-red hover:text-red-500 transition cursor-pointer"
+                  className="text-xs font-black uppercase tracking-widest text-[#ef4444] hover:text-red-500 transition cursor-pointer"
                 >
-                  Log Out
+                  LOG OUT
                 </button>
               </>
             ) : (
@@ -68,13 +69,13 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId }: NavbarProps)
                   href="/login"
                   className="text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white transition"
                 >
-                  Sign In
+                  SIGN IN
                 </Link>
                 <Link
                   href="/register"
                   className="bg-transparent hover:bg-digital-yellow/5 border-2 border-digital-yellow text-digital-yellow font-black text-xs px-4 py-2 rounded-xl uppercase tracking-widest transition shadow-md shadow-amber-950/15"
                 >
-                  Create Profile
+                  CREATE PROFILE
                 </Link>
               </>
             )}
@@ -116,7 +117,7 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId }: NavbarProps)
                 onClick={() => setMobileMenuOpen(false)}
                 className="text-xs font-black uppercase tracking-widest text-digital-yellow hover:text-amber-400 py-1 transition"
               >
-                🎮 Dashboard ({playerIgn})
+                🎮 PROFILE
               </Link>
               <button
                 onClick={() => {

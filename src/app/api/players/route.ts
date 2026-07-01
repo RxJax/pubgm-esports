@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   const role = searchParams.get("role") || "";
   const region = searchParams.get("region") || "";
   const status = searchParams.get("status") || "";
-  const minKdStr = searchParams.get("minKd") || "";
+  const minRatingStr = searchParams.get("minRating") || "";
   const deviceType = searchParams.get("deviceType") || "";
   const gyro = searchParams.get("gyro") || "";
   const urRank = searchParams.get("urRank") || "";
@@ -32,12 +32,7 @@ export async function GET(request: NextRequest) {
   const where: any = {};
   const andConditions: any[] = [];
 
-  // Exclude current logged-in user
-  if (loggedInPlayerId) {
-    andConditions.push({
-      NOT: { id: loggedInPlayerId }
-    });
-  }
+
 
   // Text search on IGN or Character ID
   if (search) {
@@ -51,7 +46,12 @@ export async function GET(request: NextRequest) {
 
   // Basic filters
   if (role && role !== "All") {
-    where.role = role;
+    if (role === "Coach") {
+      where.profileType = "Coach";
+    } else {
+      where.role = role;
+      where.profileType = { not: "Coach" };
+    }
   }
 
   if (region && region !== "All") {
@@ -66,10 +66,14 @@ export async function GET(request: NextRequest) {
     where.urRank = urRank;
   }
 
-  if (minKdStr) {
-    const minKd = parseFloat(minKdStr);
-    if (!isNaN(minKd)) {
-      where.kdRatio = { gte: minKd };
+  if (minRatingStr) {
+    const minRating = parseInt(minRatingStr);
+    if (!isNaN(minRating) && minRating > 0) {
+      const allowedTiers = ["S-Tier"];
+      if (minRating <= 110) allowedTiers.push("A-Tier");
+      if (minRating <= 70) allowedTiers.push("B-Tier");
+      if (minRating <= 35) allowedTiers.push("C-Tier");
+      where.highestTier = { in: allowedTiers };
     }
   }
 

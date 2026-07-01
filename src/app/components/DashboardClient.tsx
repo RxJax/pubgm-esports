@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -33,6 +33,7 @@ interface Player {
   region: string;
   bio: string;
   status: string;
+  avatarUrl?: string | null;
   role: string;
   device: string;
   controlSetup: string;
@@ -48,6 +49,7 @@ interface Player {
   discord: string | null;
   teamHistory: string | null;
   achievements: string | null;
+  highestTier: string;
   placements: Placement[];
   highlights: Highlight[];
   team: Team | null;
@@ -84,6 +86,55 @@ export default function DashboardClient({ player }: DashboardClientProps) {
   const [twitter, setTwitter] = useState(player.twitter || "");
   const [discord, setDiscord] = useState(player.discord || "");
   const [characterId, setCharacterId] = useState(player.characterId);
+  const [avatarUrl, setAvatarUrl] = useState(player.avatarUrl || "");
+  const [role, setRole] = useState(player.role);
+  const [region, setRegion] = useState(player.region);
+  const [highestTier, setHighestTier] = useState(player.highestTier || "None");
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Compressed WebP Image Upload handler
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          // Create canvas
+          const canvas = document.createElement("canvas");
+          let width = img.width;
+          let height = img.height;
+          
+          // Downscale to max dimensions of 256x256
+          const MAX_SIZE = 256;
+          if (width > height) {
+            if (width > MAX_SIZE) {
+              height *= MAX_SIZE / width;
+              width = MAX_SIZE;
+            }
+          } else {
+            if (height > MAX_SIZE) {
+              width *= MAX_SIZE / height;
+              height = MAX_SIZE;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            // Convert to webp with 0.75 quality compression (yielding ~15-30KB base64 string)
+            const webpDataUrl = canvas.toDataURL("image/webp", 0.75);
+            setAvatarUrl(webpDataUrl);
+          }
+        };
+        img.src = event.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // New Trophy form states
   const [trophyName, setTrophyName] = useState("");
@@ -101,6 +152,9 @@ export default function DashboardClient({ player }: DashboardClientProps) {
       ign,
       characterId,
       status,
+      avatarUrl: avatarUrl || null,
+      role,
+      region,
       kdRatio: parseFloat(kdRatio) || 0,
       headshotPct: parseFloat(headshotPct) || 0,
       winRate: parseFloat(winRate) || 0,
@@ -116,6 +170,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
       discord: discord || null,
       teamHistory: teamHistory || null,
       achievements: achievements || null,
+      highestTier,
     };
 
     // If new trophy filled, append it
@@ -169,7 +224,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
             My Portfolio Dashboard
           </h1>
           <p className="text-xs text-gray-500 mt-1">
-            Manage your Ultimate Royale stats, tryout status, and visual player card.
+            Manage your player stats, tryout status, and visual player card.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -227,33 +282,67 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                 </div>
               </div>
 
-              {/* Ultimate Royale Standing Row */}
+              {/* Role & Country Selectors */}
               <div className="grid grid-cols-2 gap-4 border-t border-gaming-gray/40 pt-4">
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Competitive Tier / Experience</label>
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">In-Game Role</label>
                   <select
-                    value={urRank}
-                    onChange={(e) => setUrRank(e.target.value)}
-                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none transition"
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
+                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
                   >
-                    <option value="Vanguard">Amateur</option>
-                    <option value="Exceed">Semi-Pro</option>
-                    <option value="Supreme">Tier-3 Pro</option>
-                    <option value="Peerless">Tier-2 Pro</option>
-                    <option value="Legend">Tier-1 Pro</option>
+                    <option value="IGL">IGL</option>
+                    <option value="Entry Fragger">Entry Fragger</option>
+                    <option value="Support">Support</option>
+                    <option value="Sniper">Sniper</option>
                   </select>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Ultimate season points</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={urPoints}
-                    onChange={(e) => setUrPoints(e.target.value)}
-                    className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none transition"
-                    required
-                  />
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Country / Region</label>
+                  <select
+                    value={region}
+                    onChange={(e) => setRegion(e.target.value)}
+                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                  >
+                    <option value="Southeast Asia">Southeast Asia</option>
+                    <option value="South Asia">South Asia</option>
+                    <option value="Europe">Europe</option>
+                    <option value="North America">North America</option>
+                    <option value="Middle East">Middle East</option>
+                  </select>
                 </div>
+              </div>
+
+              {/* Highest Official Tournament Played */}
+              <div className="flex flex-col gap-1 border-t border-gaming-gray/40 pt-4">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Highest Official Tournament Played</label>
+                <select
+                  value={highestTier}
+                  onChange={(e) => setHighestTier(e.target.value)}
+                  className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full"
+                >
+                  <option value="None">None (0 rating)</option>
+                  <option value="S-Tier">S-Tier - PMGC, PMWC (150 rating)</option>
+                  <option value="A-Tier">A-Tier - PMPL, PMPS, PMSL, PMGO (110 rating)</option>
+                  <option value="B-Tier">B-Tier - PMNC, PMCC, PMBC, PMAC (70 rating)</option>
+                  <option value="C-Tier">C-Tier - Community & 3rd Party (35 rating)</option>
+                </select>
+              </div>
+
+              {/* Competitive Standing Tier Selector */}
+              <div className="flex flex-col gap-1 border-t border-gaming-gray/40 pt-4">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Competitive Tier / Experience</label>
+                <select
+                  value={urRank}
+                  onChange={(e) => setUrRank(e.target.value)}
+                  className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none transition w-full"
+                >
+                  <option value="Vanguard">Amateur</option>
+                  <option value="Exceed">Semi-Pro</option>
+                  <option value="Supreme">Tier-3 Pro</option>
+                  <option value="Peerless">Tier-2 Pro</option>
+                  <option value="Legend">Tier-1 Pro</option>
+                </select>
               </div>
 
               {/* Competitive Team History & Roster Achievements Section */}
@@ -287,7 +376,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
 
               {/* Status Radio buttons */}
               <div className="flex flex-col gap-1.5 border-t border-gaming-gray/40 pt-4">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">LFT Availability Status</label>
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Availability Status</label>
                 <div className="flex gap-4 mt-1">
                   <label className="flex items-center gap-2 cursor-pointer text-xs text-gray-300">
                     <input
@@ -297,7 +386,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                       onChange={() => setStatus("Looking For Team")}
                       className="accent-airdrop-red"
                     />
-                    <span>Looking For Team (LFT)</span>
+                    <span>Free Agent</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer text-xs text-gray-300">
                     <input
@@ -307,67 +396,12 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                       onChange={() => setStatus("Signed")}
                       className="accent-airdrop-red"
                     />
-                    <span>Signed to Team Roster</span>
+                    <span>Not Available</span>
                   </label>
                 </div>
               </div>
 
-              {/* Stats SNAP Row */}
-              <div className="border-t border-gaming-gray/40 pt-4">
-                <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-3">UR Season Stats Snapshot</h4>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[9px] font-bold text-gray-600 uppercase">UR K/D Ratio (0-15)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      max="15"
-                      value={kdRatio}
-                      onChange={(e) => setKdRatio(e.target.value)}
-                      className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none"
-                      required
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[9px] font-bold text-gray-600 uppercase">UR Headshot %</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      min="0"
-                      max="100"
-                      value={headshotPct}
-                      onChange={(e) => setHeadshotPct(e.target.value)}
-                      className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none"
-                      required
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[9px] font-bold text-gray-600 uppercase">UR Win Rate %</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      min="0"
-                      max="100"
-                      value={winRate}
-                      onChange={(e) => setWinRate(e.target.value)}
-                      className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none"
-                      required
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[9px] font-bold text-gray-600 uppercase">UR Matches</label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={matchesPlayed}
-                      onChange={(e) => setMatchesPlayed(e.target.value)}
-                      className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none"
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
+
             </div>
 
             {/* Right Block: Setup Specs */}
@@ -375,6 +409,39 @@ export default function DashboardClient({ player }: DashboardClientProps) {
               <h3 className="text-xs font-black text-digital-yellow uppercase tracking-widest border-b border-gaming-gray pb-3 flex items-center gap-2">
                 <span className="w-1.5 h-3 bg-digital-yellow" /> Gear & Controls
               </h3>
+
+              <div className="flex flex-col gap-3.5 border-b border-gaming-gray/30 pb-5 mb-1">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Esports Profile Image</label>
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-20 rounded-xl bg-gaming-black border border-gaming-gray overflow-hidden flex items-center justify-center shrink-0 relative">
+                    {avatarUrl ? (
+                      <img src={avatarUrl} className="w-full h-full object-cover" alt="Esports Preview" />
+                    ) : (
+                      <svg viewBox="0 0 100 100" className="w-8 h-8 text-gray-600">
+                        <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
+                        <path d="M15,85 C15,60 30,55 50,55 C70,55 85,60 85,85 Z" fill="currentColor" opacity="0.6" />
+                      </svg>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-1.5 flex-grow flex-1 items-start">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="bg-digital-yellow/10 border border-digital-yellow/20 hover:bg-digital-yellow/20 text-digital-yellow font-black px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer"
+                    >
+                      Choose File
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                    <span className="text-[9px] text-gray-500 block pl-0.5">Supports PNG, JPEG. Converted directly to offline local asset.</span>
+                  </div>
+                </div>
+              </div>
 
               <div className="flex flex-col gap-1">
                 <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Gaming Device</label>

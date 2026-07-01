@@ -3,8 +3,8 @@ import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import DiscoveryClient from "./components/DiscoveryClient";
 
-// Opt out of caching so database updates are reflected immediately
-export const revalidate = 0;
+// Configure ISR (Incremental Static Regeneration) with 60s cache revalidation
+export const revalidate = 60;
 
 export default async function Home() {
   const cookieStore = await cookies();
@@ -27,11 +27,9 @@ export default async function Home() {
   let dbError = false;
 
   try {
-    // 1. General Candidate Pool Feed (excluding the current user, ordered by updatedAt desc)
+    // 1. General Candidate Pool Feed (ordered by updatedAt desc)
     players = await prisma.player.findMany({
-      where: loggedInPlayerId ? {
-        NOT: { id: loggedInPlayerId }
-      } : {},
+      where: {},
       include: {
         team: true,
       },
@@ -40,12 +38,9 @@ export default async function Home() {
       },
     });
 
-    // 2. Top Rising Fraggers (excluding the current user, K/D >= 6.0, sorted by K/D desc, limit 4)
+    // 2. Top Rising Prospects (all registered competitors sorted by K/D, limit 4)
     risingPlayers = await prisma.player.findMany({
-      where: {
-        kdRatio: { gte: 6.0 },
-        ...(loggedInPlayerId ? { NOT: { id: loggedInPlayerId } } : {})
-      },
+      where: {},
       include: {
         team: true,
       },
@@ -55,11 +50,13 @@ export default async function Home() {
       take: 4,
     });
 
-    // 3. Featured Roster Profiles (excluding the current user, isFeatured = true, limit 3)
+    // 3. Featured Roster Profiles (isFeatured = true or any active pro, limit 3)
     featuredPlayers = await prisma.player.findMany({
       where: {
-        isFeatured: true,
-        ...(loggedInPlayerId ? { NOT: { id: loggedInPlayerId } } : {})
+        OR: [
+          { isFeatured: true },
+          { urRank: { in: ["Peerless", "Legend"] } } // Automatically feature any high tier pros
+        ]
       },
       include: {
         team: true,

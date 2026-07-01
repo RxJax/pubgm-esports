@@ -4,7 +4,8 @@ import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import PlayerPortfolioClient from "@/app/components/PlayerPortfolioClient";
 
-export const revalidate = 0;
+// Configure ISR cache revalidation of 60 seconds
+export const revalidate = 60;
 
 interface PlayerPageProps {
   params: Promise<{ id: string }>;
