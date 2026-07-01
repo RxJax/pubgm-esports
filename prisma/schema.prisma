@@ -73,6 +73,8 @@ model Player {
   contractStartDate DateTime?          @map("contract_start_date")
   contractEndDate   DateTime?          @map("contract_end_date")
   
+  reportsReceived   Report[]
+
   createdAt    DateTime              @default(now())
   updatedAt    DateTime              @updatedAt
 }
@@ -97,4 +99,21 @@ model Highlight {
   player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Report {
+  id                String   @id @default(uuid())
+  reporterId        String?  @map("reporter_id")
+  reportedProfileId String   @map("reported_profile_id")
+  reasonCategory    String   @map("reason_category")
+  additionalDetails String   @map("additional_details")
+  status            String   @default("PENDING")
+  
+  // Relations
+  reportedPlayer    Player   @relation(fields: [reportedProfileId], references: [id], onDelete: Cascade)
+  
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("reports")
 }

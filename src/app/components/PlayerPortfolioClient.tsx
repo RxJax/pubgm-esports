@@ -126,6 +126,11 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState("Impersonation / Fake Player");
+  const [reportEvidence, setReportEvidence] = useState("");
+  const [submittingReport, setSubmittingReport] = useState(false);
+
   const [showClipModal, setShowClipModal] = useState(false);
   const [newClipTitle, setNewClipTitle] = useState("");
   const [newClipUrl, setNewClipUrl] = useState("");
@@ -456,6 +461,37 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
       });
   };
 
+  const handleSendReport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmittingReport(true);
+
+    try {
+      const res = await fetch("/api/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reportedProfileId: player.id,
+          reasonCategory: reportReason,
+          additionalDetails: reportEvidence,
+        }),
+      });
+
+      if (res.ok) {
+        alert("Report successfully filed for admin review.");
+        setShowReportModal(false);
+        setReportEvidence("");
+      } else {
+        const err = await res.json();
+        alert(`Error: ${err.error || "Failed to submit report"}`);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Network error: Failed to submit report.");
+    } finally {
+      setSubmittingReport(false);
+    }
+  };
+
   // Timeline placement styling helper
   const getTrophyColor = (placement: number) => {
     if (placement === 1) return { text: "1st Place", border: "border-digital-yellow", bg: "bg-digital-yellow/10", textCol: "text-digital-yellow" };
@@ -549,7 +585,15 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
               <h1 className="text-3xl md:text-4xl font-black text-white uppercase tracking-wider flex items-center justify-center sm:justify-start gap-3">
                 {player.ign}
               </h1>
-              <p className="text-gray-500 text-xs mt-1 font-mono">UID: {player.characterId}</p>
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-1 font-mono">
+                <span className="text-gray-500 text-xs">UID: {player.characterId}</span>
+                <button
+                  onClick={() => setShowReportModal(true)}
+                  className="text-[10px] text-gray-500 hover:text-airdrop-red transition flex items-center gap-1 uppercase font-black tracking-wider border-l border-gaming-gray pl-3 cursor-pointer"
+                >
+                  🚩 Report Fake Account
+                </button>
+              </div>
 
               {/* Specialties horizontal flex wrap */}
               {player.profileType === "Coach" && player.specialties && (
@@ -1633,6 +1677,69 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Report Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fade-in">
+          <div className="bg-[#0b0c10] border-2 border-airdrop-red/30 rounded-3xl w-full max-w-md overflow-hidden relative shadow-2xl">
+            <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-airdrop-red to-digital-yellow" />
+            
+            {/* Close Button */}
+            <button
+              onClick={() => setShowReportModal(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-white transition text-sm font-black cursor-pointer"
+            >
+              ✕
+            </button>
+
+            <div className="p-6 md:p-8 flex flex-col gap-5">
+              <div className="flex items-center gap-2.5">
+                <span className="text-xl">🚩</span>
+                <div>
+                  <h3 className="text-sm font-black text-white uppercase tracking-wider">Report Fake Account</h3>
+                  <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mt-0.5">Flagging IGN: {player.ign}</p>
+                </div>
+              </div>
+
+              <form onSubmit={handleSendReport} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Reason for Report</label>
+                  <select
+                    value={reportReason}
+                    onChange={(e) => setReportReason(e.target.value)}
+                    className="bg-[#0b0f19] border border-gaming-gray focus:border-airdrop-red rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full"
+                  >
+                    <option value="Impersonation / Fake Player">Impersonation / Fake Player</option>
+                    <option value="Inaccurate Stats">Inaccurate Stats</option>
+                    <option value="Toxic Behavior">Toxic Behavior</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Evidence and Details</label>
+                  <textarea
+                    value={reportEvidence}
+                    onChange={(e) => setReportEvidence(e.target.value)}
+                    required
+                    placeholder="Provide evidence links (e.g., official Twitter or Liquipedia profile)..."
+                    rows={4}
+                    className="bg-[#0b0f19] border border-gaming-gray focus:border-airdrop-red rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none transition w-full resize-none"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={submittingReport}
+                  className="mt-2 w-full bg-airdrop-red/10 border border-airdrop-red/40 hover:bg-airdrop-red hover:border-airdrop-red text-white py-2 rounded-xl text-xs font-black uppercase tracking-widest transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {submittingReport ? "SUBMITTING REPORT..." : "SUBMIT REPORT"}
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       )}
