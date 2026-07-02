@@ -642,7 +642,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                       🛡️ {player.competitiveExperience || 1} {player.competitiveExperience === 1 ? "Yr Exp" : "Yrs Exp"}
                     </span>
                     <span className="bg-purple-500/10 border border-purple-500/30 text-purple-400 text-[9px] font-black tracking-widest px-2.5 py-0.5 rounded">
-                      🏆 {player.officialTournaments === 10 ? "10+" : player.officialTournaments || 0} Official Tourneys
+                      🎮 {player.officialTournaments === 10 ? "10+" : player.officialTournaments || 0} Official Match played
                     </span>
                   </>
                 )}
@@ -959,9 +959,9 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                           </span>
                         </div>
                         <div>
-                          <span className="text-gray-500 block uppercase font-black text-[9px] mb-1">Official Tournaments Played</span>
+                          <span className="text-gray-500 block uppercase font-black text-[9px] mb-1">Official Match played</span>
                           <span className="text-digital-yellow font-bold">
-                            🏆 {player.officialTournaments !== undefined && player.officialTournaments !== null 
+                            🎮 {player.officialTournaments !== undefined && player.officialTournaments !== null 
                               ? (player.officialTournaments === 10 ? "10+" : player.officialTournaments) 
                               : "0"}
                           </span>
@@ -1415,7 +1415,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Official Tournaments Played (S/A/B-Tier)</label>
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Official Match played (S/A/B-Tier)</label>
                         <select
                           value={editOfficialTournaments}
                           onChange={(e) => setEditOfficialTournaments(e.target.value)}

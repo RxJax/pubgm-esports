@@ -177,7 +177,7 @@ const PlayerCarouselCard = memo(({ player }: { player: Player }) => {
           </span>
         </div>
         <div className="border-l border-gaming-gray/30 pl-3">
-          <span className="text-[8px] text-gray-500 font-bold block uppercase text-left">Official Tournaments played</span>
+          <span className="text-[8px] text-gray-500 font-bold block uppercase text-left">Official Match played</span>
           <span className="font-extrabold text-white text-xs mt-1 block text-left text-digital-yellow">
             {player.officialTournaments !== undefined && player.officialTournaments !== null 
               ? (player.officialTournaments === 10 ? "10+" : player.officialTournaments) 
