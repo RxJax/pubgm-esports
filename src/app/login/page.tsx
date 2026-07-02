@@ -27,7 +27,7 @@ export default function LoginPage() {
 
   // Initialize and render the actual Google Sign-In button
   useEffect(() => {
-    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "586689563121-tsvddfckhhdre6j743aplleogs91v76t.apps.googleusercontent.com";
     if (!googleClientId) return;
 
     const initializeGoogleBtn = () => {
@@ -156,7 +156,7 @@ export default function LoginPage() {
     }
   };
 
-  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "586689563121-tsvddfckhhdre6j743aplleogs91v76t.apps.googleusercontent.com";
 
   if (onboardingData) {
     return (

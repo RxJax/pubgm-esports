@@ -65,7 +65,7 @@ export default function RegisterWizard() {
   // Initialize and render the actual Google Sign-In button for Step 1
   useEffect(() => {
     if (step !== 1) return;
-    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "586689563121-tsvddfckhhdre6j743aplleogs91v76t.apps.googleusercontent.com";
     if (!googleClientId) return;
 
     const initializeGoogleBtn = () => {
@@ -295,7 +295,7 @@ export default function RegisterWizard() {
     }
   };
 
-  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "586689563121-tsvddfckhhdre6j743aplleogs91v76t.apps.googleusercontent.com";
 
   if (onboardingData) {
     return (
