@@ -33,6 +33,7 @@ export default async function Home() {
   let players: any[] = [];
   let risingPlayers: any[] = [];
   let tier2Players: any[] = [];
+  let risingStars: any[] = [];
   let featuredPlayers: any[] = [];
   let dbError = false;
 
@@ -76,6 +77,20 @@ export default async function Home() {
       take: 4,
     });
 
+    // 2.75. Rising Stars (only registered profiles marked with Tier-3 Pro, Semi-Pro, or Amateur status, sorted by K/D, limit 4)
+    risingStars = await prisma.player.findMany({
+      where: {
+        urRank: { in: ["Supreme", "Exceed", "Vanguard"] },
+      },
+      include: {
+        team: true,
+      },
+      orderBy: {
+        kdRatio: "desc",
+      },
+      take: 4,
+    });
+
     // 3. Featured Roster Profiles (isFeatured = true or any active pro, limit 3)
     featuredPlayers = await prisma.player.findMany({
       where: {
@@ -101,6 +116,7 @@ export default async function Home() {
           initialPlayers={players}
           initialRising={risingPlayers}
           initialTier2={tier2Players}
+          initialRisingStars={risingStars}
           initialFeatured={featuredPlayers}
           initialError={dbError}
           loggedInPlayerId={loggedInPlayerId}

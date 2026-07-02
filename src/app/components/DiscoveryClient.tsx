@@ -48,6 +48,7 @@ interface DiscoveryClientProps {
   initialPlayers: Player[];
   initialRising?: Player[];
   initialTier2?: Player[];
+  initialRisingStars?: Player[];
   initialFeatured?: Player[];
   initialError?: boolean;
   loggedInPlayerId?: string | null;
@@ -294,6 +295,7 @@ export default function DiscoveryClient({
   initialPlayers,
   initialRising = [],
   initialTier2 = [],
+  initialRisingStars = [],
   initialFeatured = [],
   initialError = false,
   loggedInPlayerId = null,
@@ -470,6 +472,7 @@ export default function DiscoveryClient({
   // Curated lists from live database queries
   const topRisingFraggers = useMemo(() => initialRising.filter(p => p.urRank === "Legend"), [initialRising]);
   const topTier2Fraggers = useMemo(() => initialTier2.filter(p => p.urRank === "Peerless"), [initialTier2]);
+  const risingStarPlayers = useMemo(() => initialRisingStars.filter(p => ["Supreme", "Exceed", "Vanguard"].includes(p.urRank)), [initialRisingStars]);
   const featuredProfiles = initialFeatured;
 
   // Count active filters
@@ -703,6 +706,33 @@ export default function DiscoveryClient({
               </div>
             ) : (
               topTier2Fraggers.map((player) => (
+                <PlayerCarouselCard key={player.id} player={player} />
+              ))
+            )}
+            </div>
+          </div>
+        </section>
+
+        {/* ================= SECTION 1.75: RISING STARS ================= */}
+        <section className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-black uppercase tracking-wider text-green-400 flex items-center gap-2">
+              <span className="text-xl">✨</span> RISING STAR
+            </h2>
+            <span className="text-[10px] text-gray-500 font-black uppercase tracking-wider hidden sm:inline">COMPETITIVE EXPERIENCE &ge; AMATEUR</span>
+          </div>
+
+          <div className="bg-[#0c0e12] border border-gaming-gray rounded-3xl p-5 shadow-[0_0_20px_rgba(255,189,3,0.02)]">
+            <div className="flex overflow-x-auto pb-2 gap-5 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gaming-gray scrollbar-track-transparent w-full">
+            {risingStarPlayers.length === 0 ? (
+              <div className="w-full bg-[#111827]/10 border border-gaming-gray rounded-2xl p-8 text-center flex flex-col items-center justify-center gap-2">
+                <span className="text-2xl">✨</span>
+                <p className="text-gray-400 text-xs sm:text-sm font-medium">
+                  No rising stars have registered yet.
+                </p>
+              </div>
+            ) : (
+              risingStarPlayers.map((player) => (
                 <PlayerCarouselCard key={player.id} player={player} />
               ))
             )}
