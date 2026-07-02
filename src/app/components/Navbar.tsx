@@ -117,8 +117,8 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId, isAdmin }: Nav
         <div className="flex items-center justify-between h-16">
           {/* Left: Branding, Search Input & Candidate Feed Link */}
           <div className="flex items-center gap-3 md:gap-4 flex-1">
-            <Link href="/" className="relative flex items-center h-16 px-6 bg-gradient-to-b from-[#1c1f26] to-[#0A0D14] border-x-2 border-b-2 border-[#FFBD03]/50 rounded-b-2xl shadow-lg shadow-black/80 group shrink-0">
-              <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#FFBD03] to-transparent" />
+            <Link href="/" className="relative flex items-center py-2 md:py-3 px-5 sm:px-6 bg-gradient-to-b from-[#1c1f26] to-[#0A0D14] border border-[#FFBD03]/50 rounded-xl shadow-lg shadow-black/80 group shrink-0">
+              <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#FFBD03] to-transparent rounded-t-xl" />
               <span className="text-lg mr-2 filter drop-shadow-[0_0_3px_rgba(255,189,3,0.5)]">🏆</span>
               <span className="font-black text-sm uppercase tracking-widest text-white group-hover:text-digital-yellow transition">
                 PUBGM <span className="text-digital-yellow">SCOUT</span>
