@@ -144,7 +144,7 @@ const PlayerCarouselCard = memo(({ player }: { player: Player }) => {
                 </span>
               )}
             </h3>
-            <div className="text-[9px] font-black bg-airdrop-red/10 text-airdrop-red border border-airdrop-red/20 px-2 py-0.5 rounded shrink-0 self-center">
+            <div className="text-[9px] font-black bg-airdrop-red/10 text-airdrop-red border border-airdrop-red/20 px-2 py-0.5 rounded shrink-0 self-baseline">
               {player.urRank === "Legend" ? "Tier-1 Pro" : player.urRank === "Peerless" ? "Tier-2 Pro" : player.urRank === "Supreme" ? "Tier-3 Pro" : player.urRank === "Exceed" ? "Semi-Pro" : "Amateur"}
             </div>
           </div>
@@ -243,7 +243,7 @@ const CoachCarouselCard = memo(({ player }: { player: Player }) => {
                 </span>
               )}
             </h3>
-            <div className="text-[9px] font-black bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded shrink-0 self-center">
+            <div className="text-[9px] font-black bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded shrink-0 self-baseline">
               PRO COACH
             </div>
           </div>
@@ -274,7 +274,7 @@ const CoachCarouselCard = memo(({ player }: { player: Player }) => {
         </div>
         <div className="border-l border-gaming-gray/30 pl-3">
           <span className="text-[8px] text-gray-500 font-bold block uppercase text-left">Former Teams Coached</span>
-          <span className="font-extrabold text-white text-xs mt-1 block text-left truncate" title={player.coachingHistory || "None listed"}>
+          <span className="font-extrabold text-white text-xs mt-1 block text-left truncate pr-2" title={player.coachingHistory || "None listed"}>
             {player.coachingHistory || "None listed"}
           </span>
         </div>
