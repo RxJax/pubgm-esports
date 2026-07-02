@@ -37,6 +37,16 @@ export default async function DashboardPage() {
   let player = null;
   let dbError = false;
   try {
+    // 0. Update activity heartbeat
+    try {
+      await prisma.player.update({
+        where: { id: playerId },
+        data: { updatedAt: new Date() },
+      });
+    } catch (e) {
+      // Ignore heartbeat update errors
+    }
+
     player = await prisma.player.findUnique({
       where: { id: playerId },
       include: {

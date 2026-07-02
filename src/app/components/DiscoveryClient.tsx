@@ -42,6 +42,7 @@ interface Player {
   underContract?: boolean;
   contractStartDate?: Date | string | null;
   contractEndDate?: Date | string | null;
+  updatedAt?: Date | string | null;
 }
 
 interface DiscoveryClientProps {
@@ -58,6 +59,27 @@ const ROLES = ["All", "IGL", "Entry Fragger", "Fragger", "Assaulter", "Support",
 const REGIONS = ["All", "Southeast Asia", "South Asia", "Europe", "North America", "Middle East"];
 const STATUSES = ["All", "Signed", "Looking For Team"];
 const UR_RANKS = ["All", "Vanguard", "Exceed", "Supreme", "Peerless", "Legend"];
+
+const isUserActive = (updatedAt?: Date | string | null) => {
+  if (!updatedAt) return false;
+  const date = new Date(updatedAt);
+  const diffMins = (Date.now() - date.getTime()) / (1000 * 60);
+  return diffMins < 5; // Active if updated/accessed in last 5 minutes
+};
+
+const getRelativeTime = (updatedAt?: Date | string | null) => {
+  if (!updatedAt) return "Long ago";
+  const date = new Date(updatedAt);
+  const diffMs = Date.now() - date.getTime();
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return `${diffDays}d ago`;
+};
 
 const getContractDurationText = (player: Player) => {
   if (!player.contractStartDate || !player.contractEndDate) return "";
@@ -282,8 +304,17 @@ const CandidateRow = memo(({ player }: { player: Player }) => {
       <div className="flex items-center sm:items-end justify-start sm:justify-center sm:text-right text-[10px] text-gray-500 font-mono gap-2 w-full border-t border-gaming-gray/30 pt-3 sm:border-0 sm:pt-0">
         <span className="text-gray-500 text-[9px] uppercase font-black tracking-wider sm:hidden w-16 shrink-0">Status:</span>
         <div className="flex flex-col sm:items-end text-left sm:text-right">
-          <span className="text-green-500 font-black">Active now</span>
-          <span className="text-[8px] text-gray-600">Updated recently</span>
+          {isUserActive(player.updatedAt) ? (
+            <>
+              <span className="text-green-500 font-black">Active now</span>
+              <span className="text-[8px] text-gray-600">Online</span>
+            </>
+          ) : (
+            <>
+              <span className="text-red-500 font-black">Inactive</span>
+              <span className="text-[8px] text-gray-600">Last active: {getRelativeTime(player.updatedAt)}</span>
+            </>
+          )}
         </div>
       </div>
     </Link>

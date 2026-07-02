@@ -38,6 +38,18 @@ export default async function Home() {
   let dbError = false;
 
   try {
+    // 0. Update activity heartbeat for logged-in user
+    if (loggedInPlayerId) {
+      try {
+        await prisma.player.update({
+          where: { id: loggedInPlayerId },
+          data: { updatedAt: new Date() },
+        });
+      } catch (e) {
+        // Ignore DB update errors during heartbeat
+      }
+    }
+
     // 1. General Candidate Pool Feed (ordered by updatedAt desc)
     players = await prisma.player.findMany({
       where: {},
