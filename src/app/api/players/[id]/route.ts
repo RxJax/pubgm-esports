@@ -69,7 +69,7 @@ export async function PUT(
       try {
         const JWT_SECRET = process.env.JWT_SECRET || "pubgm-esports-super-secret-key-2026";
         const decoded = jwt.verify(token, JWT_SECRET) as { email: string; role?: string; playerId?: string };
-        isAdmin = decoded.email === "rxjax007@gmail.com";
+        isAdmin = decoded.email?.toLowerCase() === "rxjax007@gmail.com";
         isOwner = decoded.playerId === id;
       } catch (e) {
         // invalid token
@@ -225,7 +225,7 @@ export async function DELETE(
     }
     const JWT_SECRET = process.env.JWT_SECRET || "pubgm-esports-super-secret-key-2026";
     const decoded = jwt.verify(token, JWT_SECRET) as { email: string; role?: string; playerId: string };
-    const isAdmin = decoded.email === "rxjax007@gmail.com";
+    const isAdmin = decoded.email?.toLowerCase() === "rxjax007@gmail.com";
     
     const isOwner = decoded.playerId === id;
     if (!isAdmin && !isOwner) {

@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     }
     const JWT_SECRET = process.env.JWT_SECRET || "pubgm-esports-super-secret-key-2026";
     const decoded = jwt.verify(token, JWT_SECRET) as { email: string; role?: string };
-    const isAdmin = decoded.email === "rxjax007@gmail.com";
+    const isAdmin = decoded.email?.toLowerCase() === "rxjax007@gmail.com";
     if (!isAdmin) {
       return NextResponse.json({ error: "Access Denied." }, { status: 403 });
     }

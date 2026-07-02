@@ -40,7 +40,7 @@ export default async function RootLayout({
       isLoggedIn = true;
       playerIgn = decoded.ign;
       playerId = decoded.playerId;
-      isAdmin = decoded.email === "rxjax007@gmail.com";
+      isAdmin = decoded.email?.toLowerCase() === "rxjax007@gmail.com";
     } catch (e) {
       // Cookie is invalid or expired
     }
