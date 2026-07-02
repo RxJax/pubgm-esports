@@ -297,6 +297,37 @@ export default function DiscoveryClient({
   loggedInPlayerId = null,
 }: DiscoveryClientProps) {
   // Return elegant full-screen empty database state if no players exist and no user is logged in
+  if (initialError) {
+    return (
+      <div className="flex-1 bg-gaming-black text-gray-100 min-h-screen flex flex-col items-center justify-center px-6 py-12 text-center relative overflow-hidden">
+        {/* Cyber grid bg */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,189,3,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,189,3,0.01)_1px,transparent_1px)] bg-[size:30px_30px] pointer-events-none" />
+        
+        <div className="relative z-10 max-w-lg flex flex-col items-center gap-6">
+          <div className="w-20 h-20 rounded-3xl bg-gaming-gray border-2 border-airdrop-red/30 text-airdrop-red flex items-center justify-center text-4xl shadow-lg animate-pulse">
+            ⚠️
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-wider bg-gradient-to-r from-airdrop-red via-digital-yellow to-airdrop-red bg-clip-text text-transparent">
+            System Maintenance
+          </h1>
+          <p className="text-gray-300 text-xs sm:text-sm leading-relaxed max-w-md">
+            We're having trouble reaching the scouting records. Please refresh or try again in a moment.
+          </p>
+          <div className="mt-4 p-3 bg-airdrop-red/10 border border-airdrop-red/30 rounded-xl text-[10px] text-airdrop-red font-bold uppercase tracking-wider">
+            🔒 Connection Status: Offline / Unreachable
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-gaming-gray/80 hover:bg-gaming-gray text-digital-yellow border border-digital-yellow/30 font-bold px-6 py-2.5 rounded-xl text-[10px] uppercase tracking-widest transition hover:scale-[1.02] active:scale-[0.98]"
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Return elegant full-screen empty database state if no players exist and no user is logged in
   if (initialPlayers.length === 0 && !loggedInPlayerId) {
     return (
       <div className="flex-1 bg-gaming-black text-gray-100 min-h-screen flex flex-col items-center justify-center px-6 py-12 text-center relative overflow-hidden">
@@ -304,32 +335,21 @@ export default function DiscoveryClient({
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,189,3,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,189,3,0.01)_1px,transparent_1px)] bg-[size:30px_30px] pointer-events-none" />
         
         <div className="relative z-10 max-w-lg flex flex-col items-center gap-6">
-          <div className={`w-20 h-20 rounded-3xl bg-gaming-gray border-2 ${initialError ? "border-airdrop-red/30 text-airdrop-red" : "border-digital-yellow/30 text-digital-yellow"} flex items-center justify-center text-4xl shadow-lg`}>
-            {initialError ? "⚠️" : "🏆"}
+          <div className="w-20 h-20 rounded-3xl bg-gaming-gray border-2 border-digital-yellow/30 text-digital-yellow flex items-center justify-center text-4xl shadow-lg">
+            🏆
           </div>
           <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-wider bg-gradient-to-r from-airdrop-red via-digital-yellow to-airdrop-red bg-clip-text text-transparent">
-            {initialError ? "System Maintenance" : "PUBGM Discovery Hub"}
+            PUBGM Discovery Hub
           </h1>
           <p className="text-gray-300 text-xs sm:text-sm leading-relaxed max-w-md">
-            {initialError ? (
-              <>
-                We're having trouble reaching the scouting records. Please refresh or try again in a moment.
-                <div className="mt-4 p-3 bg-airdrop-red/10 border border-airdrop-red/30 rounded-xl text-[10px] text-airdrop-red font-bold uppercase tracking-wider">
-                  🔒 Connection Status: Offline / Unreachable
-                </div>
-              </>
-            ) : (
-              "No verified players found yet. Be the first to build your player card and get noticed by scouts globally!"
-            )}
+            No verified players found yet. Be the first to build your player card and get noticed by scouts globally!
           </p>
-          {!initialError && (
-            <Link
-              href="/register"
-              className="mt-2 bg-digital-yellow hover:bg-amber-500 text-gaming-black font-black px-8 py-3.5 rounded-2xl text-[10px] uppercase tracking-widest transition shadow-lg shadow-amber-950/20 hover:scale-[1.02] active:scale-[0.98]"
-            >
-              Build Your Player Card
-            </Link>
-          )}
+          <Link
+            href="/register"
+            className="mt-2 bg-digital-yellow hover:bg-amber-500 text-gaming-black font-black px-8 py-3.5 rounded-2xl text-[10px] uppercase tracking-widest transition shadow-lg shadow-amber-950/20 hover:scale-[1.02] active:scale-[0.98]"
+          >
+            Build Your Player Card
+          </Link>
         </div>
       </div>
     );
