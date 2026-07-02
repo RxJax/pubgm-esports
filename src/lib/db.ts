@@ -13,7 +13,8 @@ function getPrismaClient(): PrismaClient {
     return _prisma;
   }
 
-  let dbUrl = process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/postgres";
+  const dbUrlRaw = process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/postgres";
+  let dbUrl = dbUrlRaw;
   // Strip surrounding quotes if present (common copy-paste issue on Vercel)
   if (dbUrl.startsWith('"') && dbUrl.endsWith('"')) {
     dbUrl = dbUrl.slice(1, -1);
@@ -21,11 +22,24 @@ function getPrismaClient(): PrismaClient {
     dbUrl = dbUrl.slice(1, -1);
   }
 
+  // Securely mask database URL for diagnostics
+  const maskedUrl = dbUrl.replace(/:([^:@]+)@/, ":*****@");
+  console.log(`[Diagnostic] Database Client Initialization:
+    - Raw URL length: ${dbUrlRaw.length}
+    - Cleaned URL length: ${dbUrl.length}
+    - Masked URL: ${maskedUrl}
+    - Surrounding quotes stripped: ${dbUrlRaw !== dbUrl}
+    - Protocol: ${dbUrl.split(":")[0]}
+  `);
+
   const pool = new Pool({
     connectionString: dbUrl,
     max: 10,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000,
+    ssl: dbUrl.includes("supabase.co") || dbUrl.includes("supabase.com") || dbUrl.includes("pooler.supabase.com")
+      ? { rejectUnauthorized: false }
+      : undefined,
   });
   
   const adapter = new PrismaPg(pool);
