@@ -805,6 +805,13 @@ export default function DiscoveryClient({
               ))
             )}
             </div>
+            {topRisingFraggers.length > 0 && (
+              <div className="mt-3 flex items-center justify-center">
+                <span className="text-[10px] font-black uppercase tracking-widest text-digital-yellow animate-pulse drop-shadow-[0_0_6px_rgba(255,189,3,0.5)]">
+                  ⚡ Swap left to see other player
+                </span>
+              </div>
+            )}
           </div>
         </section>
 
@@ -832,6 +839,13 @@ export default function DiscoveryClient({
               ))
             )}
             </div>
+            {topTier2Fraggers.length > 0 && (
+              <div className="mt-3 flex items-center justify-center">
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#bf5af2] animate-pulse drop-shadow-[0_0_6px_rgba(191,90,242,0.5)]">
+                  ⚡ Swap left to see other player
+                </span>
+              </div>
+            )}
           </div>
         </section>
 
@@ -859,6 +873,13 @@ export default function DiscoveryClient({
               ))
             )}
             </div>
+            {topCoaches.length > 0 && (
+              <div className="mt-3 flex items-center justify-center">
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#60a5fa] animate-pulse drop-shadow-[0_0_6px_rgba(96,165,250,0.5)]">
+                  🎓 Swap left to see other Coaches
+                </span>
+              </div>
+            )}
           </div>
         </section>
 
@@ -886,6 +907,13 @@ export default function DiscoveryClient({
               ))
             )}
             </div>
+            {risingStarPlayers.length > 0 && (
+              <div className="mt-3 flex items-center justify-center">
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#4ade80] animate-pulse drop-shadow-[0_0_6px_rgba(74,222,128,0.5)]">
+                  ✨ Swap left to see other player
+                </span>
+              </div>
+            )}
           </div>
         </section>
 
