@@ -114,6 +114,8 @@ export async function PUT(
       contractStartDate,
       contractEndDate,
       isVerified,
+      competitiveExperience,
+      officialTournaments,
     } = body;
 
     // Validate characterId (UID) if provided
@@ -167,6 +169,8 @@ export async function PUT(
         contractStartDate: contractStartDate !== undefined ? (contractStartDate ? new Date(contractStartDate) : null) : undefined,
         contractEndDate: contractEndDate !== undefined ? (contractEndDate ? new Date(contractEndDate) : null) : undefined,
         isVerified: isAdmin && isVerified !== undefined ? Boolean(isVerified) : undefined,
+        competitiveExperience: competitiveExperience !== undefined ? parseInt(competitiveExperience) || 1 : undefined,
+        officialTournaments: officialTournaments !== undefined ? parseInt(officialTournaments) || 0 : undefined,
       },
     });
 

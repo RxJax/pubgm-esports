@@ -60,6 +60,8 @@ interface Player {
   placements: Placement[];
   highlights: Highlight[];
   team: Team | null;
+  competitiveExperience?: number;
+  officialTournaments?: number;
 }
 
 interface DashboardClientProps {
@@ -100,6 +102,8 @@ export default function DashboardClient({ player }: DashboardClientProps) {
   const [role, setRole] = useState(player.role);
   const [region, setRegion] = useState(player.region);
   const [highestTier, setHighestTier] = useState(player.highestTier || "None");
+  const [competitiveExperience, setCompetitiveExperience] = useState(player.competitiveExperience?.toString() || "1");
+  const [officialTournaments, setOfficialTournaments] = useState(player.officialTournaments?.toString() || "0");
 
   const formatDateString = (dateVal: any) => {
     if (!dateVal) return "";
@@ -203,6 +207,8 @@ export default function DashboardClient({ player }: DashboardClientProps) {
       underContract: underContract,
       contractStartDate: underContract && contractStartDate ? contractStartDate : null,
       contractEndDate: underContract && contractEndDate ? contractEndDate : null,
+      competitiveExperience: parseInt(competitiveExperience) || 1,
+      officialTournaments: parseInt(officialTournaments) || 0,
     };
 
     // If new trophy filled, append it
@@ -234,6 +240,8 @@ export default function DashboardClient({ player }: DashboardClientProps) {
     player.device = device;
     player.controlSetup = controlSetup;
     player.bio = bio;
+    player.competitiveExperience = parseInt(competitiveExperience) || 1;
+    player.officialTournaments = parseInt(officialTournaments) || 0;
     player.facebook = facebook || null;
     player.instagram = instagram || null;
     player.discord = discord || null;
@@ -667,6 +675,32 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                       className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
                       required={profileType !== "Coach"}
                     />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Competitive Experience</label>
+                    <select
+                      value={competitiveExperience}
+                      onChange={(e) => setCompetitiveExperience(e.target.value)}
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition cursor-pointer"
+                    >
+                      {Array.from({ length: 8 }).map((_, i) => (
+                        <option key={i + 1} value={i + 1}>{i + 1} {i + 1 === 1 ? "Year" : "Years"}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Official Tournaments Played (S/A/B-Tier)</label>
+                    <select
+                      value={officialTournaments}
+                      onChange={(e) => setOfficialTournaments(e.target.value)}
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition cursor-pointer"
+                    >
+                      {Array.from({ length: 11 }).map((_, i) => (
+                        <option key={i} value={i}>{i === 10 ? "10+" : i}</option>
+                      ))}
+                    </select>
                   </div>
                 </>
               )}

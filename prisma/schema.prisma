@@ -76,6 +76,9 @@ model Player {
   
   reportsReceived   Report[]
 
+  competitiveExperience Int        @default(1) @map("competitive_experience")
+  officialTournaments   Int        @default(0) @map("official_tournaments")
+
   createdAt    DateTime              @default(now())
   updatedAt    DateTime              @updatedAt
 }

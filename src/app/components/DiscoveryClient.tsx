@@ -43,6 +43,8 @@ interface Player {
   contractStartDate?: Date | string | null;
   contractEndDate?: Date | string | null;
   updatedAt?: Date | string | null;
+  competitiveExperience?: number;
+  officialTournaments?: number;
 }
 
 interface DiscoveryClientProps {
@@ -165,33 +167,21 @@ const PlayerCarouselCard = memo(({ player }: { player: Player }) => {
         &ldquo;{player.bio}&rdquo;
       </p>
 
-      {/* Chart and Heatmap block */}
-      <div className="flex gap-3 mt-3 border-t border-gaming-gray/30 pt-3">
+      {/* Competitive Experience and Official Tournaments block */}
+      <div className="grid grid-cols-2 gap-3 mt-3 border-t border-gaming-gray/30 pt-3">
         <div>
-          <span className="text-[8px] text-gray-500 font-bold block uppercase text-left">Recent Tourney</span>
-          <div className="flex items-center gap-1.5 mt-1">
-            <svg width="65" height="24" className="text-digital-yellow">
-              <path d="M0,20 L15,12 L30,18 L45,5 L60,10" fill="none" stroke="currentColor" strokeWidth="2.5" />
-              <circle cx="60" cy="10" r="2" fill="currentColor" />
-            </svg>
-          </div>
+          <span className="text-[8px] text-gray-500 font-bold block uppercase text-left">Competitive Experience</span>
+          <span className="font-extrabold text-white text-xs mt-1 block text-left">
+            {player.competitiveExperience ? `${player.competitiveExperience} ${player.competitiveExperience === 1 ? "Year" : "Years"}` : "1 Year"}
+          </span>
         </div>
         <div className="border-l border-gaming-gray/30 pl-3">
-          <span className="text-[8px] text-gray-500 font-bold block uppercase text-left">Heat Map</span>
-          <div className="grid grid-cols-5 gap-[1px] mt-1.5 w-12 h-6 bg-gaming-black/60 p-[1px] rounded border border-gaming-gray/30">
-            {Array.from({ length: 10 }).map((_, idx) => {
-              const opacity = [0.1, 0.4, 0.8, 0.2, 0.9, 0.3, 0.7, 0.5, 0.9, 0.2][(idx + Math.round(player.kdRatio)) % 10];
-              return (
-                <div
-                  key={idx}
-                  className="rounded-[2px]"
-                  style={{
-                    backgroundColor: `rgba(255, 189, 3, ${opacity})`
-                  }}
-                />
-              );
-            })}
-          </div>
+          <span className="text-[8px] text-gray-500 font-bold block uppercase text-left">Official Tournaments played</span>
+          <span className="font-extrabold text-white text-xs mt-1 block text-left text-digital-yellow">
+            {player.officialTournaments !== undefined && player.officialTournaments !== null 
+              ? (player.officialTournaments === 10 ? "10+" : player.officialTournaments) 
+              : "0"}
+          </span>
         </div>
       </div>
 

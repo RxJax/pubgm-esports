@@ -73,6 +73,8 @@ interface Player {
   highlights: Highlight[];
   isVerified?: boolean;
   isFeatured?: boolean;
+  competitiveExperience?: number;
+  officialTournaments?: number;
 }
 
 interface PlayerPortfolioClientProps {
@@ -275,6 +277,8 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
   const [editProfileType, setEditProfileType] = useState(player.profileType || "Player");
   const [editCoachingYears, setEditCoachingYears] = useState(player.coachingYears?.toString() || "0");
   const [editCoachingHistory, setEditCoachingHistory] = useState(player.coachingHistory || "");
+  const [editCompetitiveExperience, setEditCompetitiveExperience] = useState(player.competitiveExperience?.toString() || "1");
+  const [editOfficialTournaments, setEditOfficialTournaments] = useState(player.officialTournaments?.toString() || "0");
   const [editSpecialties, setEditSpecialties] = useState<string[]>(player.specialties ? player.specialties.split(",") : []);
 
   const formatDateString = (dateVal: any) => {
@@ -385,6 +389,8 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
       underContract: editUnderContract,
       contractStartDate: editUnderContract && editContractStartDate ? editContractStartDate : null,
       contractEndDate: editUnderContract && editContractEndDate ? editContractEndDate : null,
+      competitiveExperience: parseInt(editCompetitiveExperience) || 1,
+      officialTournaments: parseInt(editOfficialTournaments) || 0,
     };
 
     // If new trophy fields are filled, append it
@@ -429,6 +435,8 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
     player.underContract = editUnderContract;
     player.contractStartDate = editUnderContract && editContractStartDate ? editContractStartDate : null;
     player.contractEndDate = editUnderContract && editContractEndDate ? editContractEndDate : null;
+    player.competitiveExperience = parseInt(editCompetitiveExperience) || 1;
+    player.officialTournaments = parseInt(editOfficialTournaments) || 0;
 
     setSaveSuccess("Profile Successfully Updated!");
     setActiveTab("stats");
@@ -585,6 +593,16 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                   <span className="bg-digital-yellow/10 border border-digital-yellow/30 text-digital-yellow text-[9px] font-black tracking-widest px-2.5 py-0.5 rounded">
                     👑 {player.coachingYears} Years Exp
                   </span>
+                )}
+                {player.profileType !== "Coach" && (
+                  <>
+                    <span className="bg-digital-yellow/10 border border-digital-yellow/30 text-digital-yellow text-[9px] font-black tracking-widest px-2.5 py-0.5 rounded">
+                      🛡️ {player.competitiveExperience || 1} {player.competitiveExperience === 1 ? "Yr Exp" : "Yrs Exp"}
+                    </span>
+                    <span className="bg-purple-500/10 border border-purple-500/30 text-purple-400 text-[9px] font-black tracking-widest px-2.5 py-0.5 rounded">
+                      🏆 {player.officialTournaments === 10 ? "10+" : player.officialTournaments || 0} Official Tourneys
+                    </span>
+                  </>
                 )}
               </div>
 
@@ -888,23 +906,44 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                     <span className="w-1.5 h-3 bg-digital-yellow" /> COMPETITIVE PORTFOLIO
                   </h3>
 
-                  {/* Competitive Portfolio Block */}
-                  {(player.teamHistory || player.achievements) && (
-                    <div className="bg-gaming-black p-4 rounded-xl border border-gaming-gray flex flex-col gap-3 font-mono text-xs">
-                      {player.teamHistory && (
+                   {/* Competitive Portfolio Block */}
+                  <div className="flex flex-col gap-4">
+                    {player.profileType !== "Coach" && (
+                      <div className="grid grid-cols-2 gap-4 bg-gaming-black p-4 rounded-xl border border-gaming-gray font-mono text-xs">
                         <div>
-                          <span className="text-gray-500 block uppercase font-black text-[9px] mb-1">Competitive Team History / Former Orgs</span>
-                          <span className="text-gray-300 font-semibold">{player.teamHistory}</span>
+                          <span className="text-gray-500 block uppercase font-black text-[9px] mb-1">Competitive Experience</span>
+                          <span className="text-white font-bold">
+                            🛡️ {player.competitiveExperience ? `${player.competitiveExperience} ${player.competitiveExperience === 1 ? "Year" : "Years"}` : "1 Year"}
+                          </span>
                         </div>
-                      )}
-                      {player.achievements && (
                         <div>
-                          <span className="text-gray-500 block uppercase font-black text-[9px] mb-1">Tournament Achievements</span>
-                          <span className="text-digital-yellow font-bold">🏆 {player.achievements}</span>
+                          <span className="text-gray-500 block uppercase font-black text-[9px] mb-1">Official Tournaments Played</span>
+                          <span className="text-digital-yellow font-bold">
+                            🏆 {player.officialTournaments !== undefined && player.officialTournaments !== null 
+                              ? (player.officialTournaments === 10 ? "10+" : player.officialTournaments) 
+                              : "0"}
+                          </span>
                         </div>
-                      )}
-                    </div>
-                  )}
+                      </div>
+                    )}
+
+                    {(player.teamHistory || player.achievements) && (
+                      <div className="bg-gaming-black p-4 rounded-xl border border-gaming-gray flex flex-col gap-3 font-mono text-xs">
+                        {player.teamHistory && (
+                          <div>
+                            <span className="text-gray-500 block uppercase font-black text-[9px] mb-1">Competitive Team History / Former Orgs</span>
+                            <span className="text-gray-300 font-semibold">{player.teamHistory}</span>
+                          </div>
+                        )}
+                        {player.achievements && (
+                          <div>
+                            <span className="text-gray-500 block uppercase font-black text-[9px] mb-1">Tournament Achievements</span>
+                            <span className="text-digital-yellow font-bold">🏆 {player.achievements}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Ranks Block */}
@@ -1317,6 +1356,32 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                           <option value="A-Tier">A-Tier - PMPL, PMPS, PMSL, PMGO (110 rating)</option>
                           <option value="B-Tier">B-Tier - PMNC, PMCC, PMBC, PMAC (70 rating)</option>
                           <option value="C-Tier">C-Tier - Community & 3rd Party (35 rating)</option>
+                        </select>
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Competitive Experience</label>
+                        <select
+                          value={editCompetitiveExperience}
+                          onChange={(e) => setEditCompetitiveExperience(e.target.value)}
+                          className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full cursor-pointer"
+                        >
+                          {Array.from({ length: 8 }).map((_, i) => (
+                            <option key={i + 1} value={i + 1}>{i + 1} {i + 1 === 1 ? "Year" : "Years"}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Official Tournaments Played (S/A/B-Tier)</label>
+                        <select
+                          value={editOfficialTournaments}
+                          onChange={(e) => setEditOfficialTournaments(e.target.value)}
+                          className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full cursor-pointer"
+                        >
+                          {Array.from({ length: 11 }).map((_, i) => (
+                            <option key={i} value={i}>{i === 10 ? "10+" : i}</option>
+                          ))}
                         </select>
                       </div>
 
