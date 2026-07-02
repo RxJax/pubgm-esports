@@ -45,9 +45,7 @@ function getPrismaClient(): PrismaClient {
   const adapter = new PrismaPg(pool);
   _prisma = new PrismaClient({ adapter });
 
-  if (process.env.NODE_ENV !== "production") {
-    globalForPrisma.prisma = _prisma;
-  }
+  globalForPrisma.prisma = _prisma;
 
   return _prisma;
 }

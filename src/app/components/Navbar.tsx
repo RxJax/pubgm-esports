@@ -117,7 +117,7 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId, isAdmin }: Nav
         <div className="flex items-center justify-between h-16">
           {/* Left: Branding, Search Input & Candidate Feed Link */}
           <div className="flex items-center gap-3 md:gap-4 flex-1">
-            <Link href="/" className="relative flex items-center py-2 md:py-3 px-5 sm:px-6 bg-gradient-to-b from-[#1c1f26] to-[#0A0D14] border border-[#FFBD03]/50 rounded-xl shadow-lg shadow-black/80 group shrink-0">
+            <Link href="/" prefetch={true} className="relative flex items-center py-2 md:py-3 px-5 sm:px-6 bg-gradient-to-b from-[#1c1f26] to-[#0A0D14] border border-[#FFBD03]/50 rounded-xl shadow-lg shadow-black/80 group shrink-0">
               <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#FFBD03] to-transparent rounded-t-xl" />
               <span className="text-lg mr-2 filter drop-shadow-[0_0_3px_rgba(255,189,3,0.5)]">🏆</span>
               <span className="font-black text-sm uppercase tracking-widest text-white group-hover:text-digital-yellow transition">
@@ -148,6 +148,7 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId, isAdmin }: Nav
           <div className="hidden md:flex items-center gap-6">
             <Link
               href="/"
+              prefetch={true}
               className="text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white transition"
             >
               DISCOVERY FEED
@@ -165,6 +166,7 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId, isAdmin }: Nav
                 )}
                 <Link
                   href="/dashboard"
+                  prefetch={true}
                   className="text-xs font-black uppercase tracking-widest text-[#a855f7] hover:text-digital-yellow transition"
                 >
                   🎮 PROFILE
@@ -180,12 +182,14 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId, isAdmin }: Nav
               <>
                 <Link
                   href="/login"
+                  prefetch={true}
                   className="text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white transition"
                 >
                   SIGN IN
                 </Link>
                 <Link
                   href="/register"
+                  prefetch={true}
                   className="bg-transparent hover:bg-digital-yellow/5 border-2 border-digital-yellow text-digital-yellow font-black text-xs px-4 py-2 rounded-xl uppercase tracking-widest transition shadow-md shadow-amber-950/15"
                 >
                   CREATE PROFILE
@@ -259,6 +263,7 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId, isAdmin }: Nav
           {/* 1. Discovery Feed (always first) */}
           <Link
             href="/?tab=overview"
+            prefetch={true}
             onClick={() => setMobileMenuOpen(false)}
             className="text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white min-h-[48px] flex items-center border-b border-gaming-gray/30 transition"
           >
@@ -270,6 +275,7 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId, isAdmin }: Nav
               {/* 2. Profile */}
               <Link
                 href="/dashboard"
+                prefetch={true}
                 onClick={() => setMobileMenuOpen(false)}
                 className="text-xs font-black uppercase tracking-widest text-[#a855f7] hover:text-digital-yellow min-h-[48px] flex items-center border-b border-gaming-gray/30 transition gap-2"
               >
@@ -290,6 +296,7 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId, isAdmin }: Nav
               {/* 3. Candidate Feed */}
               <Link
                 href="/?tab=pool"
+                prefetch={true}
                 onClick={() => setMobileMenuOpen(false)}
                 className="text-xs font-black uppercase tracking-widest text-digital-yellow hover:text-amber-400 min-h-[48px] flex items-center border-b border-gaming-gray/30 transition gap-2"
               >
@@ -312,6 +319,7 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId, isAdmin }: Nav
               {/* 3. Candidate Feed (if logged out) */}
               <Link
                 href="/?tab=pool"
+                prefetch={true}
                 onClick={() => setMobileMenuOpen(false)}
                 className="text-xs font-black uppercase tracking-widest text-digital-yellow hover:text-amber-400 min-h-[48px] flex items-center border-b border-gaming-gray/30 transition gap-2"
               >
@@ -319,6 +327,7 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId, isAdmin }: Nav
               </Link>
               <Link
                 href="/login"
+                prefetch={true}
                 onClick={() => setMobileMenuOpen(false)}
                 className="text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white min-h-[48px] flex items-center border-b border-gaming-gray/30 transition"
               >
@@ -326,6 +335,7 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId, isAdmin }: Nav
               </Link>
               <Link
                 href="/register"
+                prefetch={true}
                 onClick={() => setMobileMenuOpen(false)}
                 className="text-center bg-transparent border-2 border-digital-yellow text-digital-yellow font-black text-xs min-h-[48px] flex items-center justify-center rounded-xl uppercase tracking-widest transition mt-2"
               >
