@@ -107,7 +107,7 @@ const getEsportsRating = (tier?: string | null) => {
 const PlayerCarouselCard = memo(({ player }: { player: Player }) => {
   const borderGlowClass = 
     player.urRank === "Legend" ? "border-[#FFBD03] hover:shadow-[0_0_15px_rgba(255,189,3,0.3)] shadow-black/80" :
-    player.urRank === "Peerless" ? "border-purple-500 hover:shadow-[0_0_15px_rgba(168,85,247,0.3)] shadow-black/80" :
+    player.urRank === "Peerless" ? "border-[#bf5af2] hover:shadow-[0_0_15px_rgba(191,90,242,0.4)] shadow-black/80" :
     player.urRank === "Supreme" ? "border-green-500 hover:shadow-[0_0_15px_rgba(34,197,94,0.3)] shadow-black/80" :
     "border-gaming-gray hover:border-digital-yellow/40";
 
@@ -388,7 +388,7 @@ const CandidateRow = memo(({ player }: { player: Player }) => {
       </div>
 
       {/* SORTED / ACTIVE column */}
-      <div className="flex items-center sm:items-end justify-start sm:justify-center sm:text-right text-[10px] text-gray-500 font-mono gap-2 w-full border-t border-gaming-gray/30 pt-3 sm:border-0 sm:pt-0">
+      <div className="flex items-center sm:items-end justify-start sm:justify-end sm:text-right text-[10px] text-gray-500 font-mono gap-2 w-full border-t border-gaming-gray/30 pt-3 sm:border-0 sm:pt-0">
         <span className="text-gray-500 text-[9px] uppercase font-black tracking-wider sm:hidden w-16 shrink-0">Status:</span>
         <div className="flex flex-col sm:items-end text-left sm:text-right">
           {isUserActive(player.updatedAt) ? (
