@@ -691,7 +691,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Official Match played (S/A/B-Tier)</label>
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Official Tour played (S/A/B-Tier)</label>
                     <select
                       value={officialTournaments}
                       onChange={(e) => setOfficialTournaments(e.target.value)}
