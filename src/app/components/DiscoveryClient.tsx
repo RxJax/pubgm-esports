@@ -116,7 +116,7 @@ const PlayerCarouselCard = memo(({ player }: { player: Player }) => {
       <div className="flex gap-3 mb-2 relative">
         <div className="w-12 h-15 rounded-lg bg-gaming-black border border-gaming-gray overflow-hidden shrink-0 relative flex items-center justify-center">
           {player.avatarUrl ? (
-            <img src={player.avatarUrl} className="w-full h-full object-cover animate-fade-in" alt="" />
+            <img src={player.avatarUrl} className="w-full h-full object-cover animate-fade-in" alt="" loading="lazy" />
           ) : (
             <svg viewBox="0 0 100 100" className="w-full h-full text-gray-500 bg-gradient-to-t from-[#15161c] to-[#252836]">
               <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
@@ -223,7 +223,7 @@ const CandidateRow = memo(({ player }: { player: Player }) => {
       <div className="flex items-center gap-3 w-full sm:w-auto">
         <div className="w-9 h-9 rounded-full bg-gaming-black border border-gaming-gray overflow-hidden flex items-center justify-center shrink-0 relative">
           {player.avatarUrl ? (
-            <img src={player.avatarUrl} className="w-full h-full object-cover" alt="" />
+            <img src={player.avatarUrl} className="w-full h-full object-cover" alt="" loading="lazy" />
           ) : (
             <svg viewBox="0 0 100 100" className="w-full h-full text-gray-600 bg-[#1c1f26]">
               <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
@@ -395,6 +395,7 @@ export default function DiscoveryClient({
   // Real-time backend query states
   const [allPlayersCache, setAllPlayersCache] = useState<Player[]>(initialPlayers);
   const [players, setPlayers] = useState<Player[]>(initialPlayers);
+  const [visibleCount, setVisibleCount] = useState(15);
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
   const activeTab = searchParams.get("tab") || "overview";
@@ -500,6 +501,7 @@ export default function DiscoveryClient({
     }
 
     setPlayers(filtered);
+    setVisibleCount(15);
   }, [allPlayersCache, debouncedSearch, selectedRole, selectedRegion, selectedStatus, minRating, deviceType, gyro, selectedUrRank]);
 
   // Curated lists from live database queries
@@ -837,21 +839,35 @@ export default function DiscoveryClient({
                   </p>
                 </div>
               ) : (
-                <div className="flex flex-col gap-3">
-                  {/* Table Header */}
-                  <div className="hidden sm:grid grid-cols-5 gap-4 px-5 py-3 text-[10px] font-black text-gray-500 uppercase tracking-widest border-b border-gaming-gray/30">
-                    <div>Profile</div>
-                    <div>Role</div>
-                    <div>Filter Tags</div>
-                    <div>Sort / Stats</div>
-                    <div className="text-right">Sorted / Active</div>
+                <>
+                  <div className="flex flex-col gap-3">
+                    {/* Table Header */}
+                    <div className="hidden sm:grid grid-cols-5 gap-4 px-5 py-3 text-[10px] font-black text-gray-500 uppercase tracking-widest border-b border-gaming-gray/30">
+                      <div>Profile</div>
+                      <div>Role</div>
+                      <div>Filter Tags</div>
+                      <div>Sort / Stats</div>
+                      <div className="text-right">Sorted / Active</div>
+                    </div>
+
+                    {/* Table Rows */}
+                    {players.slice(0, visibleCount).map((player) => (
+                      <CandidateRow key={player.id} player={player} />
+                    ))}
                   </div>
 
-                  {/* Table Rows */}
-                  {players.map((player) => (
-                    <CandidateRow key={player.id} player={player} />
-                  ))}
-                </div>
+                  {players.length > visibleCount && (
+                    <div className="flex justify-center mt-6">
+                      <button
+                        onClick={() => setVisibleCount((prev) => prev + 15)}
+                        className="px-6 py-3 rounded-xl border border-gaming-gray bg-gaming-black/60 hover:bg-[#FFBD03]/10 hover:border-digital-yellow text-xs font-black text-white uppercase tracking-widest transition-all duration-300 shadow-md flex items-center gap-2 group cursor-pointer"
+                      >
+                        <span>Load More Candidates</span>
+                        <span className="text-gray-500 group-hover:text-digital-yellow transition">({players.length - visibleCount} remaining)</span>
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
