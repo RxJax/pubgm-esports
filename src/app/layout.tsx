@@ -4,6 +4,7 @@ import "./globals.css";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import Navbar from "@/app/components/Navbar";
+import { Analytics } from '@vercel/analytics/next';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -54,6 +55,7 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col bg-gaming-black">
         <Navbar isLoggedIn={isLoggedIn} playerIgn={playerIgn} playerId={playerId} isAdmin={isAdmin} />
         <div className="flex-1 flex flex-col">{children}</div>
+        <Analytics />
       </body>
     </html>
   );
