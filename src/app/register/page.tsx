@@ -6,7 +6,7 @@ import Link from "next/link";
 import Script from "next/script";
 
 const REGIONS = ["Southeast Asia", "South Asia", "Europe", "North America", "Middle East"];
-const ROLES = ["IGL", "Entry Fragger", "Support", "Sniper"];
+const ROLES = ["IGL", "Entry Fragger", "Fragger", "Assaulter", "Support", "Sniper", "Scout"];
 const UR_RANKS = ["Vanguard", "Exceed", "Supreme", "Peerless", "Legend"];
 const SPECIALTIES = ["Analysis", "Tactics", "Strategy", "Training", "VOD Review", "In-Game Leading", "Macro Setup", "Scouting"];
 

@@ -454,8 +454,11 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                       >
                         <option value="IGL">IGL</option>
                         <option value="Entry Fragger">Entry Fragger</option>
+                        <option value="Fragger">Fragger</option>
+                        <option value="Assaulter">Assaulter</option>
                         <option value="Support">Support</option>
                         <option value="Sniper">Sniper</option>
+                        <option value="Scout">Scout</option>
                       </select>
                     </div>
                     <div className="flex flex-col gap-1">

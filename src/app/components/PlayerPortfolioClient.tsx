@@ -953,8 +953,11 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                   <p className="text-gray-300 text-sm leading-relaxed">
                     {player.role === "IGL" && "Directs team strategy, rotation routes, compound takes, and split layouts in matches."}
                     {player.role === "Entry Fragger" && "Leads compound pushes, closes down angles, and secures first knocks in close duels."}
+                    {player.role === "Fragger" && "Specializes in close-range combat, consistently securing finishes and winning direct gunfights."}
+                    {player.role === "Assaulter" && "Bridges mid-to-close combat, providing continuous pressure and backup firepower during pushes."}
                     {player.role === "Sniper" && "Secures distance knocks using bolt-action and DMR sniper rifles, providing overview cover."}
                     {player.role === "Support" && "Coordinates utility deployment (smokes, zone nades), vehicle preservation, and team revives."}
+                    {player.role === "Scout" && "Pioneers paths, gathers intel on compound occupancy, and maps route safety for rotations."}
                   </p>
                 </div>
               </div>
@@ -1278,8 +1281,11 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                           >
                             <option value="IGL">IGL</option>
                             <option value="Entry Fragger">Entry Fragger</option>
+                            <option value="Fragger">Fragger</option>
+                            <option value="Assaulter">Assaulter</option>
                             <option value="Support">Support</option>
                             <option value="Sniper">Sniper</option>
+                            <option value="Scout">Scout</option>
                           </select>
                         </div>
                         <div className="flex flex-col gap-1">

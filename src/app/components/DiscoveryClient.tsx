@@ -52,7 +52,7 @@ interface DiscoveryClientProps {
   loggedInPlayerId?: string | null;
 }
 
-const ROLES = ["All", "IGL", "Entry Fragger", "Support", "Sniper", "Coach"];
+const ROLES = ["All", "IGL", "Entry Fragger", "Fragger", "Assaulter", "Support", "Sniper", "Scout", "Coach"];
 const REGIONS = ["All", "Southeast Asia", "South Asia", "Europe", "North America", "Middle East"];
 const STATUSES = ["All", "Signed", "Looking For Team"];
 const UR_RANKS = ["All", "Vanguard", "Exceed", "Supreme", "Peerless", "Legend"];
