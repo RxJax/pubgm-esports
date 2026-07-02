@@ -4,6 +4,8 @@ import jwt from "jsonwebtoken";
 import { prisma } from "@/lib/db";
 import dynamic from "next/dynamic";
 
+import DatabaseErrorCard from "@/app/components/DatabaseErrorCard";
+
 const DashboardClient = dynamic(() => import("@/app/components/DashboardClient"), {
   loading: () => (
     <div className="min-h-screen bg-gaming-black flex items-center justify-center text-xs font-black text-gray-500 uppercase tracking-widest">
@@ -33,6 +35,7 @@ export default async function DashboardPage() {
 
   // Fetch the logged-in player's profile data
   let player = null;
+  let dbError = false;
   try {
     player = await prisma.player.findUnique({
       where: { id: playerId },
@@ -47,7 +50,12 @@ export default async function DashboardPage() {
       },
     });
   } catch (error: any) {
-    console.warn("⚠️ Database connection failed: The remote Supabase PostgreSQL database is currently unreachable (requires IPv6).");
+    console.error("Database connection failed:", error);
+    dbError = true;
+  }
+
+  if (dbError) {
+    return <DatabaseErrorCard />;
   }
 
   if (!player) {

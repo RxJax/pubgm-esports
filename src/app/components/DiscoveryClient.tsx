@@ -307,19 +307,15 @@ export default function DiscoveryClient({
           <div className={`w-20 h-20 rounded-3xl bg-gaming-gray border-2 ${initialError ? "border-airdrop-red/30 text-airdrop-red" : "border-digital-yellow/30 text-digital-yellow"} flex items-center justify-center text-4xl shadow-lg`}>
             {initialError ? "⚠️" : "🏆"}
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-wider bg-gradient-to-r from-airdrop-red to-digital-yellow bg-clip-text text-transparent">
-            {initialError ? "Database Unreachable" : "PUBGM Discovery Hub"}
+          <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-wider bg-gradient-to-r from-airdrop-red via-digital-yellow to-airdrop-red bg-clip-text text-transparent">
+            {initialError ? "System Maintenance" : "PUBGM Discovery Hub"}
           </h1>
-          <p className="text-gray-400 text-xs sm:text-sm leading-relaxed max-w-md">
+          <p className="text-gray-300 text-xs sm:text-sm leading-relaxed max-w-md">
             {initialError ? (
               <>
-                The live remote database is currently unreachable from your local network (requires IPv6).
-                <br />
-                <span className="text-[10px] text-gray-500 block mt-2 font-mono">
-                  If testing locally, please see the <code className="text-digital-yellow font-bold">walkthrough.md</code> on how to copy a connection pooler URI from your Supabase dashboard.
-                </span>
+                We're having trouble reaching the scouting records. Please refresh or try again in a moment.
                 <div className="mt-4 p-3 bg-airdrop-red/10 border border-airdrop-red/30 rounded-xl text-[10px] text-airdrop-red font-bold uppercase tracking-wider">
-                  🔒 Spend Cap Protection Active: Auto-charging is disabled to prevent database cost surges.
+                  🔒 Connection Status: Offline / Unreachable
                 </div>
               </>
             ) : (

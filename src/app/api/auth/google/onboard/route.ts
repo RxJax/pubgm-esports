@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
       ign: player.ign,
     });
   } catch (error: any) {
-    console.error("Google Onboarding API error:", error);
+    console.error("Database connection failed:", error);
     return NextResponse.json({ error: "Onboarding failed. Internal database validation error." }, { status: 500 });
   }
 }

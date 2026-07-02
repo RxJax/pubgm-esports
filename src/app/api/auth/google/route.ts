@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       });
     }
   } catch (error: any) {
-    console.error("Google Login API error:", error);
+    console.error("Database connection failed:", error);
     return NextResponse.json({ error: "Google authentication failed. Internal server error." }, { status: 500 });
   }
 }

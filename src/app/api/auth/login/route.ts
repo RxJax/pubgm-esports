@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       ign: player.ign,
     });
   } catch (error: any) {
-    console.error("Login route error:", error);
+    console.error("Database connection failed:", error);
     return NextResponse.json({ error: "Login failed. Internal error." }, { status: 500 });
   }
 }

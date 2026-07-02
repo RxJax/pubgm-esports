@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
       ign: newPlayer.ign,
     });
   } catch (error: any) {
-    console.error("Registration route error:", error);
+    console.error("Database connection failed:", error);
     return NextResponse.json({ error: "Registration failed. Internal database error." }, { status: 500 });
   }
 }

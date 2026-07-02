@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import dynamic from "next/dynamic";
+import DatabaseErrorCard from "@/app/components/DatabaseErrorCard";
 
 const PlayerPortfolioClient = dynamic(() => import("@/app/components/PlayerPortfolioClient"), {
   loading: () => (
@@ -23,6 +24,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
   const { id } = await params;
 
   let player = null;
+  let dbError = false;
   try {
     // Query player data with all nested relations directly on the server
     player = await prisma.player.findUnique({
@@ -51,7 +53,12 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
       },
     });
   } catch (error: any) {
-    console.warn("⚠️ Database connection failed: The remote Supabase PostgreSQL database is currently unreachable (requires IPv6).");
+    console.error("Database connection failed:", error);
+    dbError = true;
+  }
+
+  if (dbError) {
+    return <DatabaseErrorCard />;
   }
 
   if (!player) {

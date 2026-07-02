@@ -35,7 +35,7 @@ export async function PUT(
 
     return NextResponse.json(updatedReport);
   } catch (error: any) {
-    console.error("Error updating report:", error);
+    console.error("Database connection failed:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

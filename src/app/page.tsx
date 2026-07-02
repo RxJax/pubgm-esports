@@ -75,7 +75,7 @@ export default async function Home() {
       take: 3,
     });
   } catch (error: any) {
-    console.warn("⚠️ Database connection failed: The remote Supabase PostgreSQL database is currently unreachable (requires IPv6). Serving offline empty state.");
+    console.error("Database connection failed:", error);
     dbError = true;
   }
 

@@ -34,27 +34,32 @@ export default async function AdminModerationPage() {
   }
 
   // Fetch pending reports
-  const pendingReports = await prisma.report.findMany({
-    where: {
-      status: "PENDING",
-    },
-    include: {
-      reportedPlayer: {
-        select: {
-          id: true,
-          ign: true,
-          characterId: true,
-          avatarUrl: true,
-          role: true,
-          region: true,
-          isVerified: true,
+  let pendingReports: any[] = [];
+  try {
+    pendingReports = await prisma.report.findMany({
+      where: {
+        status: "PENDING",
+      },
+      include: {
+        reportedPlayer: {
+          select: {
+            id: true,
+            ign: true,
+            characterId: true,
+            avatarUrl: true,
+            role: true,
+            region: true,
+            isVerified: true,
+          },
         },
       },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  } catch (error) {
+    console.error("Database connection failed:", error);
+  }
 
   return (
     <main className="min-h-screen bg-gaming-black flex flex-col">

@@ -46,8 +46,8 @@ export async function GET(
 
     return NextResponse.json(player);
   } catch (error: any) {
-    console.error("API GET player detail error:", error);
-    return NextResponse.json({ error: "Failed to fetch player details" }, { status: 500 });
+    console.error("Database connection failed:", error);
+    return NextResponse.json({ error: "Database connection failed" }, { status: 500 });
   }
 }
 
@@ -196,7 +196,7 @@ export async function PUT(
 
     return NextResponse.json({ success: true, player: updatedPlayer });
   } catch (error: any) {
-    console.error("API PUT player error:", error);
+    console.error("Database connection failed:", error);
     if (error.code === "P2002") {
       const target = error.meta?.target || [];
       if (target.includes("characterId")) {
@@ -239,7 +239,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true, message: "Account deleted successfully." });
   } catch (error: any) {
-    console.error("API DELETE player error:", error);
+    console.error("Database connection failed:", error);
     return NextResponse.json({ error: "Failed to delete player account." }, { status: 500 });
   }
 }
