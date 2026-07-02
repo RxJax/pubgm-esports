@@ -700,7 +700,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
           </div>
 
           {/* Export / Share Button */}
-          <div className="absolute right-4 bottom-4 z-20 exclude-from-export">
+          <div className="absolute right-4 top-4 sm:top-auto sm:bottom-4 z-20 exclude-from-export">
             <div className="relative">
               <button
                 type="button"
@@ -721,7 +721,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
               </button>
 
               {showShareMenu && (
-                <div className="absolute right-0 bottom-full mb-2 w-52 bg-[#0d0e12] border-2 border-gaming-gray rounded-xl shadow-2xl overflow-hidden z-30 animate-fade-in">
+                <div className="absolute right-0 top-full mt-2 sm:top-auto sm:bottom-full sm:mt-0 sm:mb-2 w-52 bg-[#0d0e12] border-2 border-gaming-gray rounded-xl shadow-2xl overflow-hidden z-30 animate-fade-in">
                   <button
                     type="button"
                     onClick={handleExportImage}
