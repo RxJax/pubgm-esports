@@ -215,6 +215,12 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
     }
   };
 
+  const getProxyUrl = (url: string | null | undefined) => {
+    if (!url) return "";
+    if (url.startsWith("data:") || url.startsWith("/") || url.startsWith("blob:")) return url;
+    return `/api/image-proxy?url=${encodeURIComponent(url)}`;
+  };
+
   const handleExportImage = async () => {
     const card = document.getElementById("esports-player-card");
     if (!card) return;
@@ -222,11 +228,36 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
     
     // Wait a short delay to allow React to apply the `.is-exporting` state to the DOM
     setTimeout(async () => {
+      // Store original values
+      const originalStyleWidth = card.style.width;
+      const originalStyleMaxWidth = card.style.maxWidth;
+      const originalStyleMargin = card.style.margin;
+
       try {
+        // Temporarily force 1024px width on the real DOM for accurate sizing measurements
+        card.style.width = "1024px";
+        card.style.maxWidth = "none";
+        card.style.margin = "0px";
+        
+        const width = 1024;
+        const height = card.offsetHeight;
+        
         const dataUrl = await htmlToImage.toPng(card, {
           quality: 0.95,
-          pixelRatio: 2,
+          pixelRatio: 3,
           cacheBust: true,
+          width: width,
+          height: height,
+          style: {
+            transform: "none",
+            margin: "0",
+            padding: "0",
+            position: "relative",
+            width: "1024px",
+            height: `${height}px`,
+            left: "0",
+            top: "0",
+          },
           filter: (node) => {
             if (node.classList?.contains("exclude-from-export")) {
               return false;
@@ -234,6 +265,12 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
             return true;
           }
         });
+
+        // Revert temporary DOM style modifications immediately
+        card.style.width = originalStyleWidth;
+        card.style.maxWidth = originalStyleMaxWidth;
+        card.style.margin = originalStyleMargin;
+
         const link = document.createElement("a");
         link.download = player.profileType === "Coach"
           ? `${player.ign.replace(/\s+/g, "_")}-Pro-Coach-Card.png`
@@ -241,6 +278,11 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
         link.href = dataUrl;
         link.click();
       } catch (err) {
+        // Revert styles in case of errors
+        card.style.width = originalStyleWidth;
+        card.style.maxWidth = originalStyleMaxWidth;
+        card.style.margin = originalStyleMargin;
+        
         console.error("Export failed:", err);
         alert("Failed to export player card as image.");
       } finally {
@@ -563,9 +605,9 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
             <div className="relative w-24 h-24 rounded-2xl bg-gaming-black border-2 border-gaming-gray flex items-center justify-center overflow-hidden shrink-0 shadow-lg">
               <div className="absolute inset-0 bg-gradient-to-t from-digital-yellow/10 to-transparent pointer-events-none" />
               {player.avatarUrl ? (
-                <img src={player.avatarUrl} alt={player.ign} className="w-full h-full object-cover" crossOrigin={player.avatarUrl?.startsWith("data:") ? undefined : "anonymous"} />
+                <img src={getProxyUrl(player.avatarUrl)} alt={player.ign} className="w-full h-full object-cover" crossOrigin="anonymous" />
               ) : player.team?.logoUrl ? (
-                <img src={player.team.logoUrl} alt="" className="w-full h-full object-cover" crossOrigin={player.team?.logoUrl?.startsWith("data:") ? undefined : "anonymous"} />
+                <img src={getProxyUrl(player.team.logoUrl)} alt="" className="w-full h-full object-cover" crossOrigin="anonymous" />
               ) : (
                 <span className="text-3xl font-black text-gaming-gray">FA</span>
               )}
