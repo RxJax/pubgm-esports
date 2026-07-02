@@ -256,13 +256,7 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId, isAdmin }: Nav
       {/* Mobile Dropdown Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-[#0D0E12]/95 backdrop-blur-md border-b-2 border-gaming-gray px-6 py-3 flex flex-col gap-1.5 shadow-2xl animate-fade-in">
-          <Link
-            href="/?tab=pool"
-            onClick={() => setMobileMenuOpen(false)}
-            className="text-xs font-black uppercase tracking-widest text-digital-yellow hover:text-amber-400 min-h-[48px] flex items-center border-b border-gaming-gray/30 transition gap-2"
-          >
-            🔍 Candidate Feed
-          </Link>
+          {/* 1. Discovery Feed (always first) */}
           <Link
             href="/?tab=overview"
             onClick={() => setMobileMenuOpen(false)}
@@ -273,22 +267,36 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId, isAdmin }: Nav
 
           {isLoggedIn ? (
             <>
+              {/* 2. Profile */}
+              <Link
+                href="/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-xs font-black uppercase tracking-widest text-[#a855f7] hover:text-digital-yellow min-h-[48px] flex items-center border-b border-gaming-gray/30 transition gap-2"
+              >
+                🎮 Profile
+              </Link>
+
+              {/* Admin Panel (if admin, placed after Profile) */}
               {isAdmin && (
                 <Link
                   href="/admin/moderation"
                   onClick={() => setMobileMenuOpen(false)}
                   className="text-xs font-black uppercase tracking-widest text-[#FFBD03] hover:text-white min-h-[48px] flex items-center gap-2 border-b border-gaming-gray/30 transition"
                 >
-                  🛠️ ADMIN PANEL
+                  🛠️ Admin Panel
                 </Link>
               )}
+
+              {/* 3. Candidate Feed */}
               <Link
-                href="/dashboard"
+                href="/?tab=pool"
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-xs font-black uppercase tracking-widest text-digital-yellow hover:text-amber-400 min-h-[48px] flex items-center border-b border-gaming-gray/30 transition"
+                className="text-xs font-black uppercase tracking-widest text-digital-yellow hover:text-amber-400 min-h-[48px] flex items-center border-b border-gaming-gray/30 transition gap-2"
               >
-                🎮 PROFILE
+                🔍 Candidate Feed
               </Link>
+
+              {/* 4. Log Out */}
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
@@ -301,6 +309,14 @@ export default function Navbar({ isLoggedIn, playerIgn, playerId, isAdmin }: Nav
             </>
           ) : (
             <>
+              {/* 3. Candidate Feed (if logged out) */}
+              <Link
+                href="/?tab=pool"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-xs font-black uppercase tracking-widest text-digital-yellow hover:text-amber-400 min-h-[48px] flex items-center border-b border-gaming-gray/30 transition gap-2"
+              >
+                🔍 Candidate Feed
+              </Link>
               <Link
                 href="/login"
                 onClick={() => setMobileMenuOpen(false)}

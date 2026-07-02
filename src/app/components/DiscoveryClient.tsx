@@ -360,6 +360,7 @@ export default function DiscoveryClient({
   const [players, setPlayers] = useState<Player[]>(initialPlayers);
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
+  const activeTab = searchParams.get("tab") || "overview";
   const feedRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -485,7 +486,7 @@ export default function DiscoveryClient({
   return (
     <div className="flex-1 w-full bg-gaming-black text-gray-100 min-h-screen pb-20 px-4 md:px-8">
       {/* Discovery Hub Banner */}
-      <header className="relative py-8 px-6 bg-gradient-to-r from-[#0d0e12] to-[#151720] border border-gaming-gray rounded-3xl mb-8 max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4 overflow-hidden">
+      <header className={`relative py-8 px-6 bg-gradient-to-r from-[#0d0e12] to-[#151720] border border-gaming-gray rounded-3xl mb-8 max-w-7xl mx-auto md:items-center md:justify-between gap-4 overflow-hidden ${activeTab === "pool" ? "hidden xl:flex" : "flex flex-col md:flex-row"}`}>
         {/* Background Trophies SVG */}
         <div className="absolute right-24 bottom-0 hidden md:block">
           <svg width="320" height="160" viewBox="0 0 400 200" fill="none">
@@ -651,7 +652,7 @@ export default function DiscoveryClient({
       <main className="max-w-7xl mx-auto w-full flex flex-col gap-10">
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start w-full">
           {/* LEFT COLUMN: Prospects & Featured Rosters */}
-          <div className="xl:col-span-5 flex flex-col gap-8 w-full">
+          <div className={`xl:col-span-5 flex flex-col gap-8 w-full ${activeTab === "pool" ? "hidden xl:flex" : "flex"}`}>
             {/* ================= SECTION 1: TIER-1 PROSPECTS ================= */}
         <section className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
@@ -700,7 +701,10 @@ export default function DiscoveryClient({
           </div>
 
           {/* RIGHT COLUMN: Candidate Pool Feed */}
-          <div ref={feedRef} className="xl:col-span-7 flex flex-col gap-4 w-full border-t xl:border-t-0 border-gaming-gray pt-8 xl:pt-0">
+          <div
+            ref={feedRef}
+            className={`xl:col-span-7 flex flex-col gap-4 w-full ${activeTab === "overview" ? "hidden xl:flex" : "flex"} ${activeTab === "pool" ? "border-0 pt-0" : "border-t xl:border-t-0 border-gaming-gray pt-8 xl:pt-0"}`}
+          >
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-black uppercase tracking-wider text-airdrop-red flex items-center gap-2">
                 <span className="text-lg">🔍</span> CANDIDATE POOL FEED
