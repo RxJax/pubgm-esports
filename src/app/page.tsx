@@ -12,8 +12,8 @@ const DiscoveryClient = dynamic(() => import("./components/DiscoveryClient"), {
   ),
 });
 
-// Configure ISR (Incremental Static Regeneration) with 60s cache revalidation
-export const revalidate = 60;
+// Configure dynamic rendering (disabled ISR cache to prevent logged-out navbar state on refresh)
+export const revalidate = 0;
 
 export default async function Home() {
   const cookieStore = await cookies();

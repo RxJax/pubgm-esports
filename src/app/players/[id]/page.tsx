@@ -13,8 +13,8 @@ const PlayerPortfolioClient = dynamic(() => import("@/app/components/PlayerPortf
   ),
 });
 
-// Configure ISR cache revalidation of 60 seconds
-export const revalidate = 60;
+// Configure dynamic rendering (disabled ISR cache to prevent outdated profile cards/edit options)
+export const revalidate = 0;
 
 interface PlayerPageProps {
   params: Promise<{ id: string }>;
