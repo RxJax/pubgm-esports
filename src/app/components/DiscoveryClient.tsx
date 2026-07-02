@@ -111,21 +111,21 @@ const PlayerCarouselCard = memo(({ player }: { player: Player }) => {
   return (
     <Link
       href={`/players/${player.id}`}
-      className={`group flex-none w-[85vw] sm:w-[340px] snap-center snap-always bg-gradient-to-br from-gaming-gray/30 to-[#0c0d12] hover:from-gaming-gray/50 hover:to-[#0c0d12] border-2 rounded-2xl p-5 transition-all duration-300 relative overflow-hidden shadow-lg ${borderGlowClass}`}
+      className={`group flex-none w-[85vw] sm:w-[340px] snap-center snap-always bg-gradient-to-br from-gaming-gray/30 to-[#0c0d12] hover:from-gaming-gray/50 hover:to-[#0c0d12] border-2 rounded-2xl p-5 hover:scale-[1.01] hover:border-yellow-400 transition-all duration-300 relative overflow-hidden shadow-lg ${borderGlowClass}`}
     >
-      <div className="flex justify-between items-start mb-2">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-15 rounded-lg bg-gaming-black border border-gaming-gray overflow-hidden shrink-0 relative flex items-center justify-center">
-            {player.avatarUrl ? (
-              <img src={player.avatarUrl} className="w-full h-full object-cover" alt="" />
-            ) : (
-              <svg viewBox="0 0 100 100" className="w-full h-full text-gray-500 bg-gradient-to-t from-[#15161c] to-[#252836]">
-                <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
-                <path d="M15,85 C15,60 30,55 50,55 C70,55 85,60 85,85 Z" fill="currentColor" opacity="0.6" />
-              </svg>
-            )}
-          </div>
-          <div>
+      <div className="flex gap-3 mb-2 relative">
+        <div className="w-12 h-15 rounded-lg bg-gaming-black border border-gaming-gray overflow-hidden shrink-0 relative flex items-center justify-center">
+          {player.avatarUrl ? (
+            <img src={player.avatarUrl} className="w-full h-full object-cover animate-fade-in" alt="" />
+          ) : (
+            <svg viewBox="0 0 100 100" className="w-full h-full text-gray-500 bg-gradient-to-t from-[#15161c] to-[#252836]">
+              <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
+              <path d="M15,85 C15,60 30,55 50,55 C70,55 85,60 85,85 Z" fill="currentColor" opacity="0.6" />
+            </svg>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex justify-between items-baseline gap-2">
             <h3 className="font-extrabold text-white text-base group-hover:text-digital-yellow transition uppercase tracking-wide flex items-center gap-1.5 text-left justify-start">
               <span>{player.ign}</span>
               {(player.isVerified || player.isFeatured) && (
@@ -141,25 +141,27 @@ const PlayerCarouselCard = memo(({ player }: { player: Player }) => {
                 </span>
               )}
             </h3>
-            <p className="text-[9px] text-gray-400 font-black uppercase tracking-wider text-left">
-              {player.status === "Signed" ? (player.team?.name || "Not Available") : (player.team?.name || "Free Agent")}
-            </p>
-            {player.status !== "Looking For Team" && player.status !== "Free Agent" && player.underContract && player.contractStartDate && player.contractEndDate && (
-              <div className="mt-1 inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-airdrop-red/30 bg-airdrop-red/10 text-[8px] font-black text-airdrop-red uppercase tracking-wider animate-pulse w-fit">
-                🔒 {getContractDurationText(player)}
-              </div>
-            )}
-            <span className="inline-block text-[8px] bg-digital-yellow/15 text-digital-yellow border border-digital-yellow/20 px-2 py-0.2 rounded font-black uppercase mt-1 block w-fit">
+            <div className="text-[9px] font-black bg-airdrop-red/10 text-airdrop-red border border-airdrop-red/20 px-2 py-0.5 rounded shrink-0 self-center">
+              {player.urRank === "Legend" ? "Tier-1 Pro" : player.urRank === "Peerless" ? "Tier-2 Pro" : player.urRank === "Supreme" ? "Tier-3 Pro" : player.urRank === "Exceed" ? "Semi-Pro" : "Amateur"}
+            </div>
+          </div>
+          <p className="text-[9px] text-gray-400 font-black uppercase tracking-wider text-left">
+            {player.status === "Signed" ? (player.team?.name || "Not Available") : (player.team?.name || "Free Agent")}
+          </p>
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            <span className="inline-block text-[8px] bg-digital-yellow/15 text-digital-yellow border border-digital-yellow/20 px-2 py-0.5 rounded font-black uppercase">
               🎯 {player.role}
             </span>
+            {player.status !== "Looking For Team" && player.status !== "Free Agent" && player.underContract && player.contractStartDate && player.contractEndDate && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-airdrop-red/30 bg-airdrop-red/10 text-[8px] font-black text-airdrop-red uppercase tracking-wider animate-pulse">
+                🔒 {getContractDurationText(player)}
+              </span>
+            )}
           </div>
-        </div>
-        <div className="text-[9px] font-black bg-airdrop-red/10 text-airdrop-red border border-airdrop-red/20 px-2 py-0.5 rounded">
-          {player.urRank === "Legend" ? "Tier-1 Pro" : player.urRank === "Peerless" ? "Tier-2 Pro" : player.urRank === "Supreme" ? "Tier-3 Pro" : player.urRank === "Exceed" ? "Semi-Pro" : "Amateur"}
         </div>
       </div>
 
-      <p className="text-gray-400 text-xs italic mb-2 line-clamp-1 mt-1 text-left">
+      <p className="text-slate-500 text-xs italic mb-2 line-clamp-1 mt-1 text-left">
         &ldquo;{player.bio}&rdquo;
       </p>
 
@@ -169,7 +171,7 @@ const PlayerCarouselCard = memo(({ player }: { player: Player }) => {
           <span className="text-[8px] text-gray-500 font-bold block uppercase text-left">Recent Tourney</span>
           <div className="flex items-center gap-1.5 mt-1">
             <svg width="65" height="24" className="text-digital-yellow">
-              <path d="M0,20 L15,12 L30,18 L45,5 L60,10" fill="none" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M0,20 L15,12 L30,18 L45,5 L60,10" fill="none" stroke="currentColor" strokeWidth="2.5" />
               <circle cx="60" cy="10" r="2" fill="currentColor" />
             </svg>
           </div>
@@ -182,7 +184,7 @@ const PlayerCarouselCard = memo(({ player }: { player: Player }) => {
               return (
                 <div
                   key={idx}
-                  className="rounded-[1px]"
+                  className="rounded-[2px]"
                   style={{
                     backgroundColor: `rgba(255, 189, 3, ${opacity})`
                   }}
