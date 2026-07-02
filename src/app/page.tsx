@@ -32,6 +32,7 @@ export default async function Home() {
 
   let players: any[] = [];
   let risingPlayers: any[] = [];
+  let tier2Players: any[] = [];
   let featuredPlayers: any[] = [];
   let dbError = false;
 
@@ -51,6 +52,20 @@ export default async function Home() {
     risingPlayers = await prisma.player.findMany({
       where: {
         urRank: "Legend",
+      },
+      include: {
+        team: true,
+      },
+      orderBy: {
+        kdRatio: "desc",
+      },
+      take: 4,
+    });
+
+    // 2.5. Tier-2 Prospects (only registered profiles marked with 'Tier-2 Pro' status, sorted by K/D, limit 4)
+    tier2Players = await prisma.player.findMany({
+      where: {
+        urRank: "Peerless",
       },
       include: {
         team: true,
@@ -85,6 +100,7 @@ export default async function Home() {
         <DiscoveryClient
           initialPlayers={players}
           initialRising={risingPlayers}
+          initialTier2={tier2Players}
           initialFeatured={featuredPlayers}
           initialError={dbError}
           loggedInPlayerId={loggedInPlayerId}

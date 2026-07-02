@@ -47,6 +47,7 @@ interface Player {
 interface DiscoveryClientProps {
   initialPlayers: Player[];
   initialRising?: Player[];
+  initialTier2?: Player[];
   initialFeatured?: Player[];
   initialError?: boolean;
   loggedInPlayerId?: string | null;
@@ -292,6 +293,7 @@ CandidateRow.displayName = "CandidateRow";
 export default function DiscoveryClient({
   initialPlayers,
   initialRising = [],
+  initialTier2 = [],
   initialFeatured = [],
   initialError = false,
   loggedInPlayerId = null,
@@ -467,6 +469,7 @@ export default function DiscoveryClient({
 
   // Curated lists from live database queries
   const topRisingFraggers = useMemo(() => initialRising.filter(p => p.urRank === "Legend"), [initialRising]);
+  const topTier2Fraggers = useMemo(() => initialTier2.filter(p => p.urRank === "Peerless"), [initialTier2]);
   const featuredProfiles = initialFeatured;
 
   // Count active filters
@@ -673,6 +676,33 @@ export default function DiscoveryClient({
               </div>
             ) : (
               topRisingFraggers.map((player) => (
+                <PlayerCarouselCard key={player.id} player={player} />
+              ))
+            )}
+            </div>
+          </div>
+        </section>
+
+        {/* ================= SECTION 1.5: TIER-2 PROSPECTS ================= */}
+        <section className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-black uppercase tracking-wider text-purple-400 flex items-center gap-2">
+              <span className="text-xl">⚡</span> TIER-2 PROSPECTS
+            </h2>
+            <span className="text-[10px] text-gray-500 font-black uppercase tracking-wider hidden sm:inline">COMPETITIVE EXPERIENCE &ge; TIER-2</span>
+          </div>
+
+          <div className="bg-[#0c0e12] border border-gaming-gray rounded-3xl p-5 shadow-[0_0_20px_rgba(255,189,3,0.02)]">
+            <div className="flex overflow-x-auto pb-2 gap-5 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gaming-gray scrollbar-track-transparent w-full">
+            {topTier2Fraggers.length === 0 ? (
+              <div className="w-full bg-[#111827]/10 border border-gaming-gray rounded-2xl p-8 text-center flex flex-col items-center justify-center gap-2">
+                <span className="text-2xl">⚡</span>
+                <p className="text-gray-400 text-xs sm:text-sm font-medium">
+                  No Tier-2 verified competitors have registered yet.
+                </p>
+              </div>
+            ) : (
+              topTier2Fraggers.map((player) => (
                 <PlayerCarouselCard key={player.id} player={player} />
               ))
             )}
