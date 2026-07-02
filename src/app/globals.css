@@ -37,3 +37,51 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
 }
+
+/* Esports Card Exporting Parity Overrides */
+.is-exporting {
+  width: 1024px !important;
+  max-width: none !important;
+}
+
+.is-exporting #esports-player-card-header {
+  flex-direction: row !important;
+  align-items: center !important;
+  padding: 40px !important;
+}
+
+.is-exporting #esports-player-card-details {
+  flex-direction: row !important;
+  align-items: center !important;
+}
+
+.is-exporting #esports-player-card-text {
+  text-align: left !important;
+}
+
+.is-exporting #esports-player-card-badges {
+  justify-content: flex-start !important;
+}
+
+.is-exporting #esports-player-card-ign {
+  font-size: 2.25rem !important;
+  justify-content: flex-start !important;
+}
+
+.is-exporting #esports-player-card-uid-row {
+  justify-content: flex-start !important;
+}
+
+.is-exporting #esports-player-card-content {
+  padding: 32px !important;
+}
+
+.is-exporting #esports-player-card-stats-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+.is-exporting #esports-player-card-stats-left {
+  grid-column: span 2 / span 2 !important;
+}
+

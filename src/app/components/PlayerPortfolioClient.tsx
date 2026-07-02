@@ -217,30 +217,35 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
     const card = document.getElementById("esports-player-card");
     if (!card) return;
     setIsExporting(true);
-    try {
-      const dataUrl = await htmlToImage.toPng(card, {
-        quality: 0.95,
-        pixelRatio: 2,
-        filter: (node) => {
-          if (node.classList?.contains("exclude-from-export")) {
-            return false;
+    
+    // Wait a short delay to allow React to apply the `.is-exporting` state to the DOM
+    setTimeout(async () => {
+      try {
+        const dataUrl = await htmlToImage.toPng(card, {
+          quality: 0.95,
+          pixelRatio: 2,
+          cacheBust: true,
+          filter: (node) => {
+            if (node.classList?.contains("exclude-from-export")) {
+              return false;
+            }
+            return true;
           }
-          return true;
-        }
-      });
-      const link = document.createElement("a");
-      link.download = player.profileType === "Coach"
-        ? `${player.ign.replace(/\s+/g, "_")}-Pro-Coach-Card.png`
-        : `${player.ign.replace(/\s+/g, "_")}-Esports-Card.png`;
-      link.href = dataUrl;
-      link.click();
-    } catch (err) {
-      console.error("Export failed:", err);
-      alert("Failed to export player card as image.");
-    } finally {
-      setIsExporting(false);
-      setShowShareMenu(false);
-    }
+        });
+        const link = document.createElement("a");
+        link.download = player.profileType === "Coach"
+          ? `${player.ign.replace(/\s+/g, "_")}-Pro-Coach-Card.png`
+          : `${player.ign.replace(/\s+/g, "_")}-Esports-Card.png`;
+        link.href = dataUrl;
+        link.click();
+      } catch (err) {
+        console.error("Export failed:", err);
+        alert("Failed to export player card as image.");
+      } finally {
+        setIsExporting(false);
+        setShowShareMenu(false);
+      }
+    }, 150);
   };
 
   // Edit profile form states
@@ -539,28 +544,28 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
       </div>
 
       {/* ================= ESPORTS PLAYER CARD BANNER ================= */}
-      <div id="esports-player-card" className="max-w-5xl mx-auto bg-gaming-black border-2 border-gaming-gray rounded-3xl overflow-hidden shadow-[0_0_20px_rgba(255,189,3,0.06)] mb-8">
-        <div className="relative bg-gradient-to-r from-gaming-gray via-gaming-black to-[#050608] p-6 md:p-10 border-b-2 border-gaming-gray flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div id="esports-player-card" className={`max-w-5xl mx-auto bg-gaming-black border-2 border-gaming-gray rounded-3xl overflow-hidden shadow-[0_0_20px_rgba(255,189,3,0.06)] mb-8 ${isExporting ? "is-exporting" : ""}`}>
+        <div id="esports-player-card-header" className="relative bg-gradient-to-r from-gaming-gray via-gaming-black to-[#050608] p-6 md:p-10 border-b-2 border-gaming-gray flex flex-col md:flex-row md:items-center justify-between gap-6">
           {/* Cybernetic grid bg */}
           <div className="absolute inset-0 bg-[linear-gradient(rgba(255,189,3,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,189,3,0.02)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
 
           {/* Left Details */}
-          <div className="flex flex-col sm:flex-row items-center gap-6 relative z-10">
+          <div id="esports-player-card-details" className="flex flex-col sm:flex-row items-center gap-6 relative z-10">
             {/* Team Logo Avatar */}
             <div className="relative w-24 h-24 rounded-2xl bg-gaming-black border-2 border-gaming-gray flex items-center justify-center overflow-hidden shrink-0 shadow-lg">
               <div className="absolute inset-0 bg-gradient-to-t from-digital-yellow/10 to-transparent pointer-events-none" />
               {player.avatarUrl ? (
-                <img src={player.avatarUrl} alt={player.ign} className="w-full h-full object-cover" />
+                <img src={player.avatarUrl} alt={player.ign} className="w-full h-full object-cover" crossOrigin={player.avatarUrl?.startsWith("data:") ? undefined : "anonymous"} />
               ) : player.team?.logoUrl ? (
-                <img src={player.team.logoUrl} alt="" className="w-full h-full object-cover" />
+                <img src={player.team.logoUrl} alt="" className="w-full h-full object-cover" crossOrigin={player.team?.logoUrl?.startsWith("data:") ? undefined : "anonymous"} />
               ) : (
                 <span className="text-3xl font-black text-gaming-gray">FA</span>
               )}
             </div>
 
-            <div className="text-center sm:text-left">
+            <div id="esports-player-card-text" className="text-center sm:text-left">
               {/* Badges */}
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-2">
+              <div id="esports-player-card-badges" className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-2">
                 <span
                   className={`text-[9px] uppercase font-black tracking-widest px-2.5 py-0.5 rounded border ${
                     player.status === "Signed"
@@ -584,7 +589,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
               </div>
 
               {/* IGN */}
-              <h1 className="text-3xl md:text-4xl font-black text-white uppercase tracking-wider flex items-center justify-center sm:justify-start gap-3">
+              <h1 id="esports-player-card-ign" className="text-3xl md:text-4xl font-black text-white uppercase tracking-wider flex items-center justify-center sm:justify-start gap-3">
                 <span>{player.ign}</span>
                 {(player.isVerified || player.isFeatured) && (
                   <span className="relative group/tooltip inline-flex items-center shrink-0 align-middle cursor-pointer" tabIndex={0}>
@@ -599,7 +604,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                   </span>
                 )}
               </h1>
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-1 font-mono">
+              <div id="esports-player-card-uid-row" className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-1 font-mono">
                 <span className="text-gray-500 text-xs">UID: {player.characterId}</span>
                 {!player.isVerified && (
                   <button
@@ -796,13 +801,13 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
         </div>
 
         {/* ================= SCANNABLE BLOCKS ================= */}
-        <div className="p-6 md:p-8 bg-[#0D0E12]">
+        <div id="esports-player-card-content" className="p-6 md:p-8 bg-[#0D0E12]">
           {/* TAB: Stats Snapshot Grid */}
           {(activeTab === "stats" || isExporting) && (
             player.profileType === "Coach" ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in">
+              <div id="esports-player-card-stats-grid" className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in">
                 {/* Stats Block */}
-                <div className="md:col-span-2 bg-gaming-black/60 border border-gaming-gray p-6 rounded-2xl flex flex-col gap-6">
+                <div id="esports-player-card-stats-left" className="md:col-span-2 bg-gaming-black/60 border border-gaming-gray p-6 rounded-2xl flex flex-col gap-6">
                   <h3 className="text-xs font-black text-digital-yellow uppercase tracking-widest border-b border-gaming-gray pb-3 flex items-center gap-2">
                     <span className="w-1.5 h-3 bg-digital-yellow" /> COACHING PORTFOLIO
                   </h3>
@@ -876,9 +881,9 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div id="esports-player-card-stats-grid" className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Stats Block */}
-                <div className="md:col-span-2 bg-gaming-black/60 border border-gaming-gray p-6 rounded-2xl flex flex-col gap-6">
+                <div id="esports-player-card-stats-left" className="md:col-span-2 bg-gaming-black/60 border border-gaming-gray p-6 rounded-2xl flex flex-col gap-6">
                   <h3 className="text-xs font-black text-digital-yellow uppercase tracking-widest border-b border-gaming-gray pb-3 flex items-center gap-2">
                     <span className="w-1.5 h-3 bg-digital-yellow" /> COMPETITIVE PORTFOLIO
                   </h3>
