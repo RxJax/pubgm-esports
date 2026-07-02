@@ -51,6 +51,7 @@ interface DiscoveryClientProps {
   initialPlayers: Player[];
   initialRising?: Player[];
   initialTier2?: Player[];
+  initialCoaches?: Player[];
   initialRisingStars?: Player[];
   initialFeatured?: Player[];
   initialError?: boolean;
@@ -203,6 +204,100 @@ const PlayerCarouselCard = memo(({ player }: { player: Player }) => {
 });
 PlayerCarouselCard.displayName = "PlayerCarouselCard";
 
+const CoachCarouselCard = memo(({ player }: { player: Player }) => {
+  const specialtiesArray = player.specialties ? player.specialties.split(",").slice(0, 3) : ["Tactics", "Strategy"];
+
+  return (
+    <Link
+      href={`/players/${player.id}`}
+      className="group flex-none w-[85vw] sm:w-[340px] snap-center snap-always bg-gradient-to-br from-[#111827]/80 to-[#0c0d12] hover:from-[#111827]/90 hover:to-[#0c0d12] border-2 border-blue-500/50 hover:border-digital-yellow/80 hover:shadow-[0_0_15px_rgba(59,130,246,0.3)] shadow-black/80 rounded-2xl p-5 hover:scale-[1.01] transition-all duration-300 relative overflow-hidden shadow-lg"
+    >
+      {/* Cybernetic grid bg */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.01)_1px,transparent_1px)] bg-[size:15px_15px] pointer-events-none" />
+
+      <div className="flex gap-3 mb-2 relative">
+        <div className="w-12 h-15 rounded-lg bg-gaming-black border border-gaming-gray overflow-hidden shrink-0 relative flex items-center justify-center">
+          {player.avatarUrl ? (
+            <img src={player.avatarUrl} className="w-full h-full object-cover animate-fade-in" alt="" loading="lazy" />
+          ) : (
+            <svg viewBox="0 0 100 100" className="w-full h-full text-gray-500 bg-gradient-to-t from-[#15161c] to-[#252836]">
+              <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
+              <path d="M15,85 C15,60 30,55 50,55 C70,55 85,60 85,85 Z" fill="currentColor" opacity="0.6" />
+            </svg>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex justify-between items-baseline gap-2">
+            <h3 className="font-extrabold text-white text-base group-hover:text-digital-yellow transition uppercase tracking-wide flex items-center gap-1.5 text-left justify-start">
+              <span>{player.ign}</span>
+              {(player.isVerified || player.isFeatured) && (
+                <span className="relative group/tooltip inline-flex items-center shrink-0 align-middle cursor-pointer" tabIndex={0}>
+                  <span className="inline-flex items-center justify-center w-[14px] h-[14px] rounded-full bg-[#1877F2] text-white select-none pointer-events-auto shrink-0" style={{ filter: 'drop-shadow(0 0 6px rgba(0, 112, 243, 0.7))' }}>
+                    <svg className="w-[9.5px] h-[9.5px] text-white" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </span>
+                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-white bg-black border border-gaming-gray rounded-lg opacity-0 group-hover/tooltip:opacity-100 group-focus/tooltip:opacity-100 pointer-events-none transition-all duration-150 whitespace-nowrap z-50 shadow-xl font-sans normal-case">
+                    Verified Coach
+                  </span>
+                </span>
+              )}
+            </h3>
+            <div className="text-[9px] font-black bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded shrink-0 self-center">
+              PRO COACH
+            </div>
+          </div>
+          <p className="text-[9px] text-gray-400 font-black uppercase tracking-wider text-left">
+            📍 {player.region}
+          </p>
+          <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+            {specialtiesArray.map((spec) => (
+              <span key={spec} className="inline-block text-[8px] bg-blue-500/15 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded font-black uppercase">
+                🎯 {spec.trim()}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <p className="text-slate-500 text-xs italic mb-2 line-clamp-1 mt-1 text-left">
+        &ldquo;{player.bio || "No biography narrative provided."}&rdquo;
+      </p>
+
+      {/* Coaching Experience and Teams Coached block */}
+      <div className="grid grid-cols-2 gap-3 mt-3 border-t border-gaming-gray/30 pt-3">
+        <div>
+          <span className="text-[8px] text-gray-500 font-bold block uppercase text-left">Coaching Experience</span>
+          <span className="font-extrabold text-white text-xs mt-1 block text-left text-digital-yellow">
+            👑 {player.coachingYears || 0} {player.coachingYears === 1 ? "Year" : "Years"}
+          </span>
+        </div>
+        <div className="border-l border-gaming-gray/30 pl-3">
+          <span className="text-[8px] text-gray-500 font-bold block uppercase text-left">Former Teams Coached</span>
+          <span className="font-extrabold text-white text-xs mt-1 block text-left truncate" title={player.coachingHistory || "None listed"}>
+            {player.coachingHistory || "None listed"}
+          </span>
+        </div>
+      </div>
+
+      {/* Status Footer */}
+      <div className="mt-3.5 pt-2.5 border-t border-gaming-gray/40 flex items-center justify-between">
+        <span className="text-[8px] text-gray-500 font-black uppercase tracking-wider">Availability</span>
+        {player.status === "Looking For Team" || player.status === "Free Agent" ? (
+          <span className="text-[9px] font-black bg-[#10B981] text-white px-2.5 py-1 rounded-lg uppercase tracking-wider shadow-sm shadow-[#10B981]/20">
+            OPEN FOR OFFERS
+          </span>
+        ) : (
+          <span className="text-[9px] font-black bg-airdrop-red/10 text-airdrop-red border border-airdrop-red/30 px-2.5 py-1 rounded-lg uppercase tracking-wider">
+            NOT AVAILABLE
+          </span>
+        )}
+      </div>
+    </Link>
+  );
+});
+CoachCarouselCard.displayName = "CoachCarouselCard";
+
 const CandidateRow = memo(({ player }: { player: Player }) => {
   return (
     <Link
@@ -318,6 +413,7 @@ export default function DiscoveryClient({
   initialPlayers,
   initialRising = [],
   initialTier2 = [],
+  initialCoaches = [],
   initialRisingStars = [],
   initialFeatured = [],
   initialError = false,
@@ -497,6 +593,7 @@ export default function DiscoveryClient({
   // Curated lists from live database queries
   const topRisingFraggers = useMemo(() => initialRising.filter(p => p.urRank === "Legend"), [initialRising]);
   const topTier2Fraggers = useMemo(() => initialTier2.filter(p => p.urRank === "Peerless"), [initialTier2]);
+  const topCoaches = useMemo(() => initialCoaches.filter(p => p.profileType === "Coach"), [initialCoaches]);
   const risingStarPlayers = useMemo(() => initialRisingStars.filter(p => ["Supreme", "Exceed", "Vanguard"].includes(p.urRank)), [initialRisingStars]);
   const featuredProfiles = initialFeatured;
 
@@ -732,6 +829,33 @@ export default function DiscoveryClient({
             ) : (
               topTier2Fraggers.map((player) => (
                 <PlayerCarouselCard key={player.id} player={player} />
+              ))
+            )}
+            </div>
+          </div>
+        </section>
+
+        {/* ================= COACH PROSPECTS ================= */}
+        <section className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-black uppercase tracking-wider text-blue-400 flex items-center gap-2">
+              <span className="text-xl">🎓</span> COACH PROSPECTS
+            </h2>
+            <span className="text-[10px] text-gray-500 font-black uppercase tracking-wider hidden sm:inline">STRATEGY & ANALYSIS PROFILES</span>
+          </div>
+
+          <div className="bg-[#0c0e12] border border-gaming-gray rounded-3xl p-5 shadow-[0_0_20px_rgba(59,130,246,0.02)]">
+            <div className="flex overflow-x-auto pb-2 gap-5 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gaming-gray scrollbar-track-transparent w-full">
+            {topCoaches.length === 0 ? (
+              <div className="w-full bg-[#111827]/10 border border-gaming-gray rounded-2xl p-8 text-center flex flex-col items-center justify-center gap-2">
+                <span className="text-2xl">🎓</span>
+                <p className="text-gray-400 text-xs sm:text-sm font-medium">
+                  No verified coaching candidates have registered yet.
+                </p>
+              </div>
+            ) : (
+              topCoaches.map((player) => (
+                <CoachCarouselCard key={player.id} player={player} />
               ))
             )}
             </div>

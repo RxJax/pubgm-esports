@@ -34,6 +34,7 @@ export default async function Home() {
   let risingPlayers: any[] = [];
   let tier2Players: any[] = [];
   let risingStars: any[] = [];
+  let coachPlayers: any[] = [];
   let featuredPlayers: any[] = [];
   let dbError = false;
 
@@ -65,6 +66,7 @@ export default async function Home() {
     risingPlayers = await prisma.player.findMany({
       where: {
         urRank: "Legend",
+        profileType: { not: "Coach" },
       },
       include: {
         team: true,
@@ -79,6 +81,7 @@ export default async function Home() {
     tier2Players = await prisma.player.findMany({
       where: {
         urRank: "Peerless",
+        profileType: { not: "Coach" },
       },
       include: {
         team: true,
@@ -89,10 +92,25 @@ export default async function Home() {
       take: 4,
     });
 
+    // 2.6. Dedicated Coach Prospects (profileType = "Coach", sorted by updatedAt desc, limit 4)
+    coachPlayers = await prisma.player.findMany({
+      where: {
+        profileType: "Coach",
+      },
+      include: {
+        team: true,
+      },
+      orderBy: {
+        updatedAt: "desc",
+      },
+      take: 4,
+    });
+
     // 2.75. Rising Stars (only registered profiles marked with Tier-3 Pro, Semi-Pro, or Amateur status, sorted by K/D, limit 4)
     risingStars = await prisma.player.findMany({
       where: {
         urRank: { in: ["Supreme", "Exceed", "Vanguard"] },
+        profileType: { not: "Coach" },
       },
       include: {
         team: true,
@@ -106,6 +124,7 @@ export default async function Home() {
     // 3. Featured Roster Profiles (isFeatured = true or any active pro, limit 3)
     featuredPlayers = await prisma.player.findMany({
       where: {
+        profileType: { not: "Coach" },
         OR: [
           { isFeatured: true },
           { urRank: { in: ["Peerless", "Legend"] } } // Automatically feature any high tier pros
@@ -128,6 +147,7 @@ export default async function Home() {
           initialPlayers={players}
           initialRising={risingPlayers}
           initialTier2={tier2Players}
+          initialCoaches={coachPlayers}
           initialRisingStars={risingStars}
           initialFeatured={featuredPlayers}
           initialError={dbError}
