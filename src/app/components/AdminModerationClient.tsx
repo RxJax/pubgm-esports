@@ -111,6 +111,55 @@ export default function AdminModerationClient({ initialReports, adminId, adminIg
   const [searchResults, setSearchResults] = useState<{ id: string; ign: string; email: string; avatarUrl: string | null; status: string; isVerified: boolean }[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
 
+  // Maintenance Mode States
+  const [maintenanceActive, setMaintenanceActive] = useState(false);
+  const [maintenanceLoading, setMaintenanceLoading] = useState(false);
+
+  React.useEffect(() => {
+    const fetchMaintenanceStatus = async () => {
+      try {
+        const res = await fetch("/api/maintenance");
+        if (res.ok) {
+          const data = await res.json();
+          setMaintenanceActive(data.maintenanceActive);
+        }
+      } catch (e) {
+        console.error("Failed to fetch maintenance status:", e);
+      }
+    };
+    fetchMaintenanceStatus();
+  }, []);
+
+  const handleToggleMaintenance = async () => {
+    const confirmed = confirm(
+      maintenanceActive
+        ? "Are you sure you want to deactivate Maintenance Mode? Public access to the scouting portal will be immediately restored."
+        : "⚠️ WARNING: Are you sure you want to activate Maintenance Mode? This will immediately redirect all public visitors to the offline maintenance screen."
+    );
+    if (!confirmed) return;
+
+    setMaintenanceLoading(true);
+    try {
+      const res = await fetch("/api/maintenance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ maintenanceActive: !maintenanceActive }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMaintenanceActive(data.maintenanceActive);
+      } else {
+        const err = await res.json();
+        alert(`Error: ${err.error || "Failed to update maintenance configuration"}`);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Network error: Failed to toggle maintenance configuration.");
+    } finally {
+      setMaintenanceLoading(false);
+    }
+  };
+
   const executeSearch = async (val: string) => {
     if (!val.trim()) {
       setSearchResults([]);
@@ -246,6 +295,37 @@ export default function AdminModerationClient({ initialReports, adminId, adminIg
             Review incoming fake account flags, impersonation claims, and profile violations submitted by community members. Exercise platform removal authority when required.
           </p>
         </div>
+
+        {/* Global Server Maintenance Mode Config Card */}
+        {adminEmail?.toLowerCase() === "rxjax007@gmail.com" && (
+          <div className="bg-[#0d0e12] border border-gaming-gray rounded-3xl p-6 mb-8 relative overflow-hidden shadow-lg shadow-black/40">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-airdrop-red/5 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xs font-black text-airdrop-red uppercase tracking-widest flex items-center gap-2 mb-2">
+                  <span className="w-1.5 h-3 bg-airdrop-red" /> Global Server Maintenance
+                </h2>
+                <p className="text-gray-400 text-xs max-w-xl">
+                  Activating Maintenance Mode immediately redirects all public visitors to the offline card, while authenticated developers maintain live access to perform validation and updates.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleToggleMaintenance}
+                disabled={maintenanceLoading}
+                className={`min-h-[44px] px-6 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 border cursor-pointer shrink-0 ${
+                  maintenanceActive
+                    ? "bg-airdrop-red/10 border-airdrop-red text-airdrop-red hover:bg-airdrop-red/20 shadow-[0_0_15px_rgba(239,68,68,0.2)]"
+                    : "bg-gaming-gray border-gaming-gray text-gray-400 hover:border-gray-500 hover:text-white"
+                }`}
+              >
+                {maintenanceLoading ? "Processing..." : maintenanceActive ? "🔴 MAINTENANCE ACTIVE" : "⚪ ACTIVATE MAINTENANCE"}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Admin Player Search Panel (Master Admin Only) */}
         {adminEmail?.toLowerCase() === "rxjax007@gmail.com" && (
