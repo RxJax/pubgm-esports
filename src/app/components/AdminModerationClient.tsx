@@ -115,6 +115,55 @@ export default function AdminModerationClient({ initialReports, adminId, adminIg
   const [maintenanceActive, setMaintenanceActive] = useState(false);
   const [maintenanceLoading, setMaintenanceLoading] = useState(false);
 
+  // Registration Queue States
+  const [activeTab, setActiveTab] = useState<"reports" | "registrations">("reports");
+  const [pendingRegistrations, setPendingRegistrations] = useState<any[]>([]);
+  const [registrationsLoading, setRegistrationsLoading] = useState(false);
+
+  React.useEffect(() => {
+    if (activeTab === "registrations") {
+      const fetchRegistrations = async () => {
+        setRegistrationsLoading(true);
+        try {
+          const res = await fetch("/api/admin/players?type=pending");
+          if (res.ok) {
+            const data = await res.json();
+            setPendingRegistrations(data);
+          }
+        } catch (e) {
+          console.error("Failed to fetch pending registrations:", e);
+        } finally {
+          setRegistrationsLoading(false);
+        }
+      };
+      fetchRegistrations();
+    }
+  }, [activeTab]);
+
+  const handleAssignTier = async (playerId: string, tier: "Legend" | "Peerless", ign: string) => {
+    setActionLoading(`tier-${playerId}`);
+    try {
+      const res = await fetch("/api/admin/players", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: playerId, urRank: tier }),
+      });
+
+      if (res.ok) {
+        setPendingRegistrations((prev) => prev.filter((p) => p.id !== playerId));
+        alert(`Success: Assigned "${ign}" to ${tier === "Legend" ? "Tier-1 Pro" : "Tier-2 Pro"} status!`);
+      } else {
+        const err = await res.json();
+        alert(`Error: ${err.error || "Failed to assign tier"}`);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Network error: Failed to assign tier.");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   React.useEffect(() => {
     const fetchMaintenanceStatus = async () => {
       try {
@@ -296,6 +345,22 @@ export default function AdminModerationClient({ initialReports, adminId, adminIg
           </p>
         </div>
 
+        {/* Sub-navigation Header */}
+        <div className="flex gap-4 border-b border-gaming-gray pb-4 mb-8">
+          <Link
+            href="/admin/moderation"
+            className="text-xs font-black uppercase tracking-widest px-4 py-2.5 bg-airdrop-red/10 border border-airdrop-red text-airdrop-red rounded-lg transition"
+          >
+            🛡️ Moderation Center
+          </Link>
+          <Link
+            href="/admin/players"
+            className="text-xs font-black uppercase tracking-widest px-4 py-2.5 bg-gaming-gray/20 border border-gaming-gray/30 text-gray-400 hover:text-white rounded-lg transition"
+          >
+            👥 Manage Players
+          </Link>
+        </div>
+
         {/* Global Server Maintenance Mode Config Card */}
         {adminEmail?.toLowerCase() === "rxjax007@gmail.com" && (
           <div className="bg-[#0d0e12] border border-gaming-gray rounded-3xl p-6 mb-8 relative overflow-hidden shadow-lg shadow-black/40">
@@ -374,48 +439,62 @@ export default function AdminModerationClient({ initialReports, adminId, adminIg
               </div>
             )}
 
-            {searchQuery && searchResults.length === 0 && !searchLoading && (
-              <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-4">
-                No users found matching "{searchQuery}"
-              </p>
-            )}
-          </div>
+        {searchQuery && searchResults.length === 0 && !searchLoading && (
+          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-4">
+            No users found matching "{searchQuery}"
+          </p>
         )}
+      </div>
+    )}
+           {/* Reports / Registrations Tab Control */}
+        <div className="flex gap-4 border-b border-gaming-gray/40 pb-3 mb-6">
+          <button
+            type="button"
+            onClick={() => setActiveTab("reports")}
+            className={`text-xs font-black uppercase tracking-widest pb-2 border-b-2 transition cursor-pointer ${
+              activeTab === "reports"
+                ? "border-digital-yellow text-digital-yellow"
+                : "border-transparent text-gray-500 hover:text-gray-300"
+            }`}
+          >
+            Active Pending Reports ({reports.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("registrations")}
+            className={`text-xs font-black uppercase tracking-widest pb-2 border-b-2 transition cursor-pointer ${
+              activeTab === "registrations"
+                ? "border-digital-yellow text-digital-yellow"
+                : "border-transparent text-gray-500 hover:text-gray-300"
+            }`}
+          >
+            Review Registrations ({pendingRegistrations.length})
+          </button>
+        </div>
 
         {/* Reports Section */}
-        <div className="flex flex-col gap-6">
-          <div className="flex justify-between items-center border-b border-gaming-gray pb-4">
-            <h2 className="text-xs font-black text-digital-yellow uppercase tracking-widest flex items-center gap-2">
-              <span className="w-1.5 h-3 bg-digital-yellow" /> Active Pending Reports ({reports.length})
-            </h2>
-          </div>
+        {activeTab === "reports" && (
+          <div className="flex flex-col gap-6">
+            {reports.length === 0 ? (
+              <div className="bg-[#0d0e12] border border-gaming-gray rounded-3xl p-10 text-center flex flex-col items-center justify-center gap-3">
+                <span className="text-3xl">✅</span>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">No Pending Reports</h3>
+                <p className="text-gray-500 text-xs max-w-xs">
+                  All community flags have been successfully resolved or dismissed. Great job keeping the community clean!
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-6">
+                {reports.map((report) => (
+                  <div
+                    key={report.id}
+                    className="bg-[#0d0e12] border border-gaming-gray hover:border-airdrop-red/30 rounded-3xl p-6 transition-all duration-150 flex flex-col md:flex-row gap-6 justify-between items-start md:items-center relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 left-0 w-1 h-full bg-airdrop-red/60" />
 
-          {reports.length === 0 ? (
-            <div className="bg-[#0d0e12] border border-gaming-gray rounded-3xl p-10 text-center flex flex-col items-center justify-center gap-3">
-              <span className="text-3xl">✅</span>
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">No Pending Reports</h3>
-              <p className="text-gray-500 text-xs max-w-xs">
-                All community flags have been successfully resolved or dismissed. Great job keeping the community clean!
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-6">
-              {reports.map((report) => (
-                <div
-                  key={report.id}
-                  className="bg-[#0d0e12] border border-gaming-gray hover:border-airdrop-red/30 rounded-3xl p-6 transition-all duration-150 flex flex-col md:flex-row gap-6 justify-between items-start md:items-center relative overflow-hidden"
-                >
-                  <div className="absolute top-0 left-0 w-1 h-full bg-airdrop-red/60" />
-
-                  {/* Left Column: Accused profile & Report info */}
-                  <div className="flex-1 flex flex-col md:flex-row gap-5 items-start">
-                    
-                    {/* Accused Player Card Frame */}
-                    <Link
-                      href={`/players/${report.reportedPlayer.id}`}
-                      className="group shrink-0 flex items-center gap-3 p-3 bg-gaming-black/60 border border-gaming-gray/80 rounded-2xl hover:border-digital-yellow/40 transition"
-                    >
-                      <div className="w-10 h-10 rounded-full bg-gaming-black border border-gaming-gray overflow-hidden flex items-center justify-center shrink-0">
+                    {/* Left Column: Accused profile & Report info */}
+                    <div className="flex-1 flex flex-col md:flex-row gap-5 items-start">
+                      <div className="w-12 h-12 rounded-full bg-gaming-black border border-gaming-gray overflow-hidden flex items-center justify-center shrink-0">
                         {report.reportedPlayer.avatarUrl ? (
                           <img src={report.reportedPlayer.avatarUrl} className="w-full h-full object-cover" alt="" />
                         ) : (
@@ -425,9 +504,14 @@ export default function AdminModerationClient({ initialReports, adminId, adminIg
                           </svg>
                         )}
                       </div>
-                      <div className="max-w-[150px] truncate">
-                        <h4 className="font-extrabold text-white text-xs uppercase tracking-wide group-hover:text-digital-yellow transition truncate flex items-center gap-1 justify-start">
-                          <span>{report.reportedPlayer.ign}</span>
+                      <div className="flex-1 text-left min-w-0">
+                        <div className="flex items-center gap-2 mb-1 justify-start">
+                          <h3 className="font-extrabold text-white text-sm uppercase tracking-wide truncate">
+                            {report.reportedPlayer.ign}
+                          </h3>
+                          <span className="text-[9px] font-black uppercase bg-gaming-gray border border-gaming-gray/80 px-2 py-0.5 rounded text-gray-400">
+                            {report.reportedPlayer.role}
+                          </span>
                           {report.reportedPlayer.isVerified && (
                             <span className="relative group/tooltip inline-flex items-center shrink-0 align-middle cursor-pointer" tabIndex={0}>
                               <span className="inline-flex items-center justify-center w-[12px] h-[12px] rounded-full bg-[#1877F2] text-white select-none pointer-events-auto shrink-0" style={{ filter: 'drop-shadow(0 0 6px rgba(0, 112, 243, 0.7))' }}>
@@ -440,67 +524,144 @@ export default function AdminModerationClient({ initialReports, adminId, adminIg
                               </span>
                             </span>
                           )}
-                        </h4>
-                        <p className="text-[9px] text-gray-500 font-mono mt-0.5 truncate">
-                          UID: {report.reportedPlayer.characterId}
-                        </p>
-                      </div>
-                    </Link>
-
-                    {/* Report Specific Details */}
-                    <div className="flex-1 flex flex-col gap-1.5">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="bg-airdrop-red/10 text-airdrop-red border border-airdrop-red/20 text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded">
-                          {report.reasonCategory}
-                        </span>
-                        <span className="text-[8px] text-gray-500 font-bold uppercase">
-                          Filed: {new Date(report.createdAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                      
-                      <div className="bg-[#0b0c10] border border-gaming-gray/40 p-3.5 rounded-xl text-xs text-gray-300 font-medium">
-                        <span className="text-[8px] text-gray-500 font-bold block uppercase mb-1">Community Evidence Submitted</span>
-                        &ldquo;{report.additionalDetails || "No text description details provided."}&rdquo;
+                        </div>
+                        <div className="flex gap-2.5 text-[9px] font-mono text-gray-500 mb-3 uppercase">
+                          <span>🆔 ID: {report.reportedPlayer.characterId}</span>
+                          <span>•</span>
+                          <span>🌍 {report.reportedPlayer.region}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 mb-2.5">
+                          <span className="text-[9px] font-black uppercase tracking-wider bg-airdrop-red/10 border border-airdrop-red/20 px-2 py-0.5 rounded text-airdrop-red">
+                            ⚠️ {report.reasonCategory}
+                          </span>
+                          <span className="text-[9px] font-bold text-gray-500 font-mono">
+                            {new Date(report.createdAt).toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="bg-[#0b0c10] border border-gaming-gray/40 p-3.5 rounded-xl text-xs text-gray-300 font-medium">
+                          <span className="text-[8px] text-gray-500 font-bold block uppercase mb-1">Community Evidence Submitted</span>
+                          &ldquo;{report.additionalDetails || "No text description details provided."}&rdquo;
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Right Column: Moderator Action Buttons */}
-                  <div className="shrink-0 flex sm:flex-row md:flex-col gap-2.5 w-full md:w-auto">
-                    {adminEmail?.toLowerCase() === "rxjax007@gmail.com" && (
+                    {/* Right Column: Moderator Action Buttons */}
+                    <div className="shrink-0 flex sm:flex-row md:flex-col gap-2.5 w-full md:w-auto">
+                      {adminEmail?.toLowerCase() === "rxjax007@gmail.com" && (
+                        <button
+                          onClick={() => handleToggleVerification(report.reportedPlayer.id, report.reportedPlayer.isVerified)}
+                          disabled={actionLoading !== null || report.reportedPlayer.isVerified}
+                          className={`flex-1 md:flex-initial border text-xs font-black uppercase tracking-widest px-5 py-2.5 rounded-xl transition cursor-pointer disabled:opacity-75 ${
+                            report.reportedPlayer.isVerified
+                              ? "bg-[#1877F2]/10 border-[#1877F2]/30 text-[#1877F2] cursor-default"
+                              : "bg-[#1877F2]/20 hover:bg-[#1877F2] text-white border-[#1877F2]/40 hover:border-[#1877F2]"
+                          }`}
+                        >
+                          {report.reportedPlayer.isVerified ? "✓ Verified Pro" : "Grant Blue Tick"}
+                        </button>
+                      )}
                       <button
-                        onClick={() => handleToggleVerification(report.reportedPlayer.id, report.reportedPlayer.isVerified)}
-                        disabled={actionLoading !== null || report.reportedPlayer.isVerified}
-                        className={`flex-1 md:flex-initial border text-xs font-black uppercase tracking-widest px-5 py-2.5 rounded-xl transition cursor-pointer disabled:opacity-75 ${
-                          report.reportedPlayer.isVerified
-                            ? "bg-[#1877F2]/10 border-[#1877F2]/30 text-[#1877F2] cursor-default"
-                            : "bg-[#1877F2]/20 hover:bg-[#1877F2] text-white border-[#1877F2]/40 hover:border-[#1877F2]"
-                        }`}
+                        onClick={() => handleDismiss(report.id)}
+                        disabled={actionLoading !== null}
+                        className="flex-1 md:flex-initial bg-gaming-gray hover:bg-gray-800 text-gray-200 border border-gaming-gray hover:border-gray-500 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition cursor-pointer disabled:opacity-50"
                       >
-                        {report.reportedPlayer.isVerified ? "✓ Verified Pro" : "Grant Blue Tick"}
+                        Dismiss Report
                       </button>
-                    )}
-                    <button
-                      onClick={() => handleDismiss(report.id)}
-                      disabled={actionLoading !== null}
-                      className="flex-1 md:flex-initial bg-gaming-gray hover:bg-gray-800 text-gray-200 border border-gaming-gray hover:border-gray-500 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition cursor-pointer disabled:opacity-50"
-                    >
-                      Dismiss Report
-                    </button>
-                    <button
-                      onClick={() => handleDeleteAccount(report.id, report.reportedPlayer.id, report.reportedPlayer.ign)}
-                      disabled={actionLoading !== null}
-                      className="flex-1 md:flex-initial bg-airdrop-red/15 hover:bg-airdrop-red text-white border border-airdrop-red/30 hover:border-airdrop-red px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition cursor-pointer disabled:opacity-50"
-                    >
-                      Delete Account
-                    </button>
-                  </div>
+                      <button
+                        onClick={() => handleDeleteAccount(report.id, report.reportedPlayer.id, report.reportedPlayer.ign)}
+                        disabled={actionLoading !== null}
+                        className="flex-1 md:flex-initial bg-airdrop-red/15 hover:bg-airdrop-red text-white border border-airdrop-red/30 hover:border-airdrop-red px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition cursor-pointer disabled:opacity-50"
+                      >
+                        Delete Account
+                      </button>
+                    </div>
 
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Registrations Section */}
+        {activeTab === "registrations" && (
+          <div className="flex flex-col gap-6">
+            {registrationsLoading ? (
+              <div className="text-center py-10 text-xs font-bold text-gray-500 uppercase tracking-widest animate-pulse">
+                Loading registrations...
+              </div>
+            ) : pendingRegistrations.length === 0 ? (
+              <div className="bg-[#0d0e12] border border-gaming-gray rounded-3xl p-10 text-center flex flex-col items-center justify-center gap-3">
+                <span className="text-3xl">🎉</span>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">No Pending Registrations</h3>
+                <p className="text-gray-500 text-xs max-w-xs">
+                  All registered players have already been successfully assigned to Tier-1 or Tier-2 tiers.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {pendingRegistrations.map((player) => (
+                  <div
+                    key={player.id}
+                    className="bg-[#0d0e12] border border-gaming-gray rounded-3xl p-5 flex flex-col justify-between gap-4 relative overflow-hidden"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-full bg-gaming-black border border-gaming-gray overflow-hidden flex items-center justify-center shrink-0">
+                        {player.avatarUrl ? (
+                          <img src={player.avatarUrl} className="w-full h-full object-cover" alt="" />
+                        ) : (
+                          <svg viewBox="0 0 100 100" className="w-full h-full text-gray-600 bg-[#1c1f26]">
+                            <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
+                            <path d="M15,85 C15,60 30,55 50,55 C70,55 85,60 85,85 Z" fill="currentColor" opacity="0.6" />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="text-left min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-extrabold text-white text-sm uppercase tracking-wide truncate">
+                            {player.ign}
+                          </h4>
+                          <span className="text-[9px] font-black uppercase bg-gaming-gray border border-gaming-gray px-1.5 py-0.5 rounded text-gray-400">
+                            {player.urRank}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-gray-500 font-mono truncate">{player.email}</p>
+                        <p className="text-[10px] text-gray-400 mt-2 line-clamp-2">{player.bio || "No biography provided."}</p>
+                        
+                        <div className="mt-3 flex flex-wrap gap-2 text-[9px] font-mono text-gray-500">
+                          <span>🎮 Role: <strong className="text-gray-300 uppercase">{player.role}</strong></span>
+                          <span>•</span>
+                          <span>📱 Device: <strong className="text-gray-300">{player.device}</strong></span>
+                          <span>•</span>
+                          <span>⚔️ K/D: <strong className="text-gray-300">{player.kdRatio}</strong></span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2.5 pt-3 border-t border-gaming-gray/30">
+                      <button
+                        type="button"
+                        onClick={() => handleAssignTier(player.id, "Legend", player.ign)}
+                        disabled={actionLoading === `tier-${player.id}`}
+                        className="flex-1 bg-digital-yellow/10 border border-digital-yellow/30 hover:border-digital-yellow text-digital-yellow hover:bg-digital-yellow/20 text-[10px] font-black uppercase tracking-widest py-2 rounded-xl transition cursor-pointer text-center"
+                      >
+                        Assign Tier-1
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleAssignTier(player.id, "Peerless", player.ign)}
+                        disabled={actionLoading === `tier-${player.id}`}
+                        className="flex-1 bg-[#bf5af2]/10 border border-[#bf5af2]/30 hover:border-[#bf5af2] text-[#bf5af2] hover:bg-[#bf5af2]/20 text-[10px] font-black uppercase tracking-widest py-2 rounded-xl transition cursor-pointer text-center"
+                      >
+                        Assign Tier-2
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
       </div>
     </div>
