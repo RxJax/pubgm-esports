@@ -59,7 +59,7 @@ interface DiscoveryClientProps {
 }
 
 const ROLES = ["All", "IGL", "Entry Fragger", "Fragger", "Assaulter", "Support", "Sniper", "Scout", "Coach"];
-const REGIONS = ["All", "Southeast Asia", "South Asia", "Europe", "North America", "Middle East"];
+const REGIONS = ["All", "Southeast Asia", "South Asia", "Europe", "North America", "Middle East", "Bangladesh 🇧🇩", "Nepal 🇳🇵", "Pakistan 🇵🇰"];
 const STATUSES = ["All", "Signed", "Looking For Team"];
 const UR_RANKS = ["All", "Vanguard", "Exceed", "Supreme", "Peerless", "Legend"];
 

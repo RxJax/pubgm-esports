@@ -341,7 +341,15 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                 <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Profile Type</label>
                 <select
                   value={profileType}
-                  onChange={(e) => setProfileType(e.target.value)}
+                  onChange={(e) => {
+                    const newType = e.target.value;
+                    setProfileType(newType);
+                    if (newType === "Player") {
+                      setRegion("South Asia");
+                    } else {
+                      setRegion("Southeast Asia");
+                    }
+                  }}
                   className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full"
                 >
                   <option value="Player">Player</option>
@@ -476,11 +484,10 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                         onChange={(e) => setRegion(e.target.value)}
                         className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
                       >
-                        <option value="Southeast Asia">Southeast Asia</option>
                         <option value="South Asia">South Asia</option>
-                        <option value="Europe">Europe</option>
-                        <option value="North America">North America</option>
-                        <option value="Middle East">Middle East</option>
+                        <option value="Bangladesh 🇧🇩">Bangladesh 🇧🇩</option>
+                        <option value="Nepal 🇳🇵">Nepal 🇳🇵</option>
+                        <option value="Pakistan 🇵🇰">Pakistan 🇵🇰</option>
                       </select>
                     </div>
                   </div>

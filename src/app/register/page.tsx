@@ -469,7 +469,15 @@ export default function RegisterWizard() {
                 <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Profile Type</label>
                 <select
                   value={profileType}
-                  onChange={(e) => setProfileType(e.target.value)}
+                  onChange={(e) => {
+                    const newType = e.target.value;
+                    setProfileType(newType);
+                    if (newType === "Player") {
+                      setRegion("South Asia");
+                    } else {
+                      setRegion("Southeast Asia");
+                    }
+                  }}
                   className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none transition w-full"
                 >
                   <option value="Player">Player</option>
@@ -510,11 +518,19 @@ export default function RegisterWizard() {
                     onChange={(e) => setRegion(e.target.value)}
                     className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none transition"
                   >
-                    {REGIONS.map((r) => (
-                      <option key={r} value={r}>
-                        {r}
-                      </option>
-                    ))}
+                    {profileType === "Coach" ? (
+                      REGIONS.map((r) => (
+                        <option key={r} value={r}>
+                          {r}
+                        </option>
+                      ))
+                    ) : (
+                      ["South Asia", "Bangladesh 🇧🇩", "Nepal 🇳🇵", "Pakistan 🇵🇰"].map((r) => (
+                        <option key={r} value={r}>
+                          {r}
+                        </option>
+                      ))
+                    )}
                   </select>
                 </div>
 

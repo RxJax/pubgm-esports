@@ -128,6 +128,12 @@ export default function AdminPlayersClient({ adminId, adminIgn, adminEmail }: Ad
     if (type === "checkbox") {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData((prev) => ({ ...prev, [name]: checked }));
+    } else if (name === "role") {
+      setFormData((prev) => ({
+        ...prev,
+        role: value,
+        region: value === "Coach" ? "Southeast Asia" : "South Asia"
+      }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -342,19 +348,30 @@ export default function AdminPlayersClient({ adminId, adminIgn, adminEmail }: Ad
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Region</label>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Country / Region</label>
                 <select
                   name="region"
                   value={formData.region}
                   onChange={handleInputChange}
                   className="w-full min-h-[44px] bg-gaming-black border border-gaming-gray focus:border-digital-yellow rounded-xl px-4 text-xs font-semibold text-white tracking-wide focus:outline-none transition"
                 >
-                  <option value="Southeast Asia">Southeast Asia</option>
-                  <option value="South Asia">South Asia</option>
-                  <option value="Middle East">Middle East</option>
-                  <option value="Europe">Europe</option>
-                  <option value="Americas">Americas</option>
-                  <option value="East Asia">East Asia</option>
+                  {formData.role === "Coach" ? (
+                    <>
+                      <option value="Southeast Asia">Southeast Asia</option>
+                      <option value="South Asia">South Asia</option>
+                      <option value="Middle East">Middle East</option>
+                      <option value="Europe">Europe</option>
+                      <option value="Americas">Americas</option>
+                      <option value="East Asia">East Asia</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="South Asia">South Asia</option>
+                      <option value="Bangladesh 🇧🇩">Bangladesh 🇧🇩</option>
+                      <option value="Nepal 🇳🇵">Nepal 🇳🇵</option>
+                      <option value="Pakistan 🇵🇰">Pakistan 🇵🇰</option>
+                    </>
+                  )}
                 </select>
               </div>
 
