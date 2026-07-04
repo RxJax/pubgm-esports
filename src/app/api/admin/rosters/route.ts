@@ -19,10 +19,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Access denied. Administrator permissions required." }, { status: 403 });
     }
 
-    // Query pending rosters
+    // Query pending and approved rosters
     const rosters = await prisma.teamRoster.findMany({
       where: {
-        status: "PENDING",
+        status: { in: ["PENDING", "APPROVED"] },
       },
       include: {
         organization: {

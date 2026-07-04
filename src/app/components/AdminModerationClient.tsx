@@ -3,6 +3,7 @@
 import React, { useState, memo } from "react";
 import Link from "next/link";
 import Navbar from "./Navbar";
+import { disbandRosterAction } from "@/app/actions/roster";
 
 interface PlayerSummary {
   id: string;
@@ -194,7 +195,16 @@ export default function AdminModerationClient({ initialReports, adminId, adminIg
       });
 
       if (res.ok) {
-        setPendingRosters((prev) => prev.filter((r) => r.id !== rosterId));
+        if (status === "APPROVED") {
+          // If approved, refresh the page data to move it to the approved section
+          const rostersRes = await fetch("/api/admin/rosters");
+          if (rostersRes.ok) {
+            const data = await rostersRes.json();
+            setPendingRosters(data);
+          }
+        } else {
+          setPendingRosters((prev) => prev.filter((r) => r.id !== rosterId));
+        }
         alert(`Success: Roster application has been ${status.toLowerCase()}!`);
       } else {
         const err = await res.json();
@@ -203,6 +213,27 @@ export default function AdminModerationClient({ initialReports, adminId, adminIg
     } catch (e) {
       console.error(e);
       alert("Network error: Failed to process roster action.");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleDisbandRoster = async (rosterId: string, teamName: string) => {
+    const confirmed = window.confirm(`Are you sure you want to remove this active lineup?`);
+    if (!confirmed) return;
+
+    setActionLoading(`disband-${rosterId}`);
+    try {
+      const res = await disbandRosterAction(rosterId);
+      if (res.success) {
+        setPendingRosters((prev) => prev.filter((r) => r.id !== rosterId));
+        alert(`Success: The roster for "${teamName}" has been disbanded.`);
+      } else {
+        alert(`Error: ${res.error || "Failed to disband active roster"}`);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Network error: Failed to disband active roster.");
     } finally {
       setActionLoading(null);
     }
@@ -720,88 +751,163 @@ export default function AdminModerationClient({ initialReports, adminId, adminIg
 
         {/* Rosters Section */}
         {activeTab === "rosters" && (
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-8">
             {rostersLoading ? (
               <div className="text-center py-10 text-xs font-bold text-gray-500 uppercase tracking-widest animate-pulse">
                 Loading roster applications...
               </div>
-            ) : pendingRosters.length === 0 ? (
-              <div className="bg-[#0d0e12] border border-gaming-gray rounded-3xl p-10 text-center flex flex-col items-center justify-center gap-3">
-                <span className="text-3xl">🏆</span>
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider">No Pending Rosters</h3>
-                <p className="text-gray-500 text-xs max-w-xs">
-                  All submitted organizational team lineups have been successfully reviewed and approved/rejected.
-                </p>
-              </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {pendingRosters.map((roster) => (
-                  <div
-                    key={roster.id}
-                    className="bg-[#0d0e12] border border-gaming-gray rounded-3xl p-6 flex flex-col justify-between gap-5 relative overflow-hidden"
-                  >
-                    <div className="flex flex-col gap-4 text-left">
-                      <div className="flex items-center justify-between border-b border-gaming-gray/30 pb-3">
-                        <div>
-                          <h4 className="font-extrabold text-white text-base uppercase tracking-wide">
-                            {roster.teamName} {roster.tag && <span className="text-xs text-gray-500 font-mono">[{roster.tag}]</span>}
-                          </h4>
-                          <span className="text-[9px] text-gray-500 uppercase tracking-widest">
-                            Org: <strong className="text-gray-300">{roster.organization.name}</strong>
-                          </span>
-                        </div>
-                        <span className="text-[8px] bg-digital-yellow/10 border border-digital-yellow/30 text-digital-yellow px-2 py-0.5 rounded uppercase font-black tracking-widest animate-pulse">
-                          PENDING REVIEW
-                        </span>
-                      </div>
-
-                      {/* Lineup list */}
-                      <div className="flex flex-col gap-2">
-                        <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">Lineup ({roster.players.length} Players)</span>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          {roster.players.map((player: any) => (
-                            <div key={player.id} className="bg-gaming-black/60 border border-gaming-gray/50 rounded-xl p-2.5 flex items-center gap-2">
-                              <div className="w-6 h-6 rounded-full bg-gaming-black border border-gaming-gray overflow-hidden shrink-0 flex items-center justify-center">
-                                {player.avatarUrl ? (
-                                  <img src={player.avatarUrl} className="w-full h-full object-cover" alt="" />
-                                ) : (
-                                  <svg viewBox="0 0 100 100" className="w-full h-full text-gray-600 bg-[#1c1f26]">
-                                    <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
-                                    <path d="M15,85 C15,60 30,55 50,55 C70,55 85,60 85,85 Z" fill="currentColor" opacity="0.6" />
-                                  </svg>
-                                )}
+              <>
+                {/* 1. Pending Applications */}
+                <div className="flex flex-col gap-4 text-left">
+                  <h3 className="text-sm font-black uppercase tracking-wider text-digital-yellow border-b border-gaming-gray/30 pb-2">
+                    Pending Roster Applications ({pendingRosters.filter(r => r.status === "PENDING").length})
+                  </h3>
+                  {pendingRosters.filter(r => r.status === "PENDING").length === 0 ? (
+                    <p className="text-gray-500 text-xs font-semibold py-4">No pending roster submissions.</p>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {pendingRosters.filter(r => r.status === "PENDING").map((roster) => (
+                        <div
+                          key={roster.id}
+                          className="bg-[#0d0e12] border border-gaming-gray rounded-3xl p-6 flex flex-col justify-between gap-5 relative overflow-hidden"
+                        >
+                          <div className="flex flex-col gap-4 text-left">
+                            <div className="flex items-center justify-between border-b border-gaming-gray/30 pb-3">
+                              <div>
+                                <h4 className="font-extrabold text-white text-base uppercase tracking-wide">
+                                  {roster.teamName} {roster.tag && <span className="text-xs text-gray-500 font-mono">[{roster.tag}]</span>}
+                                </h4>
+                                <span className="text-[9px] text-gray-500 uppercase tracking-widest">
+                                  Org: <strong className="text-gray-300">{roster.organization.name}</strong>
+                                </span>
                               </div>
-                              <div className="truncate min-w-0">
-                                <div className="text-xs font-bold text-white uppercase truncate">{player.ign}</div>
-                                <div className="text-[7px] text-gray-500 uppercase font-black tracking-wider">{player.role}</div>
+                              <span className="text-[8px] bg-digital-yellow/10 border border-digital-yellow/30 text-digital-yellow px-2 py-0.5 rounded uppercase font-black tracking-widest animate-pulse">
+                                PENDING REVIEW
+                              </span>
+                            </div>
+
+                            {/* Lineup list */}
+                            <div className="flex flex-col gap-2">
+                              <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">Lineup ({roster.players.length} Players)</span>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                {roster.players.map((player: any) => (
+                                  <div key={player.id} className="bg-gaming-black/60 border border-gaming-gray/50 rounded-xl p-2.5 flex items-center gap-2">
+                                    <div className="w-6 h-6 rounded-full bg-gaming-black border border-gaming-gray overflow-hidden shrink-0 flex items-center justify-center">
+                                      {player.avatarUrl ? (
+                                        <img src={player.avatarUrl} className="w-full h-full object-cover" alt="" />
+                                      ) : (
+                                        <svg viewBox="0 0 100 100" className="w-full h-full text-gray-600 bg-[#1c1f26]">
+                                          <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
+                                          <path d="M15,85 C15,60 30,55 50,55 C70,55 85,60 85,85 Z" fill="currentColor" opacity="0.6" />
+                                        </svg>
+                                      )}
+                                    </div>
+                                    <div className="truncate min-w-0">
+                                      <div className="text-xs font-bold text-white uppercase truncate">{player.ign}</div>
+                                      <div className="text-[7px] text-gray-500 uppercase font-black tracking-wider">{player.role}</div>
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
+                          </div>
 
-                    <div className="flex gap-3 pt-4 border-t border-gaming-gray/30">
-                      <button
-                        type="button"
-                        onClick={() => handleRosterAction(roster.id, "APPROVED")}
-                        disabled={actionLoading === `roster-${roster.id}`}
-                        className="flex-1 bg-[#10B981]/25 hover:bg-[#10B981] text-white border border-[#10B981]/40 hover:border-[#10B981] text-xs font-black uppercase tracking-widest py-2.5 rounded-xl transition cursor-pointer text-center"
-                      >
-                        Approve Roster
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleRosterAction(roster.id, "REJECTED")}
-                        disabled={actionLoading === `roster-${roster.id}`}
-                        className="flex-1 bg-airdrop-red/25 hover:bg-airdrop-red text-white border border-airdrop-red/40 hover:border-airdrop-red text-xs font-black uppercase tracking-widest py-2.5 rounded-xl transition cursor-pointer text-center"
-                      >
-                        Reject Roster
-                      </button>
+                          <div className="flex gap-3 pt-4 border-t border-gaming-gray/30">
+                            <button
+                              type="button"
+                              onClick={() => handleRosterAction(roster.id, "APPROVED")}
+                              disabled={actionLoading === `roster-${roster.id}`}
+                              className="flex-1 bg-[#10B981]/25 hover:bg-[#10B981] text-white border border-[#10B981]/40 hover:border-[#10B981] text-xs font-black uppercase tracking-widest py-2.5 rounded-xl transition cursor-pointer text-center"
+                            >
+                              Approve Roster
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRosterAction(roster.id, "REJECTED")}
+                              disabled={actionLoading === `roster-${roster.id}`}
+                              className="flex-1 bg-airdrop-red/25 hover:bg-airdrop-red text-white border border-airdrop-red/40 hover:border-airdrop-red text-xs font-black uppercase tracking-widest py-2.5 rounded-xl transition cursor-pointer text-center"
+                            >
+                              Reject Roster
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  </div>
-                ))}
-              </div>
+                  )}
+                </div>
+
+                {/* 2. Active Approved Rosters */}
+                <div className="flex flex-col gap-4 text-left mt-6">
+                  <h3 className="text-sm font-black uppercase tracking-wider text-airdrop-red border-b border-gaming-gray/30 pb-2">
+                    Active Approved Rosters ({pendingRosters.filter(r => r.status === "APPROVED").length})
+                  </h3>
+                  {pendingRosters.filter(r => r.status === "APPROVED").length === 0 ? (
+                    <p className="text-gray-500 text-xs font-semibold py-4">No active team lineups verified yet.</p>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {pendingRosters.filter(r => r.status === "APPROVED").map((roster) => (
+                        <div
+                          key={roster.id}
+                          className="bg-[#0d0e12] border border-gaming-gray rounded-3xl p-6 flex flex-col justify-between gap-5 relative overflow-hidden"
+                        >
+                          <div className="flex flex-col gap-4 text-left">
+                            <div className="flex items-center justify-between border-b border-gaming-gray/30 pb-3">
+                              <div>
+                                <h4 className="font-extrabold text-white text-base uppercase tracking-wide">
+                                  {roster.teamName} {roster.tag && <span className="text-xs text-gray-500 font-mono">[{roster.tag}]</span>}
+                                </h4>
+                                <span className="text-[9px] text-gray-500 uppercase tracking-widest">
+                                  Org: <strong className="text-gray-300">{roster.organization.name}</strong>
+                                </span>
+                              </div>
+                              <span className="text-[8px] bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30 px-2 py-0.5 rounded uppercase font-black tracking-widest">
+                                APPROVED & ACTIVE
+                              </span>
+                            </div>
+
+                            {/* Lineup list */}
+                            <div className="flex flex-col gap-2">
+                              <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">Lineup ({roster.players.length} Players)</span>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                {roster.players.map((player: any) => (
+                                  <div key={player.id} className="bg-gaming-black/60 border border-gaming-gray/50 rounded-xl p-2.5 flex items-center gap-2">
+                                    <div className="w-6 h-6 rounded-full bg-gaming-black border border-gaming-gray overflow-hidden shrink-0 flex items-center justify-center">
+                                      {player.avatarUrl ? (
+                                        <img src={player.avatarUrl} className="w-full h-full object-cover" alt="" />
+                                      ) : (
+                                        <svg viewBox="0 0 100 100" className="w-full h-full text-gray-600 bg-[#1c1f26]">
+                                          <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
+                                          <path d="M15,85 C15,60 30,55 50,55 C70,55 85,60 85,85 Z" fill="currentColor" opacity="0.6" />
+                                        </svg>
+                                      )}
+                                    </div>
+                                    <div className="truncate min-w-0">
+                                      <div className="text-xs font-bold text-white uppercase truncate">{player.ign}</div>
+                                      <div className="text-[7px] text-gray-500 uppercase font-black tracking-wider">{player.role}</div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-3 pt-4 border-t border-gaming-gray/30">
+                            <button
+                              type="button"
+                              onClick={() => handleDisbandRoster(roster.id, roster.teamName)}
+                              disabled={actionLoading === `disband-${roster.id}`}
+                              className="w-full bg-gaming-black border border-airdrop-red text-airdrop-red hover:bg-airdrop-red hover:text-white text-xs font-black uppercase tracking-widest py-2.5 rounded-xl transition cursor-pointer text-center"
+                            >
+                              {actionLoading === `disband-${roster.id}` ? "Disbanding..." : "Disband Active Lineup"}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
             )}
           </div>
         )}
