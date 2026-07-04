@@ -79,9 +79,6 @@ export default function OrgProfileClient({
                 VERIFIED ORG
               </span>
             </div>
-            <p className="text-xs text-gray-400 font-mono truncate">
-              ✉️ {organization.email}
-            </p>
             <p className="text-xs text-gray-500 max-w-lg mt-1">
               Active developer & organizer representing PUBG Mobile competitive squads. Verified roster administrator.
             </p>
