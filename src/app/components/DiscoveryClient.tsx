@@ -114,7 +114,7 @@ const PlayerCarouselCard = memo(({ player }: { player: Player }) => {
   return (
     <Link
       href={`/players/${player.id}`}
-      className={`group flex-none w-[85vw] sm:w-[340px] snap-center snap-always bg-gradient-to-br from-gaming-gray/30 to-[#0c0d12] hover:from-gaming-gray/50 hover:to-[#0c0d12] border-2 rounded-2xl p-5 hover:scale-[1.01] hover:border-yellow-400 transition-all duration-300 relative overflow-hidden shadow-lg ${borderGlowClass}`}
+      className={`group flex-none w-full max-w-full sm:w-[340px] snap-center snap-always bg-gradient-to-br from-gaming-gray/30 to-[#0c0d12] hover:from-gaming-gray/50 hover:to-[#0c0d12] border-2 rounded-2xl p-5 hover:scale-[1.01] hover:border-yellow-400 transition-all duration-300 relative overflow-hidden shadow-lg ${borderGlowClass}`}
     >
       <div className="flex gap-3 mb-2 relative">
         <div className="w-12 h-15 rounded-lg bg-gaming-black border border-gaming-gray overflow-hidden shrink-0 relative flex items-center justify-center">
@@ -210,7 +210,7 @@ const CoachCarouselCard = memo(({ player }: { player: Player }) => {
   return (
     <Link
       href={`/players/${player.id}`}
-      className="group flex-none w-[85vw] sm:w-[340px] snap-center snap-always bg-gradient-to-br from-[#111827]/80 to-[#0c0d12] hover:from-[#111827]/90 hover:to-[#0c0d12] border-2 border-blue-500/50 hover:border-digital-yellow/80 hover:shadow-[0_0_15px_rgba(59,130,246,0.3)] shadow-black/80 rounded-2xl p-5 hover:scale-[1.01] transition-all duration-300 relative overflow-hidden shadow-lg"
+      className="group flex-none w-full max-w-full sm:w-[340px] snap-center snap-always bg-gradient-to-br from-[#111827]/80 to-[#0c0d12] hover:from-[#111827]/90 hover:to-[#0c0d12] border-2 border-blue-500/50 hover:border-digital-yellow/80 hover:shadow-[0_0_15px_rgba(59,130,246,0.3)] shadow-black/80 rounded-2xl p-5 hover:scale-[1.01] transition-all duration-300 relative overflow-hidden shadow-lg"
     >
       {/* Cybernetic grid bg */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.01)_1px,transparent_1px)] bg-[size:15px_15px] pointer-events-none" />
@@ -791,7 +791,7 @@ export default function DiscoveryClient({
           </div>
 
           <div className="bg-[#0c0e12] border border-gaming-gray rounded-3xl p-5 shadow-[0_0_20px_rgba(255,189,3,0.02)]">
-            <div className="flex overflow-x-auto pb-2 gap-5 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gaming-gray scrollbar-track-transparent w-full">
+            <div className="flex overflow-x-auto pb-2 px-4 gap-5 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gaming-gray scrollbar-track-transparent w-full">
             {topRisingFraggers.length === 0 ? (
               <div className="w-full bg-[#111827]/10 border border-gaming-gray rounded-2xl p-8 text-center flex flex-col items-center justify-center gap-2">
                 <span className="text-2xl">🔥</span>
@@ -825,7 +825,7 @@ export default function DiscoveryClient({
           </div>
 
           <div className="bg-[#0c0e12] border border-gaming-gray rounded-3xl p-5 shadow-[0_0_20px_rgba(255,189,3,0.02)]">
-            <div className="flex overflow-x-auto pb-2 gap-5 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gaming-gray scrollbar-track-transparent w-full">
+            <div className="flex overflow-x-auto pb-2 px-4 gap-5 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gaming-gray scrollbar-track-transparent w-full">
             {topTier2Fraggers.length === 0 ? (
               <div className="w-full bg-[#111827]/10 border border-gaming-gray rounded-2xl p-8 text-center flex flex-col items-center justify-center gap-2">
                 <span className="text-2xl">⚡</span>
@@ -859,7 +859,7 @@ export default function DiscoveryClient({
           </div>
 
           <div className="bg-[#0c0e12] border border-gaming-gray rounded-3xl p-5 shadow-[0_0_20px_rgba(59,130,246,0.02)]">
-            <div className="flex overflow-x-auto pb-2 gap-5 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gaming-gray scrollbar-track-transparent w-full">
+            <div className="flex overflow-x-auto pb-2 px-4 gap-5 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gaming-gray scrollbar-track-transparent w-full">
             {topCoaches.length === 0 ? (
               <div className="w-full bg-[#111827]/10 border border-gaming-gray rounded-2xl p-8 text-center flex flex-col items-center justify-center gap-2">
                 <span className="text-2xl">🎓</span>
@@ -893,7 +893,7 @@ export default function DiscoveryClient({
           </div>
 
           <div className="bg-[#0c0e12] border border-gaming-gray rounded-3xl p-5 shadow-[0_0_20px_rgba(255,189,3,0.02)]">
-            <div className="flex overflow-x-auto pb-2 gap-5 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gaming-gray scrollbar-track-transparent w-full">
+            <div className="flex overflow-x-auto pb-2 px-4 gap-5 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gaming-gray scrollbar-track-transparent w-full">
             {risingStarPlayers.length === 0 ? (
               <div className="w-full bg-[#111827]/10 border border-gaming-gray rounded-2xl p-8 text-center flex flex-col items-center justify-center gap-2">
                 <span className="text-2xl">✨</span>
