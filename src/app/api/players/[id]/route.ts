@@ -198,6 +198,7 @@ export async function PUT(
         data: {
           title: newHighlight.title,
           url: newHighlight.videoUrl,
+          thumbnailUrl: newHighlight.thumbnailUrl || null,
           playerId: id,
         },
       });

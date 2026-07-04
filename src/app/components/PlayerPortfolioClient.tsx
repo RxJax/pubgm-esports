@@ -35,6 +35,7 @@ interface Highlight {
   id: string;
   title: string;
   url: string;
+  thumbnailUrl?: string | null;
 }
 
 interface Player {
@@ -138,6 +139,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
   const [showClipModal, setShowClipModal] = useState(false);
   const [newClipTitle, setNewClipTitle] = useState("");
   const [newClipUrl, setNewClipUrl] = useState("");
+  const [newClipThumbnailUrl, setNewClipThumbnailUrl] = useState("");
   const [savingClip, setSavingClip] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
@@ -176,6 +178,17 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
     return { type: "unsupported", embedUrl: url };
   };
 
+  const isSocialVideo = (url: string): boolean => {
+    if (!url) return false;
+    const lowercaseUrl = url.toLowerCase();
+    return (
+      lowercaseUrl.includes("facebook.com") ||
+      lowercaseUrl.includes("fb.watch") ||
+      lowercaseUrl.includes("instagram.com") ||
+      lowercaseUrl.includes("tiktok.com")
+    );
+  };
+
   const handleSaveClip = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newClipTitle.trim() || !newClipUrl.trim()) {
@@ -188,6 +201,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
       newHighlight: {
         title: newClipTitle.trim(),
         videoUrl: newClipUrl.trim(),
+        thumbnailUrl: newClipThumbnailUrl.trim() || null,
       }
     };
 
@@ -201,6 +215,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
       if (res.ok) {
         setNewClipTitle("");
         setNewClipUrl("");
+        setNewClipThumbnailUrl("");
         setShowClipModal(false);
         router.refresh();
       } else {
@@ -1154,10 +1169,35 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {player.highlights.map((hl) => {
                     const embed = getEmbedUrl(hl.url);
+                    const isSocial = isSocialVideo(hl.url);
                     return (
                       <div key={hl.id} className="flex flex-col gap-2">
                         <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-gaming-gray bg-black shadow-lg">
-                          {embed.type === "iframe" ? (
+                          {isSocial ? (
+                            <a
+                              href={hl.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="absolute inset-0 flex items-center justify-center bg-cover bg-center group/play transition-all duration-300"
+                              style={{
+                                backgroundImage: hl.thumbnailUrl ? `url(${hl.thumbnailUrl})` : 'none',
+                              }}
+                            >
+                              <div className={`absolute inset-0 transition-opacity duration-300 ${
+                                hl.thumbnailUrl 
+                                  ? "bg-black/45 group-hover/play:bg-black/25" 
+                                  : "bg-gradient-to-br from-[#121620] to-[#0a0d14] opacity-95 group-hover/play:opacity-90"
+                              }`} />
+                              <div className="relative z-10 w-16 h-16 rounded-full bg-digital-yellow/10 border-2 border-digital-yellow flex items-center justify-center group-hover/play:scale-110 group-hover/play:bg-digital-yellow/20 group-hover/play:border-yellow-400 transition-all duration-300 shadow-[0_0_15px_rgba(255,189,3,0.3)] group-hover/play:shadow-[0_0_25px_rgba(255,189,3,0.5)]">
+                                <svg className="w-6 h-6 text-digital-yellow group-hover/play:text-yellow-300 ml-1 fill-current" viewBox="0 0 24 24">
+                                  <path d="M8 5v14l11-7z" />
+                                </svg>
+                              </div>
+                              <div className="absolute bottom-3 right-3 bg-black/80 px-2.5 py-1 rounded-md border border-gaming-gray text-[9px] font-black uppercase text-gray-400 tracking-wider">
+                                {hl.url.toLowerCase().includes("tiktok") ? "TikTok" : hl.url.toLowerCase().includes("instagram") ? "Instagram" : "Facebook"} ↗
+                              </div>
+                            </a>
+                          ) : embed.type === "iframe" ? (
                             <iframe
                               src={embed.embedUrl}
                               title={hl.title}
@@ -1795,6 +1835,17 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                     placeholder="https://www.youtube.com/watch?v=..."
                     value={newClipUrl}
                     onChange={(e) => setNewClipUrl(e.target.value)}
+                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Custom Thumbnail URL (Optional)</label>
+                  <input
+                    type="url"
+                    placeholder="https://example.com/thumbnail.jpg"
+                    value={newClipThumbnailUrl}
+                    onChange={(e) => setNewClipThumbnailUrl(e.target.value)}
                     className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full"
                   />
                 </div>

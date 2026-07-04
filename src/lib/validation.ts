@@ -160,5 +160,6 @@ export const PlayerEditSelfSchema = z.object({
   newHighlight: z.object({
     title: safeString,
     videoUrl: safeString,
+    thumbnailUrl: safeStringOptional,
   }).strict().optional().nullable(),
 }).strict();
