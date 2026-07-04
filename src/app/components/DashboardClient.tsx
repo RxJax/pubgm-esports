@@ -350,21 +350,21 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                       setRegion("Southeast Asia");
                     }
                   }}
-                  className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full"
+                  className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:outline-none transition w-full"
                 >
                   <option value="Player">Player</option>
                   <option value="Coach">Coach</option>
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1">
                   <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">In-Game Name (IGN)</label>
                   <input
                     type="text"
                     value={ign}
                     onChange={(e) => setIgn(e.target.value)}
-                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:outline-none transition"
                     required
                   />
                 </div>
@@ -374,7 +374,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                     type="text"
                     value={characterId}
                     onChange={(e) => setCharacterId(e.target.value)}
-                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition font-mono"
+                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:outline-none transition font-mono"
                     required
                   />
                 </div>
@@ -383,13 +383,13 @@ export default function DashboardClient({ player }: DashboardClientProps) {
               {profileType === "Coach" ? (
                 <>
                   {/* Years of Experience & Region */}
-                  <div className="grid grid-cols-2 gap-4 border-t border-gaming-gray/40 pt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-gaming-gray/40 pt-4">
                     <div className="flex flex-col gap-1">
                       <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Years of Experience</label>
                       <select
                         value={coachingYears}
                         onChange={(e) => setCoachingYears(e.target.value)}
-                        className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                        className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:outline-none transition"
                       >
                         <option value="0">0 years</option>
                         <option value="1">1 year</option>
@@ -404,7 +404,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                       <select
                         value={region}
                         onChange={(e) => setRegion(e.target.value)}
-                        className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                        className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:outline-none transition"
                       >
                         <option value="Southeast Asia">Southeast Asia</option>
                         <option value="South Asia">South Asia</option>
@@ -422,7 +422,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                       type="text"
                       value={coachingHistory}
                       onChange={(e) => setCoachingHistory(e.target.value)}
-                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none transition"
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:outline-none transition"
                       placeholder="e.g. Nova Esports, Alpha Team, Apex Esports"
                     />
                   </div>
@@ -460,13 +460,13 @@ export default function DashboardClient({ player }: DashboardClientProps) {
               ) : (
                 <>
                   {/* Role & Country Selectors */}
-                  <div className="grid grid-cols-2 gap-4 border-t border-gaming-gray/40 pt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-gaming-gray/40 pt-4">
                     <div className="flex flex-col gap-1">
                       <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">In-Game Role</label>
                       <select
                         value={role}
                         onChange={(e) => setRole(e.target.value)}
-                        className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                        className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:outline-none transition"
                       >
                         <option value="IGL">IGL</option>
                         <option value="Entry Fragger">Entry Fragger</option>
@@ -482,7 +482,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                       <select
                         value={region}
                         onChange={(e) => setRegion(e.target.value)}
-                        className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                        className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:outline-none transition"
                       >
                         <option value="South Asia">South Asia</option>
                         <option value="Bangladesh 🇧🇩">Bangladesh 🇧🇩</option>
@@ -498,7 +498,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                     <select
                       value={highestTier}
                       onChange={(e) => setHighestTier(e.target.value)}
-                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full"
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:outline-none transition w-full"
                     >
                       <option value="None">None (0 rating)</option>
                       <option value="S-Tier">S-Tier - PMGC, PMWC (150 rating)</option>
@@ -514,7 +514,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                     <select
                       value={urRank}
                       onChange={(e) => setUrRank(e.target.value)}
-                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none transition w-full"
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-3 md:py-2 text-xs text-gray-300 focus:outline-none transition w-full"
                     >
                       <option value="Vanguard">Amateur</option>
                       <option value="Exceed">Semi-Pro</option>
@@ -530,7 +530,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                     <select
                       value={underContract ? "yes" : "no"}
                       onChange={(e) => setUnderContract(e.target.value === "yes")}
-                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full"
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:outline-none transition w-full"
                     >
                       <option value="no">No, I am a Free Agent / Open for Offers</option>
                       <option value="yes">Yes, I am signed/under contract with a team</option>
@@ -538,14 +538,14 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                   </div>
 
                   {underContract && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 animate-fade-in">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 animate-fade-in">
                       <div className="flex flex-col gap-1">
                         <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Contract Start Date</label>
                         <input
                           type="date"
                           value={contractStartDate}
                           onChange={(e) => setContractStartDate(e.target.value)}
-                          className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full [color-scheme:dark]"
+                          className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:outline-none transition w-full [color-scheme:dark]"
                         />
                       </div>
                       <div className="flex flex-col gap-1">
@@ -554,7 +554,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                           type="date"
                           value={contractEndDate}
                           onChange={(e) => setContractEndDate(e.target.value)}
-                          className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full [color-scheme:dark]"
+                          className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:outline-none transition w-full [color-scheme:dark]"
                         />
                       </div>
                     </div>
@@ -575,7 +575,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                     value={teamHistory}
                     onChange={(e) => setTeamHistory(e.target.value)}
                     placeholder="e.g. Nova Esports, Alpha Team, Free Agent"
-                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:outline-none transition"
                   />
                 </div>
 
@@ -586,7 +586,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                     onChange={(e) => setAchievements(e.target.value)}
                     placeholder="e.g. 1st Place PMCO 2025, MVP PMSL Season 2"
                     rows={3}
-                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition resize-none"
+                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:outline-none transition resize-none"
                   />
                 </div>
               </div>
@@ -668,7 +668,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                       type="text"
                       value={device}
                       onChange={(e) => setDevice(e.target.value)}
-                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:outline-none transition"
                       required={profileType !== "Coach"}
                     />
                   </div>
@@ -679,7 +679,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                       type="text"
                       value={controlSetup}
                       onChange={(e) => setControlSetup(e.target.value)}
-                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:outline-none transition"
                       required={profileType !== "Coach"}
                     />
                   </div>
@@ -689,7 +689,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                     <select
                       value={competitiveExperience}
                       onChange={(e) => setCompetitiveExperience(e.target.value)}
-                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition cursor-pointer"
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:outline-none transition cursor-pointer"
                     >
                       {Array.from({ length: 8 }).map((_, i) => (
                         <option key={i + 1} value={i + 1}>{i + 1} {i + 1 === 1 ? "Year" : "Years"}</option>
@@ -702,7 +702,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                     <select
                       value={officialTournaments}
                       onChange={(e) => setOfficialTournaments(e.target.value)}
-                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition cursor-pointer"
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:outline-none transition cursor-pointer"
                     >
                       {Array.from({ length: 11 }).map((_, i) => (
                         <option key={i} value={i}>{i === 10 ? "10+" : i}</option>
@@ -718,7 +718,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   rows={4}
-                  className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition resize-none leading-relaxed"
+                  className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:outline-none transition resize-none leading-relaxed"
                   required
                 />
               </div>
@@ -734,7 +734,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
               Log recruitment contact paths so team scouts can reach out to you directly. Empty fields will not be displayed.
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
               <div className="flex flex-col gap-1">
                 <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Discord Tag</label>
                 <input
@@ -742,7 +742,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                   placeholder="e.g. username#0000 or username"
                   value={discord}
                   onChange={(e) => setDiscord(e.target.value)}
-                  className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-2 text-xs text-white focus:border-digital-yellow focus:outline-none"
+                  className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:border-digital-yellow focus:outline-none"
                 />
               </div>
               <div className="flex flex-col gap-1">
@@ -752,17 +752,17 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                   placeholder="e.g. instagram.com/username"
                   value={instagram}
                   onChange={(e) => setInstagram(e.target.value)}
-                  className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-2 text-xs text-white focus:border-digital-yellow focus:outline-none"
+                  className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:border-digital-yellow focus:outline-none"
                 />
               </div>
-              <div className="flex flex-col gap-1 sm:col-span-2">
+              <div className="flex flex-col gap-1 md:col-span-2">
                 <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Facebook Link</label>
                 <input
                   type="text"
                   placeholder="e.g. facebook.com/username"
                   value={facebook}
                   onChange={(e) => setFacebook(e.target.value)}
-                  className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-2 text-xs text-white focus:border-digital-yellow focus:outline-none"
+                  className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:border-digital-yellow focus:outline-none"
                 />
               </div>
             </div>
@@ -777,7 +777,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
               Fill these fields if you want to append a new tournament placement record to your profile. Left empty, no trophies will be added.
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
               <div className="flex flex-col gap-1">
                 <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Tournament Name</label>
                 <input
@@ -785,7 +785,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                   placeholder="e.g. PMSL SEA Spring"
                   value={trophyName}
                   onChange={(e) => setTrophyName(e.target.value)}
-                  className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-2 text-xs text-white focus:border-digital-yellow focus:outline-none"
+                  className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:border-digital-yellow focus:outline-none"
                 />
               </div>
 
@@ -797,7 +797,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                   placeholder="e.g. 1"
                   value={trophyPlacement}
                   onChange={(e) => setTrophyPlacement(e.target.value)}
-                  className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-2 text-xs text-white focus:border-digital-yellow focus:outline-none"
+                  className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:border-digital-yellow focus:outline-none"
                 />
               </div>
 
@@ -808,7 +808,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                   placeholder="e.g. Viper Clan"
                   value={trophyTeam}
                   onChange={(e) => setTrophyTeam(e.target.value)}
-                  className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-2 text-xs text-white focus:border-digital-yellow focus:outline-none"
+                  className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:border-digital-yellow focus:outline-none"
                 />
               </div>
 
@@ -819,7 +819,7 @@ export default function DashboardClient({ player }: DashboardClientProps) {
                   placeholder="e.g. 2026-06"
                   value={trophyDate}
                   onChange={(e) => setTrophyDate(e.target.value)}
-                  className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-2 text-xs text-white focus:border-digital-yellow focus:outline-none"
+                  className="bg-[#0b0f19] border border-gaming-gray rounded-xl px-3 py-3 md:py-2 text-xs text-white focus:border-digital-yellow focus:outline-none"
                 />
               </div>
             </div>
