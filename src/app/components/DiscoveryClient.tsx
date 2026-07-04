@@ -54,6 +54,7 @@ interface DiscoveryClientProps {
   initialCoaches?: Player[];
   initialRisingStars?: Player[];
   initialFeatured?: Player[];
+  initialRosters?: any[];
   initialError?: boolean;
   loggedInPlayerId?: string | null;
 }
@@ -416,6 +417,7 @@ export default function DiscoveryClient({
   initialCoaches = [],
   initialRisingStars = [],
   initialFeatured = [],
+  initialRosters = [],
   initialError = false,
   loggedInPlayerId = null,
 }: DiscoveryClientProps) {
@@ -923,17 +925,67 @@ export default function DiscoveryClient({
             <span className="text-xl">⭐</span> FEATURED ESPORTS ROSTERS
           </h2>
           
-          <div className="bg-[#0d0e12] border-2 border-dashed border-gaming-gray/60 rounded-3xl p-10 text-center flex flex-col items-center justify-center gap-3.5 shadow-lg relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-digital-yellow/[0.01] rounded-full blur-xl" />
-            <span className="text-3xl filter drop-shadow-[0_0_8px_rgba(255,189,3,0.3)]">🔒</span>
-            <h3 className="text-sm font-black text-white uppercase tracking-widest">
-              FEATURED ROSTERS LOCKED
-            </h3>
-            <p className="text-gray-400 text-xs max-w-md leading-relaxed">
-              Only system developers can add and configure official competitive esports rosters. 
-              Please contact the platform administrator to register team slots.
-            </p>
-          </div>
+          {initialRosters && initialRosters.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {initialRosters.map((roster) => (
+                <div key={roster.id} className="bg-[#0c0e12] border border-gaming-gray hover:border-digital-yellow/40 rounded-3xl p-5 shadow-lg flex flex-col justify-between gap-4 text-left transition duration-300">
+                  <div className="flex items-center justify-between border-b border-gaming-gray/30 pb-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-xl bg-gaming-black border border-gaming-gray overflow-hidden flex items-center justify-center shrink-0">
+                        {roster.logoUrl ? (
+                          <img src={roster.logoUrl} className="w-full h-full object-cover" alt="" />
+                        ) : (
+                          <span className="text-lg">🏆</span>
+                        )}
+                      </div>
+                      <div className="truncate min-w-0">
+                        <h3 className="font-extrabold text-white text-sm uppercase tracking-wide truncate">
+                          {roster.teamName} {roster.tag && <span className="text-xs text-gray-500 font-mono">[{roster.tag}]</span>}
+                        </h3>
+                        <p className="text-[10px] text-gray-500 uppercase tracking-widest font-black truncate">
+                          Verified Squad • {roster.organization.name}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Player list */}
+                  <div className="grid grid-cols-2 gap-2">
+                    {roster.players.map((player: any) => (
+                      <div key={player.id} className="bg-gaming-black/60 border border-gaming-gray/50 rounded-2xl p-2.5 flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full bg-gaming-black border border-gaming-gray overflow-hidden shrink-0 flex items-center justify-center">
+                          {player.avatarUrl ? (
+                            <img src={player.avatarUrl} className="w-full h-full object-cover" alt="" />
+                          ) : (
+                            <svg viewBox="0 0 100 100" className="w-full h-full text-gray-600 bg-[#1c1f26]">
+                              <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
+                              <path d="M15,85 C15,60 30,55 50,55 C70,55 85,60 85,85 Z" fill="currentColor" opacity="0.6" />
+                            </svg>
+                          )}
+                        </div>
+                        <div className="truncate min-w-0">
+                          <div className="text-[11px] font-bold text-white uppercase truncate">{player.ign}</div>
+                          <div className="text-[8px] text-gray-500 uppercase font-black tracking-wider">{player.role}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-[#0d0e12] border-2 border-dashed border-gaming-gray/60 rounded-3xl p-10 text-center flex flex-col items-center justify-center gap-3.5 shadow-lg relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-digital-yellow/[0.01] rounded-full blur-xl" />
+              <span className="text-3xl filter drop-shadow-[0_0_8px_rgba(255,189,3,0.3)]">🔒</span>
+              <h3 className="text-sm font-black text-white uppercase tracking-widest">
+                FEATURED ROSTERS LOCKED
+              </h3>
+              <p className="text-gray-400 text-xs max-w-md leading-relaxed">
+                Only system developers can add and configure official competitive esports rosters. 
+                Please contact the platform administrator to register team slots.
+              </p>
+            </div>
+          )}
         </section>
           </div>
 

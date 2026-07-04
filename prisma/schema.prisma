@@ -53,6 +53,8 @@ model Player {
   // Relations
   teamId       String?
   team         Team?                 @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  teamRosterId String?               @map("team_roster_id")
+  teamRoster   TeamRoster?           @relation(fields: [teamRosterId], references: [id], onDelete: SetNull)
   placements   TournamentPlacement[]
   highlights   Highlight[]
   
@@ -130,4 +132,32 @@ model SystemConfig {
   updatedAt         DateTime @updatedAt @map("updated_at")
 
   @@map("system_config")
+}
+
+model Organization {
+  id        String       @id @default(uuid())
+  email     String       @unique
+  password  String
+  name      String
+  logoUrl   String?      @map("logo_url")
+  rosters   TeamRoster[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@map("organizations")
+}
+
+model TeamRoster {
+  id             String       @id @default(uuid())
+  teamName       String       @map("team_name")
+  logoUrl        String?      @map("logo_url")
+  tag            String?
+  status         String       @default("PENDING") // 'PENDING', 'APPROVED', 'REJECTED'
+  organizationId String       @map("organization_id")
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  players        Player[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("team_rosters")
 }

@@ -163,3 +163,22 @@ export const PlayerEditSelfSchema = z.object({
     thumbnailUrl: safeStringOptional,
   }).strict().optional().nullable(),
 }).strict();
+
+export const OrganizationRegisterSchema = z.object({
+  email: safeString.email("Invalid email format"),
+  password: safeString.min(6, "Password must be at least 6 characters long"),
+  name: safeString.min(1, "Organization Name is required"),
+  logoUrl: safeStringOptional,
+}).strict();
+
+export const RosterSubmitSchema = z.object({
+  teamName: safeString.min(1, "Team Name is required"),
+  tag: safeStringOptional,
+  logoUrl: safeStringOptional,
+  playerIds: z.array(safeString).min(4, "Roster must have at least 4 players").max(6, "Roster can have at most 6 players"),
+}).strict();
+
+export const RosterActionSchema = z.object({
+  id: safeString.min(1, "Roster ID is required"),
+  status: z.enum(["APPROVED", "REJECTED"]),
+}).strict();

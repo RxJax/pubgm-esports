@@ -36,6 +36,7 @@ export default async function Home() {
   let risingStars: any[] = [];
   let coachPlayers: any[] = [];
   let featuredPlayers: any[] = [];
+  let approvedRosters: any[] = [];
   let dbError = false;
 
   try {
@@ -135,6 +136,32 @@ export default async function Home() {
       },
       take: 3,
     });
+
+    // 4. Query approved team rosters
+    approvedRosters = await prisma.teamRoster.findMany({
+      where: {
+        status: "APPROVED",
+      },
+      include: {
+        organization: {
+          select: {
+            name: true,
+            logoUrl: true,
+          },
+        },
+        players: {
+          select: {
+            id: true,
+            ign: true,
+            role: true,
+            avatarUrl: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
   } catch (error: any) {
     console.error("Database connection failed:", error);
     dbError = true;
@@ -150,6 +177,7 @@ export default async function Home() {
           initialCoaches={coachPlayers}
           initialRisingStars={risingStars}
           initialFeatured={featuredPlayers}
+          initialRosters={approvedRosters}
           initialError={dbError}
           loggedInPlayerId={loggedInPlayerId}
         />

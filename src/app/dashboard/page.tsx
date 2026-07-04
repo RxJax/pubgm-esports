@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import dynamic from "next/dynamic";
 
 import DatabaseErrorCard from "@/app/components/DatabaseErrorCard";
+import OrgDashboardClient from "@/app/components/OrgDashboardClient";
 
 const DashboardClient = dynamic(() => import("@/app/components/DashboardClient"), {
   loading: () => (
@@ -25,12 +26,54 @@ export default async function DashboardPage() {
   }
 
   let playerId = "";
+  let orgId = "";
+  let isOrg = false;
   try {
     const JWT_SECRET = process.env.JWT_SECRET || "pubgm-esports-super-secret-key-2026";
-    const decoded = jwt.verify(token, JWT_SECRET) as { playerId: string };
-    playerId = decoded.playerId;
+    const decoded = jwt.verify(token, JWT_SECRET) as { playerId?: string; orgId?: string; role?: string };
+    
+    if (decoded.role === "organization" || decoded.orgId) {
+      orgId = decoded.orgId || "";
+      isOrg = true;
+    } else {
+      playerId = decoded.playerId || "";
+    }
   } catch (e) {
     redirect("/login");
+  }
+
+  // Handle Organization dashboard loading
+  if (isOrg) {
+    let org = null;
+    let dbError = false;
+    try {
+      org = await prisma.organization.findUnique({
+        where: { id: orgId },
+        include: {
+          rosters: {
+            include: {
+              players: true,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Database connection failed:", error);
+      dbError = true;
+    }
+
+    if (dbError) {
+      return <DatabaseErrorCard />;
+    }
+
+    if (!org) {
+      redirect("/login");
+    }
+
+    return <OrgDashboardClient organization={org} />;
   }
 
   // Fetch the logged-in player's profile data

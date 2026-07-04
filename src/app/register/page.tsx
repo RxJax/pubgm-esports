@@ -22,6 +22,7 @@ export default function RegisterWizard() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [ign, setIgn] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
   const [characterId, setCharacterId] = useState("");
   const [region, setRegion] = useState("Southeast Asia");
   const [role, setRole] = useState("Entry Fragger");
@@ -136,6 +137,36 @@ export default function RegisterWizard() {
     }
   }, [step, router, onboardingData]);
 
+  const handleOrgSubmit = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/organization/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          password,
+          name: ign,
+          logoUrl: logoUrl || null,
+        }),
+      });
+
+      if (res.ok) {
+        router.push("/dashboard");
+        router.refresh();
+      } else {
+        const errData = await res.json();
+        setError(errData.error || "Organization registration failed.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("A connection error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Move to next step with basic validation
   const nextStep = () => {
     setError("");
@@ -153,6 +184,14 @@ export default function RegisterWizard() {
         return;
       }
     } else if (step === 2) {
+      if (profileType === "Organization") {
+        if (!ign) {
+          setError("Please enter your Organization Name.");
+          return;
+        }
+        handleOrgSubmit();
+        return;
+      }
       if (profileType === "Coach") {
         if (!ign || !characterId || !coachingHistory) {
           setError("Please fill out IGN, UID, and Teams Coached.");
@@ -482,160 +521,192 @@ export default function RegisterWizard() {
                 >
                   <option value="Player">Player</option>
                   <option value="Coach">Coach</option>
+                  <option value="Organization">Organization</option>
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">In-Game Name (IGN)</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. APX.Slayer"
-                    value={ign}
-                    onChange={(e) => setIgn(e.target.value)}
-                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
-                    required
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">UID (In-Game ID)</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. 5123984712"
-                    value={characterId}
-                    onChange={(e) => setCharacterId(e.target.value)}
-                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition font-mono"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Region</label>
-                  <select
-                    value={region}
-                    onChange={(e) => setRegion(e.target.value)}
-                    className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none transition"
-                  >
-                    {profileType === "Coach" ? (
-                      REGIONS.map((r) => (
-                        <option key={r} value={r}>
-                          {r}
-                        </option>
-                      ))
-                    ) : (
-                      ["South Asia", "Bangladesh 🇧🇩", "Nepal 🇳🇵", "Pakistan 🇵🇰"].map((r) => (
-                        <option key={r} value={r}>
-                          {r}
-                        </option>
-                      ))
-                    )}
-                  </select>
-                </div>
-
-                {profileType === "Coach" ? (
+              {profileType === "Organization" ? (
+                <div className="grid grid-cols-1 gap-4">
                   <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Years of Coaching Experience</label>
-                    <select
-                      value={coachingYears}
-                      onChange={(e) => setCoachingYears(e.target.value)}
-                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none transition w-full"
-                    >
-                      <option value="0">0 years</option>
-                      <option value="1">1 year</option>
-                      <option value="2">2 years</option>
-                      <option value="3">3 years</option>
-                      <option value="4">4 years</option>
-                      <option value="5">5+ years</option>
-                    </select>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Playstyle Role</label>
-                    <select
-                      value={role}
-                      onChange={(e) => setRole(e.target.value)}
-                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none transition"
-                    >
-                      {ROLES.map((role) => (
-                        <option key={role} value={role}>
-                          {role}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-              </div>
-
-              {profileType === "Coach" ? (
-                <>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Teams Coached (comma-separated)</label>
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Organization Name</label>
                     <input
                       type="text"
-                      placeholder="e.g. Nova Esports, Alpha Team, Apex Esports"
-                      value={coachingHistory}
-                      onChange={(e) => setCoachingHistory(e.target.value)}
-                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                      placeholder="e.g. Nova Esports"
+                      value={ign}
+                      onChange={(e) => setIgn(e.target.value)}
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full"
                       required
                     />
                   </div>
-
                   <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Core Specialties</label>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1">
-                      {SPECIALTIES.map((tag) => {
-                        const isSelected = specialties.includes(tag);
-                        return (
-                          <button
-                            type="button"
-                            key={tag}
-                            onClick={() => {
-                              if (isSelected) {
-                                setSpecialties(specialties.filter((s) => s !== tag));
-                              } else {
-                                setSpecialties([...specialties, tag]);
-                              }
-                            }}
-                            className={`px-3 py-1.5 rounded-lg border text-[10px] font-black tracking-wider uppercase transition text-center cursor-pointer ${
-                              isSelected
-                                ? "bg-digital-yellow border-digital-yellow text-gaming-black"
-                                : "bg-gaming-black border-gaming-gray text-gray-400 hover:border-gray-700"
-                            }`}
-                          >
-                            {tag}
-                          </button>
-                        );
-                      })}
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Logo URL (Optional)</label>
+                    <input
+                      type="url"
+                      placeholder="https://example.com/logo.png"
+                      value={logoUrl}
+                      onChange={(e) => setLogoUrl(e.target.value)}
+                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition w-full"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">In-Game Name (IGN)</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. APX.Slayer"
+                        value={ign}
+                        onChange={(e) => setIgn(e.target.value)}
+                        className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                        required
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">UID (In-Game ID)</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 5123984712"
+                        value={characterId}
+                        onChange={(e) => setCharacterId(e.target.value)}
+                        className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition font-mono"
+                        required
+                      />
                     </div>
                   </div>
                 </>
-              ) : (
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Gaming Device</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. iPhone 15 Pro Max"
-                      value={device}
-                      onChange={(e) => setDevice(e.target.value)}
-                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
-                      required
-                    />
+              )}
+              {profileType !== "Organization" && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Region</label>
+                      <select
+                        value={region}
+                        onChange={(e) => setRegion(e.target.value)}
+                        className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none transition"
+                      >
+                        {profileType === "Coach" ? (
+                          REGIONS.map((r) => (
+                            <option key={r} value={r}>
+                              {r}
+                            </option>
+                          ))
+                        ) : (
+                          ["South Asia", "Bangladesh 🇧🇩", "Nepal 🇳🇵", "Pakistan 🇵🇰"].map((r) => (
+                            <option key={r} value={r}>
+                              {r}
+                            </option>
+                          ))
+                        )}
+                      </select>
+                    </div>
+
+                    {profileType === "Coach" ? (
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Years of Coaching Experience</label>
+                        <select
+                          value={coachingYears}
+                          onChange={(e) => setCoachingYears(e.target.value)}
+                          className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none transition w-full"
+                        >
+                          <option value="0">0 years</option>
+                          <option value="1">1 year</option>
+                          <option value="2">2 years</option>
+                          <option value="3">3 years</option>
+                          <option value="4">4 years</option>
+                          <option value="5">5+ years</option>
+                        </select>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Playstyle Role</label>
+                        <select
+                          value={role}
+                          onChange={(e) => setRole(e.target.value)}
+                          className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none transition"
+                        >
+                          {ROLES.map((role) => (
+                            <option key={role} value={role}>
+                              {role}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Control Setup</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. 4-finger claw, gyro always-on"
-                      value={controlSetup}
-                      onChange={(e) => setControlSetup(e.target.value)}
-                      className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
-                      required
-                    />
-                  </div>
-                </div>
+
+                  {profileType === "Coach" ? (
+                    <>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Teams Coached (comma-separated)</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Nova Esports, Alpha Team, Apex Esports"
+                          value={coachingHistory}
+                          onChange={(e) => setCoachingHistory(e.target.value)}
+                          className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                          required
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Core Specialties</label>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1">
+                          {SPECIALTIES.map((tag) => {
+                            const isSelected = specialties.includes(tag);
+                            return (
+                              <button
+                                type="button"
+                                key={tag}
+                                onClick={() => {
+                                  if (isSelected) {
+                                    setSpecialties(specialties.filter((s) => s !== tag));
+                                  } else {
+                                    setSpecialties([...specialties, tag]);
+                                  }
+                                }}
+                                className={`px-3 py-1.5 rounded-lg border text-[10px] font-black tracking-wider uppercase transition text-center cursor-pointer ${
+                                  isSelected
+                                    ? "bg-digital-yellow border-digital-yellow text-gaming-black"
+                                    : "bg-gaming-black border-gaming-gray text-gray-400 hover:border-gray-700"
+                                }`}
+                              >
+                                {tag}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Gaming Device</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. iPhone 15 Pro Max"
+                          value={device}
+                          onChange={(e) => setDevice(e.target.value)}
+                          className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                          required
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Control Setup</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. 4-finger claw, gyro always-on"
+                          value={controlSetup}
+                          onChange={(e) => setControlSetup(e.target.value)}
+                          className="bg-[#0b0f19] border border-gaming-gray focus:border-digital-yellow rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition"
+                          required
+                        />
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
 
               <div className="flex flex-col gap-1">

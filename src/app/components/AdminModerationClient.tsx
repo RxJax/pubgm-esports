@@ -116,9 +116,13 @@ export default function AdminModerationClient({ initialReports, adminId, adminIg
   const [maintenanceLoading, setMaintenanceLoading] = useState(false);
 
   // Registration Queue States
-  const [activeTab, setActiveTab] = useState<"reports" | "registrations">("reports");
+  const [activeTab, setActiveTab] = useState<"reports" | "registrations" | "rosters">("reports");
   const [pendingRegistrations, setPendingRegistrations] = useState<any[]>([]);
   const [registrationsLoading, setRegistrationsLoading] = useState(false);
+
+  // Roster Queue States
+  const [pendingRosters, setPendingRosters] = useState<any[]>([]);
+  const [rostersLoading, setRostersLoading] = useState(false);
 
   React.useEffect(() => {
     if (activeTab === "registrations") {
@@ -137,6 +141,22 @@ export default function AdminModerationClient({ initialReports, adminId, adminIg
         }
       };
       fetchRegistrations();
+    } else if (activeTab === "rosters") {
+      const fetchRosters = async () => {
+        setRostersLoading(true);
+        try {
+          const res = await fetch("/api/admin/rosters");
+          if (res.ok) {
+            const data = await res.json();
+            setPendingRosters(data);
+          }
+        } catch (e) {
+          console.error("Failed to fetch pending rosters:", e);
+        } finally {
+          setRostersLoading(false);
+        }
+      };
+      fetchRosters();
     }
   }, [activeTab]);
 
@@ -159,6 +179,30 @@ export default function AdminModerationClient({ initialReports, adminId, adminIg
     } catch (e) {
       console.error(e);
       alert("Network error: Failed to assign tier.");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleRosterAction = async (rosterId: string, status: "APPROVED" | "REJECTED") => {
+    setActionLoading(`roster-${rosterId}`);
+    try {
+      const res = await fetch("/api/admin/rosters", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: rosterId, status }),
+      });
+
+      if (res.ok) {
+        setPendingRosters((prev) => prev.filter((r) => r.id !== rosterId));
+        alert(`Success: Roster application has been ${status.toLowerCase()}!`);
+      } else {
+        const err = await res.json();
+        alert(`Error: ${err.error || "Failed to process roster action"}`);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Network error: Failed to process roster action.");
     } finally {
       setActionLoading(null);
     }
@@ -447,7 +491,7 @@ export default function AdminModerationClient({ initialReports, adminId, adminIg
       </div>
     )}
            {/* Reports / Registrations Tab Control */}
-        <div className="flex gap-4 border-b border-gaming-gray/40 pb-3 mb-6">
+        <div className="flex gap-4 border-b border-gaming-gray/40 pb-3 mb-6 flex-wrap">
           <button
             type="button"
             onClick={() => setActiveTab("reports")}
@@ -469,6 +513,17 @@ export default function AdminModerationClient({ initialReports, adminId, adminIg
             }`}
           >
             Review Registrations ({pendingRegistrations.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("rosters")}
+            className={`text-xs font-black uppercase tracking-widest pb-2 border-b-2 transition cursor-pointer ${
+              activeTab === "rosters"
+                ? "border-digital-yellow text-digital-yellow"
+                : "border-transparent text-gray-500 hover:text-gray-300"
+            }`}
+          >
+            Roster Applications ({pendingRosters.length})
           </button>
         </div>
 
@@ -654,6 +709,94 @@ export default function AdminModerationClient({ initialReports, adminId, adminIg
                         className="flex-1 bg-[#bf5af2]/10 border border-[#bf5af2]/30 hover:border-[#bf5af2] text-[#bf5af2] hover:bg-[#bf5af2]/20 text-[10px] font-black uppercase tracking-widest py-2 rounded-xl transition cursor-pointer text-center"
                       >
                         Assign Tier-2
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Rosters Section */}
+        {activeTab === "rosters" && (
+          <div className="flex flex-col gap-6">
+            {rostersLoading ? (
+              <div className="text-center py-10 text-xs font-bold text-gray-500 uppercase tracking-widest animate-pulse">
+                Loading roster applications...
+              </div>
+            ) : pendingRosters.length === 0 ? (
+              <div className="bg-[#0d0e12] border border-gaming-gray rounded-3xl p-10 text-center flex flex-col items-center justify-center gap-3">
+                <span className="text-3xl">🏆</span>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">No Pending Rosters</h3>
+                <p className="text-gray-500 text-xs max-w-xs">
+                  All submitted organizational team lineups have been successfully reviewed and approved/rejected.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {pendingRosters.map((roster) => (
+                  <div
+                    key={roster.id}
+                    className="bg-[#0d0e12] border border-gaming-gray rounded-3xl p-6 flex flex-col justify-between gap-5 relative overflow-hidden"
+                  >
+                    <div className="flex flex-col gap-4 text-left">
+                      <div className="flex items-center justify-between border-b border-gaming-gray/30 pb-3">
+                        <div>
+                          <h4 className="font-extrabold text-white text-base uppercase tracking-wide">
+                            {roster.teamName} {roster.tag && <span className="text-xs text-gray-500 font-mono">[{roster.tag}]</span>}
+                          </h4>
+                          <span className="text-[9px] text-gray-500 uppercase tracking-widest">
+                            Org: <strong className="text-gray-300">{roster.organization.name}</strong>
+                          </span>
+                        </div>
+                        <span className="text-[8px] bg-digital-yellow/10 border border-digital-yellow/30 text-digital-yellow px-2 py-0.5 rounded uppercase font-black tracking-widest animate-pulse">
+                          PENDING REVIEW
+                        </span>
+                      </div>
+
+                      {/* Lineup list */}
+                      <div className="flex flex-col gap-2">
+                        <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">Lineup ({roster.players.length} Players)</span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {roster.players.map((player: any) => (
+                            <div key={player.id} className="bg-gaming-black/60 border border-gaming-gray/50 rounded-xl p-2.5 flex items-center gap-2">
+                              <div className="w-6 h-6 rounded-full bg-gaming-black border border-gaming-gray overflow-hidden shrink-0 flex items-center justify-center">
+                                {player.avatarUrl ? (
+                                  <img src={player.avatarUrl} className="w-full h-full object-cover" alt="" />
+                                ) : (
+                                  <svg viewBox="0 0 100 100" className="w-full h-full text-gray-600 bg-[#1c1f26]">
+                                    <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
+                                    <path d="M15,85 C15,60 30,55 50,55 C70,55 85,60 85,85 Z" fill="currentColor" opacity="0.6" />
+                                  </svg>
+                                )}
+                              </div>
+                              <div className="truncate min-w-0">
+                                <div className="text-xs font-bold text-white uppercase truncate">{player.ign}</div>
+                                <div className="text-[7px] text-gray-500 uppercase font-black tracking-wider">{player.role}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3 pt-4 border-t border-gaming-gray/30">
+                      <button
+                        type="button"
+                        onClick={() => handleRosterAction(roster.id, "APPROVED")}
+                        disabled={actionLoading === `roster-${roster.id}`}
+                        className="flex-1 bg-[#10B981]/25 hover:bg-[#10B981] text-white border border-[#10B981]/40 hover:border-[#10B981] text-xs font-black uppercase tracking-widest py-2.5 rounded-xl transition cursor-pointer text-center"
+                      >
+                        Approve Roster
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRosterAction(roster.id, "REJECTED")}
+                        disabled={actionLoading === `roster-${roster.id}`}
+                        className="flex-1 bg-airdrop-red/25 hover:bg-airdrop-red text-white border border-airdrop-red/40 hover:border-airdrop-red text-xs font-black uppercase tracking-widest py-2.5 rounded-xl transition cursor-pointer text-center"
+                      >
+                        Reject Roster
                       </button>
                     </div>
                   </div>

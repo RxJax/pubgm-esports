@@ -5,9 +5,11 @@ const JWT_SECRET = process.env.JWT_SECRET || "pubgm-esports-super-secret-key-202
 const TOKEN_COOKIE_NAME = "auth-token";
 
 export interface SessionPayload {
-  playerId: string;
+  playerId?: string;
+  orgId?: string;
   email: string;
   ign: string;
+  role?: string;
 }
 
 // Sign JWT and set HTTP-only cookie on response
