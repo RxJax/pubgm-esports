@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import { AdminPlayerOnboardSchema, AdminPlayerEditSchema } from "@/lib/validation";
 
 export const revalidate = 0;
 
@@ -100,6 +101,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+    
+    // Strict schema validation using Zod
+    const result = AdminPlayerOnboardSchema.safeParse(body);
+    if (!result.success) {
+      const errorMsg = result.error.issues[0]?.message || "Invalid player onboarding data";
+      return NextResponse.json({ error: errorMsg }, { status: 400 });
+    }
+
     const {
       email,
       password,
@@ -118,11 +127,7 @@ export async function POST(request: NextRequest) {
       urPoints,
       competitiveExperience,
       officialTournaments,
-    } = body;
-
-    if (!email || !password || !ign || !characterId) {
-      return NextResponse.json({ error: "Missing required onboarding fields." }, { status: 400 });
-    }
+    } = result.data;
 
     // Check existing
     const existing = await prisma.player.findFirst({
@@ -148,14 +153,14 @@ export async function POST(request: NextRequest) {
         role: role || "Fragger",
         device: device || "iPhone 15 Pro Max",
         controlSetup: controlSetup || "4-Finger Claw",
-        kdRatio: parseFloat(kdRatio) || 0,
-        headshotPct: parseFloat(headshotPct) || 0,
-        winRate: parseFloat(winRate) || 0,
-        matchesPlayed: parseInt(matchesPlayed) || 0,
+        kdRatio,
+        headshotPct,
+        winRate,
+        matchesPlayed,
         urRank: urRank || "Vanguard",
-        urPoints: parseInt(urPoints) || 0,
-        competitiveExperience: parseInt(competitiveExperience) || 1,
-        officialTournaments: parseInt(officialTournaments) || 0,
+        urPoints,
+        competitiveExperience,
+        officialTournaments,
       },
     });
 
@@ -173,45 +178,41 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { id, ...updateData } = body;
-
-    if (!id) {
-      return NextResponse.json({ error: "Missing Player ID for update" }, { status: 400 });
+    
+    // Strict schema validation using Zod
+    const result = AdminPlayerEditSchema.safeParse(body);
+    if (!result.success) {
+      const errorMsg = result.error.issues[0]?.message || "Invalid player edit data";
+      return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
 
-    // Format numbers and dates
-    if (updateData.kdRatio !== undefined) updateData.kdRatio = parseFloat(updateData.kdRatio) || 0;
-    if (updateData.headshotPct !== undefined) updateData.headshotPct = parseFloat(updateData.headshotPct) || 0;
-    if (updateData.winRate !== undefined) updateData.winRate = parseFloat(updateData.winRate) || 0;
-    if (updateData.matchesPlayed !== undefined) updateData.matchesPlayed = parseInt(updateData.matchesPlayed) || 0;
-    if (updateData.urPoints !== undefined) updateData.urPoints = parseInt(updateData.urPoints) || 0;
-    if (updateData.competitiveExperience !== undefined) updateData.competitiveExperience = parseInt(updateData.competitiveExperience) || 1;
-    if (updateData.officialTournaments !== undefined) updateData.officialTournaments = parseInt(updateData.officialTournaments) || 0;
+    const { id, ...updateData } = result.data;
+    const prismaUpdateData: any = { ...updateData };
 
     // Handle password change if provided
     if (updateData.password && updateData.password.trim() !== "") {
-      updateData.password = await bcrypt.hash(updateData.password, 10);
+      prismaUpdateData.password = await bcrypt.hash(updateData.password, 10);
     } else {
-      delete updateData.password; // Do not overwrite if empty
+      delete prismaUpdateData.password; // Do not overwrite if empty
     }
 
     // Handle contract dates parsing
     if (updateData.underContract !== undefined) {
       if (updateData.underContract) {
-        updateData.contractStartDate = updateData.contractStartDate ? new Date(updateData.contractStartDate) : null;
-        updateData.contractEndDate = updateData.contractEndDate ? new Date(updateData.contractEndDate) : null;
+        prismaUpdateData.contractStartDate = updateData.contractStartDate ? new Date(updateData.contractStartDate) : null;
+        prismaUpdateData.contractEndDate = updateData.contractEndDate ? new Date(updateData.contractEndDate) : null;
       } else {
-        updateData.contractStartDate = null;
-        updateData.contractEndDate = null;
+        prismaUpdateData.contractStartDate = null;
+        prismaUpdateData.contractEndDate = null;
       }
     } else {
-      delete updateData.contractStartDate;
-      delete updateData.contractEndDate;
+      delete prismaUpdateData.contractStartDate;
+      delete prismaUpdateData.contractEndDate;
     }
 
     const updatedPlayer = await prisma.player.update({
       where: { id },
-      data: updateData,
+      data: prismaUpdateData,
     });
 
     return NextResponse.json({ success: true, player: updatedPlayer });

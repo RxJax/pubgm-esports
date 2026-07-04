@@ -2,10 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { setAuthCookie } from "@/lib/auth";
+import { RegisterSchema } from "@/lib/validation";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    
+    // Strict schema validation using Zod
+    const result = RegisterSchema.safeParse(body);
+    if (!result.success) {
+      const errorMsg = result.error.issues[0]?.message || "Invalid registration data";
+      return NextResponse.json({ error: errorMsg }, { status: 400 });
+    }
+
     const {
       email,
       password,
@@ -38,12 +47,7 @@ export async function POST(request: NextRequest) {
       coachingYears,
       coachingHistory,
       specialties,
-    } = body;
-
-    // Boundary validations
-    if (!email || !password || !ign || !characterId) {
-      return NextResponse.json({ error: "Missing required email, password, IGN, or Character ID fields" }, { status: 400 });
-    }
+    } = result.data;
 
     // Check duplicate email or characterId
     const existingPlayer = await prisma.player.findFirst({
@@ -62,12 +66,12 @@ export async function POST(request: NextRequest) {
     // Hash password credentials
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Validate numbers
-    const parsedKd = Math.max(0, Math.min(15, parseFloat(kdRatio) || 0));
-    const parsedHs = Math.max(0, Math.min(100, parseFloat(headshotPct) || 0));
-    const parsedWr = Math.max(0, Math.min(100, parseFloat(winRate) || 0));
-    const parsedMatches = Math.max(0, parseInt(matchesPlayed) || 0);
-    const parsedPoints = Math.max(0, parseInt(urPoints) || 0);
+    // Validate numbers (bounds checks)
+    const parsedKd = Math.max(0, Math.min(15, kdRatio));
+    const parsedHs = Math.max(0, Math.min(100, headshotPct));
+    const parsedWr = Math.max(0, Math.min(100, winRate));
+    const parsedMatches = Math.max(0, matchesPlayed);
+    const parsedPoints = Math.max(0, urPoints);
 
     // Create player profile with optional contacts
     const newPlayer = await prisma.player.create({
@@ -95,7 +99,7 @@ export async function POST(request: NextRequest) {
         teamHistory: teamHistory || null,
         achievements: achievements || null,
         profileType: profileType || "Player",
-        coachingYears: coachingYears !== undefined ? parseInt(coachingYears) || 0 : 0,
+        coachingYears: coachingYears ?? 0,
         coachingHistory: coachingHistory || null,
         specialties: specialties || null,
       },
@@ -108,7 +112,7 @@ export async function POST(request: NextRequest) {
           date: trophyDate || new Date().toISOString().substring(0, 7),
           tournamentName: trophyName,
           teamRepresented: trophyTeam || "Free Agent",
-          placement: parseInt(trophyPlacement) || 1,
+          placement: trophyPlacement ?? 1,
           playerId: newPlayer.id,
         },
       });

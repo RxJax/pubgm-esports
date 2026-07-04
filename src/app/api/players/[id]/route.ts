@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
+import { PlayerEditSelfSchema } from "@/lib/validation";
 
 // Fetch player details
 export async function GET(
@@ -81,6 +82,14 @@ export async function PUT(
     }
 
     const body = await request.json();
+
+    // Strict schema validation using Zod
+    const result = PlayerEditSelfSchema.safeParse(body);
+    if (!result.success) {
+      const errorMsg = result.error.issues[0]?.message || "Invalid edit profile data";
+      return NextResponse.json({ error: errorMsg }, { status: 400 });
+    }
+
     const {
       ign,
       status,
@@ -116,24 +125,20 @@ export async function PUT(
       isVerified,
       competitiveExperience,
       officialTournaments,
-    } = body;
+    } = result.data;
 
     // Validate characterId (UID) if provided
     let verifiedCharacterId = undefined;
     if (characterId !== undefined && characterId !== null) {
-      const uidStr = characterId.toString().trim();
-      if (!/^\d{5,12}$/.test(uidStr)) {
-        return NextResponse.json({ error: "UID must be a valid numeric ID (5 to 12 digits)." }, { status: 400 });
-      }
-      verifiedCharacterId = uidStr;
+      verifiedCharacterId = characterId.trim();
     }
 
     // Safety validation bounds on statistics
-    const validatedKd = Math.max(0, Math.min(15, parseFloat(kdRatio) || 0));
-    const validatedHs = Math.max(0, Math.min(100, parseFloat(headshotPct) || 0));
-    const validatedWr = Math.max(0, Math.min(100, parseFloat(winRate) || 0));
-    const validatedMatches = Math.max(0, parseInt(matchesPlayed) || 0);
-    const validatedPoints = Math.max(0, parseInt(urPoints) || 0);
+    const validatedKd = kdRatio !== undefined ? Math.max(0, Math.min(15, kdRatio)) : undefined;
+    const validatedHs = headshotPct !== undefined ? Math.max(0, Math.min(100, headshotPct)) : undefined;
+    const validatedWr = winRate !== undefined ? Math.max(0, Math.min(100, winRate)) : undefined;
+    const validatedMatches = matchesPlayed !== undefined ? Math.max(0, matchesPlayed) : undefined;
+    const validatedPoints = urPoints !== undefined ? Math.max(0, urPoints) : undefined;
 
     // Update the player record in database
     const updatedPlayer = await prisma.player.update({
@@ -162,15 +167,15 @@ export async function PUT(
         achievements: achievements !== undefined ? achievements : undefined,
         highestTier: highestTier !== undefined ? highestTier : undefined,
         profileType: profileType !== undefined ? profileType : undefined,
-        coachingYears: coachingYears !== undefined ? parseInt(coachingYears) || 0 : undefined,
+        coachingYears: coachingYears !== undefined ? coachingYears : undefined,
         coachingHistory: coachingHistory !== undefined ? coachingHistory : undefined,
         specialties: specialties !== undefined ? specialties : undefined,
-        underContract: underContract !== undefined ? Boolean(underContract) : undefined,
+        underContract: underContract !== undefined ? underContract : undefined,
         contractStartDate: contractStartDate !== undefined ? (contractStartDate ? new Date(contractStartDate) : null) : undefined,
         contractEndDate: contractEndDate !== undefined ? (contractEndDate ? new Date(contractEndDate) : null) : undefined,
-        isVerified: isAdmin && isVerified !== undefined ? Boolean(isVerified) : undefined,
-        competitiveExperience: competitiveExperience !== undefined ? parseInt(competitiveExperience) || 1 : undefined,
-        officialTournaments: officialTournaments !== undefined ? parseInt(officialTournaments) || 0 : undefined,
+        isVerified: isAdmin && isVerified !== undefined ? isVerified : undefined,
+        competitiveExperience: competitiveExperience !== undefined ? competitiveExperience : undefined,
+        officialTournaments: officialTournaments !== undefined ? officialTournaments : undefined,
       },
     });
 
@@ -181,7 +186,7 @@ export async function PUT(
           date: newTrophy.date || new Date().toISOString().substring(0, 7), // YYYY-MM
           tournamentName: newTrophy.tournamentName,
           teamRepresented: newTrophy.teamRepresented || "Free Agent",
-          placement: parseInt(newTrophy.placement) || 1,
+          placement: newTrophy.placement || 1,
           playerId: id,
         },
       });

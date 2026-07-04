@@ -2,15 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { setAuthCookie } from "@/lib/auth";
+import { GoogleAuthSchema } from "@/lib/validation";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { credential } = body;
-
-    if (!credential) {
-      return NextResponse.json({ error: "Missing Google authentication credential token" }, { status: 400 });
+    
+    // Strict schema validation using Zod
+    const result = GoogleAuthSchema.safeParse(body);
+    if (!result.success) {
+      const errorMsg = result.error.issues[0]?.message || "Invalid Google Auth data";
+      return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
+
+    const { credential } = result.data;
 
     // 1. Verify the ID token via Google's secure OAuth2 tokeninfo endpoint
     const googleVerifyUrl = `https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`;

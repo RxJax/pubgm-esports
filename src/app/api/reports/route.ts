@@ -2,17 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
+import { ReportSchema } from "@/lib/validation";
 
 export async function POST(request: NextRequest) {
   try {
-    const { reportedProfileId, reasonCategory, additionalDetails } = await request.json();
-
-    if (!reportedProfileId || !reasonCategory) {
-      return NextResponse.json(
-        { error: "Reported profile ID and reason category are required." },
-        { status: 400 }
-      );
+    const body = await request.json();
+    
+    // Strict schema validation using Zod
+    const result = ReportSchema.safeParse(body);
+    if (!result.success) {
+      const errorMsg = result.error.issues[0]?.message || "Invalid report payload";
+      return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
+
+    const { reportedProfileId, reasonCategory, additionalDetails } = result.data;
 
     // Check if the reported profile exists
     const playerExists = await prisma.player.findUnique({

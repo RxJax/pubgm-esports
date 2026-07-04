@@ -2,21 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { setAuthCookie } from "@/lib/auth";
+import { GoogleOnboardSchema } from "@/lib/validation";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { credential, ign, characterId } = body;
-
-    if (!credential || !ign || !characterId) {
-      return NextResponse.json({ error: "Missing required onboarding parameters (credential, IGN, UID)" }, { status: 400 });
+    
+    // Strict schema validation using Zod
+    const result = GoogleOnboardSchema.safeParse(body);
+    if (!result.success) {
+      const errorMsg = result.error.issues[0]?.message || "Invalid onboarding data";
+      return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
 
-    // Validate UID format
+    const { credential, ign, characterId } = result.data;
     const uidStr = characterId.trim();
-    if (!/^\d{5,12}$/.test(uidStr)) {
-      return NextResponse.json({ error: "UID must be a valid numeric ID (5 to 12 digits)." }, { status: 400 });
-    }
 
     // 1. Verify the ID token via Google's secure OAuth2 tokeninfo endpoint
     const googleVerifyUrl = `https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`;

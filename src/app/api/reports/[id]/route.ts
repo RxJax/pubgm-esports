@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
+import { ReportUpdateSchema } from "@/lib/validation";
 
 export async function PUT(
   request: NextRequest,
@@ -23,10 +24,16 @@ export async function PUT(
       return NextResponse.json({ error: "Access Denied. Platform administrator permissions required." }, { status: 403 });
     }
 
-    const { status } = await request.json();
-    if (!status) {
-      return NextResponse.json({ error: "Status is required." }, { status: 400 });
+    const body = await request.json();
+    
+    // Strict schema validation using Zod
+    const result = ReportUpdateSchema.safeParse(body);
+    if (!result.success) {
+      const errorMsg = result.error.issues[0]?.message || "Invalid report update payload";
+      return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
+
+    const { status } = result.data;
 
     const updatedReport = await prisma.report.update({
       where: { id },

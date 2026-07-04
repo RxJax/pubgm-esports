@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
+import { MaintenanceSchema } from "@/lib/validation";
 
 export const revalidate = 0;
 
@@ -33,10 +34,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Access Denied." }, { status: 403 });
     }
 
-    const { maintenanceActive } = await request.json();
-    if (typeof maintenanceActive !== "boolean") {
-      return NextResponse.json({ error: "Invalid configuration type." }, { status: 400 });
+    const body = await request.json();
+    
+    // Strict schema validation using Zod
+    const result = MaintenanceSchema.safeParse(body);
+    if (!result.success) {
+      const errorMsg = result.error.issues[0]?.message || "Invalid maintenance config payload";
+      return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
+
+    const { maintenanceActive } = result.data;
 
     const config = await prisma.systemConfig.upsert({
       where: { id: "default" },

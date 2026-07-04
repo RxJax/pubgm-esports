@@ -2,14 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { setAuthCookie } from "@/lib/auth";
+import { LoginSchema } from "@/lib/validation";
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
-
-    if (!email || !password) {
-      return NextResponse.json({ error: "Missing email or password credentials" }, { status: 400 });
+    const body = await request.json();
+    
+    // Strict schema validation using Zod
+    const result = LoginSchema.safeParse(body);
+    if (!result.success) {
+      const errorMsg = result.error.issues[0]?.message || "Invalid login data";
+      return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
+
+    const { email, password } = result.data;
 
     // Lookup user in SQLite
     const player = await prisma.player.findUnique({
