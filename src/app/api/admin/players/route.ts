@@ -63,6 +63,7 @@ export async function GET(request: NextRequest) {
         id: true,
         ign: true,
         email: true,
+        characterId: true,
         avatarUrl: true,
         status: true,
         role: true,
@@ -188,15 +189,25 @@ export async function PUT(request: NextRequest) {
     if (updateData.officialTournaments !== undefined) updateData.officialTournaments = parseInt(updateData.officialTournaments) || 0;
 
     // Handle password change if provided
-    if (updateData.password) {
+    if (updateData.password && updateData.password.trim() !== "") {
       updateData.password = await bcrypt.hash(updateData.password, 10);
     } else {
       delete updateData.password; // Do not overwrite if empty
     }
 
     // Handle contract dates parsing
-    if (updateData.contractStartDate) updateData.contractStartDate = new Date(updateData.contractStartDate);
-    if (updateData.contractEndDate) updateData.contractEndDate = new Date(updateData.contractEndDate);
+    if (updateData.underContract !== undefined) {
+      if (updateData.underContract) {
+        updateData.contractStartDate = updateData.contractStartDate ? new Date(updateData.contractStartDate) : null;
+        updateData.contractEndDate = updateData.contractEndDate ? new Date(updateData.contractEndDate) : null;
+      } else {
+        updateData.contractStartDate = null;
+        updateData.contractEndDate = null;
+      }
+    } else {
+      delete updateData.contractStartDate;
+      delete updateData.contractEndDate;
+    }
 
     const updatedPlayer = await prisma.player.update({
       where: { id },
