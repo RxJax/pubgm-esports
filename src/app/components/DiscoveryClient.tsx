@@ -928,7 +928,11 @@ export default function DiscoveryClient({
           {initialRosters && initialRosters.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {initialRosters.map((roster) => (
-                <div key={roster.id} className="bg-[#0c0e12] border border-gaming-gray hover:border-digital-yellow/40 rounded-3xl p-5 shadow-lg flex flex-col justify-between gap-4 text-left transition duration-300">
+                <Link
+                  key={roster.id}
+                  href={`/orgs/${roster.organizationId}`}
+                  className="bg-[#0c0e12] border border-gaming-gray hover:border-digital-yellow hover:shadow-[0_0_20px_rgba(255,189,3,0.05)] hover:-translate-y-1 rounded-3xl p-5 shadow-lg flex flex-col justify-between gap-4 text-left cursor-pointer transition-all duration-300 group"
+                >
                   <div className="flex items-center justify-between border-b border-gaming-gray/30 pb-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-9 h-9 rounded-xl bg-gaming-black border border-gaming-gray overflow-hidden flex items-center justify-center shrink-0">
@@ -939,7 +943,7 @@ export default function DiscoveryClient({
                         )}
                       </div>
                       <div className="truncate min-w-0">
-                        <h3 className="font-extrabold text-white text-sm uppercase tracking-wide truncate">
+                        <h3 className="font-extrabold text-white text-sm uppercase tracking-wide truncate group-hover:text-digital-yellow transition-colors">
                           {roster.teamName} {roster.tag && <span className="text-xs text-gray-500 font-mono">[{roster.tag}]</span>}
                         </h3>
                         <p className="text-[10px] text-gray-500 uppercase tracking-widest font-black truncate">
@@ -970,7 +974,7 @@ export default function DiscoveryClient({
                       </div>
                     ))}
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (
