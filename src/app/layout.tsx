@@ -5,11 +5,11 @@ import jwt from "jsonwebtoken";
 import Navbar from "@/app/components/Navbar";
 
 const geistSans = {
-  variable: "font-sans",
+  variable: "",
 };
 
 const geistMono = {
-  variable: "font-mono",
+  variable: "",
 };
 
 export const metadata: Metadata = {
