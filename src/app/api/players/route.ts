@@ -119,6 +119,7 @@ export async function GET(request: NextRequest) {
       orderBy: {
         updatedAt: "desc", // Sort by most recently updated
       },
+      take: 10,
     });
 
     return NextResponse.json(players);

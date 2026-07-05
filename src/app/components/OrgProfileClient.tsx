@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 interface Player {
   id: string;
@@ -59,10 +60,13 @@ export default function OrgProfileClient({
           {/* Org Logo */}
           <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-gaming-black border border-gaming-gray overflow-hidden flex items-center justify-center shrink-0 shadow-lg relative group">
             {organization.logoUrl ? (
-              <img
+              <Image
                 src={organization.logoUrl}
-                className="w-full h-full object-cover transition duration-500 group-hover:scale-105"
+                fill
+                className="object-cover transition duration-500 group-hover:scale-105"
                 alt={organization.name}
+                sizes="(max-width: 640px) 96px, 112px"
+                quality={75}
               />
             ) : (
               <span className="text-4xl">🏢</span>
@@ -115,9 +119,9 @@ export default function OrgProfileClient({
                 >
                   <div className="flex items-center justify-between border-b border-gaming-gray/30 pb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gaming-black border border-gaming-gray overflow-hidden flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-gaming-black border border-gaming-gray overflow-hidden flex items-center justify-center shrink-0 relative">
                         {roster.logoUrl ? (
-                          <img src={roster.logoUrl} className="w-full h-full object-cover" alt="" />
+                          <Image src={roster.logoUrl} fill className="object-cover" alt="" sizes="40px" quality={75} />
                         ) : (
                           <span className="text-xl">🎮</span>
                         )}
@@ -143,9 +147,9 @@ export default function OrgProfileClient({
                           href={`/players/${player.id}`}
                           className="bg-gaming-black hover:border-digital-yellow/50 border border-gaming-gray/60 rounded-2xl p-3 flex items-center gap-3 hover:-translate-y-0.5 transition-all duration-300 group cursor-pointer"
                         >
-                          <div className="w-8 h-8 rounded-full bg-gaming-black border border-gaming-gray overflow-hidden shrink-0 flex items-center justify-center">
+                          <div className="w-8 h-8 rounded-full bg-gaming-black border border-gaming-gray overflow-hidden shrink-0 flex items-center justify-center relative">
                             {player.avatarUrl ? (
-                              <img src={player.avatarUrl} className="w-full h-full object-cover" alt="" />
+                              <Image src={player.avatarUrl} fill className="object-cover" alt="" sizes="32px" quality={75} />
                             ) : (
                               <svg viewBox="0 0 100 100" className="w-full h-full text-gray-600 bg-[#1c1f26]">
                                 <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />

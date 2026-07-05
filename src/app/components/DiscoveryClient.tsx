@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef, memo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 
 interface Team {
@@ -120,7 +121,7 @@ const PlayerCarouselCard = memo(({ player }: { player: Player }) => {
       <div className="flex gap-3 mb-2 relative">
         <div className="w-12 h-15 rounded-lg bg-gaming-black border border-gaming-gray overflow-hidden shrink-0 relative flex items-center justify-center">
           {player.avatarUrl ? (
-            <img src={player.avatarUrl} className="w-full h-full object-cover animate-fade-in" alt="" loading="lazy" />
+            <Image src={player.avatarUrl} fill className="object-cover animate-fade-in" alt="" sizes="48px" quality={75} />
           ) : (
             <svg viewBox="0 0 100 100" className="w-full h-full text-gray-500 bg-gradient-to-t from-[#15161c] to-[#252836]">
               <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
@@ -219,7 +220,7 @@ const CoachCarouselCard = memo(({ player }: { player: Player }) => {
       <div className="flex gap-3 mb-2 relative">
         <div className="w-12 h-15 rounded-lg bg-gaming-black border border-gaming-gray overflow-hidden shrink-0 relative flex items-center justify-center">
           {player.avatarUrl ? (
-            <img src={player.avatarUrl} className="w-full h-full object-cover animate-fade-in" alt="" loading="lazy" />
+            <Image src={player.avatarUrl} fill className="object-cover animate-fade-in" alt="" sizes="48px" quality={75} />
           ) : (
             <svg viewBox="0 0 100 100" className="w-full h-full text-gray-500 bg-gradient-to-t from-[#15161c] to-[#252836]">
               <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
@@ -309,7 +310,7 @@ const CandidateRow = memo(({ player }: { player: Player }) => {
       <div className="flex items-center gap-3 w-full sm:w-auto">
         <div className="w-9 h-9 rounded-full bg-gaming-black border border-gaming-gray overflow-hidden flex items-center justify-center shrink-0 relative">
           {player.avatarUrl ? (
-            <img src={player.avatarUrl} className="w-full h-full object-cover" alt="" loading="lazy" />
+            <Image src={player.avatarUrl} fill className="object-cover" alt="" sizes="36px" quality={75} />
           ) : (
             <svg viewBox="0 0 100 100" className="w-full h-full text-gray-600 bg-[#1c1f26]">
               <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
@@ -935,9 +936,9 @@ export default function DiscoveryClient({
                 >
                   <div className="flex items-center justify-between border-b border-gaming-gray/30 pb-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-9 h-9 rounded-xl bg-gaming-black border border-gaming-gray overflow-hidden flex items-center justify-center shrink-0">
+                      <div className="w-9 h-9 rounded-xl bg-gaming-black border border-gaming-gray overflow-hidden flex items-center justify-center shrink-0 relative">
                         {roster.logoUrl ? (
-                          <img src={roster.logoUrl} className="w-full h-full object-cover" alt="" />
+                          <Image src={roster.logoUrl} fill className="object-cover" alt="" sizes="36px" quality={75} />
                         ) : (
                           <span className="text-lg">🏆</span>
                         )}
@@ -957,9 +958,9 @@ export default function DiscoveryClient({
                   <div className="grid grid-cols-2 gap-2">
                     {roster.players.map((player: any) => (
                       <div key={player.id} className="bg-gaming-black/60 border border-gaming-gray/50 rounded-2xl p-2.5 flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full bg-gaming-black border border-gaming-gray overflow-hidden shrink-0 flex items-center justify-center">
+                        <div className="w-7 h-7 rounded-full bg-gaming-black border border-gaming-gray overflow-hidden shrink-0 flex items-center justify-center relative">
                           {player.avatarUrl ? (
-                            <img src={player.avatarUrl} className="w-full h-full object-cover" alt="" />
+                            <Image src={player.avatarUrl} fill className="object-cover" alt="" sizes="28px" quality={75} />
                           ) : (
                             <svg viewBox="0 0 100 100" className="w-full h-full text-gray-600 bg-[#1c1f26]">
                               <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />

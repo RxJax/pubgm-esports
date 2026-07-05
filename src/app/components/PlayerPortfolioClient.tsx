@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import * as htmlToImage from "html-to-image";
 
@@ -359,7 +360,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => {
-        const img = new Image();
+        const img = new window.Image();
         img.onload = () => {
           // Create canvas
           const canvas = document.createElement("canvas");
@@ -620,9 +621,9 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
             <div className="relative w-24 h-24 rounded-2xl bg-gaming-black border-2 border-gaming-gray flex items-center justify-center overflow-hidden shrink-0 shadow-lg">
               <div className="absolute inset-0 bg-gradient-to-t from-digital-yellow/10 to-transparent pointer-events-none" />
               {player.avatarUrl ? (
-                <img src={getProxyUrl(player.avatarUrl)} alt={player.ign} className="w-full h-full object-cover" crossOrigin="anonymous" />
+                <Image src={getProxyUrl(player.avatarUrl)} alt={player.ign} fill className="object-cover" sizes="96px" quality={75} />
               ) : player.team?.logoUrl ? (
-                <img src={getProxyUrl(player.team.logoUrl)} alt="" className="w-full h-full object-cover" crossOrigin="anonymous" />
+                <Image src={getProxyUrl(player.team.logoUrl)} alt="" fill className="object-cover" sizes="96px" quality={75} />
               ) : (
                 <span className="text-3xl font-black text-gaming-gray">FA</span>
               )}
@@ -766,7 +767,9 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
               <div className="bg-gaming-black/90 border border-gaming-gray p-4 rounded-xl flex flex-col gap-2 shadow-inner">
                 <div className="text-[9px] text-gray-500 font-black uppercase tracking-wider">Teammates</div>
                 <div className="flex items-center gap-2">
-                  <img src={player.team.logoUrl || ""} className="w-4 h-4 rounded-full object-cover" alt="" />
+                  <div className="relative w-4 h-4 rounded-full overflow-hidden shrink-0">
+                    <Image src={player.team.logoUrl || ""} fill className="object-cover" alt="" sizes="16px" quality={75} />
+                  </div>
                   <span className="text-xs font-bold text-white uppercase tracking-wider">{player.team.name}</span>
                 </div>
                 <button
@@ -1560,7 +1563,7 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-15 rounded-lg bg-gaming-black border border-gaming-gray overflow-hidden flex items-center justify-center shrink-0 relative">
                         {editAvatarUrl ? (
-                          <img src={editAvatarUrl} className="w-full h-full object-cover" alt="Esports Preview" />
+                          <Image src={editAvatarUrl} fill className="object-cover" alt="Esports Preview" sizes="48px" quality={75} />
                         ) : (
                           <svg viewBox="0 0 100 100" className="w-6 h-6 text-gray-600">
                             <circle cx="50" cy="35" r="20" fill="currentColor" opacity="0.4" />
@@ -1745,7 +1748,9 @@ export default function PlayerPortfolioClient({ player, isOwner }: PlayerPortfol
             {/* Modal Header */}
             <div className="flex items-center justify-between p-4 border-b border-gaming-gray bg-gaming-gray/20">
               <div className="flex items-center gap-2">
-                <img src={player.team.logoUrl || ""} className="w-5 h-5 rounded-full object-cover" alt="" />
+                <div className="relative w-5 h-5 rounded-full overflow-hidden shrink-0">
+                  <Image src={player.team.logoUrl || ""} fill className="object-cover" alt="" sizes="20px" quality={75} />
+                </div>
                 <h3 className="font-black text-xs text-white uppercase tracking-widest">{player.team.name} Active Roster</h3>
               </div>
               <button onClick={() => setShowRosterModal(false)} className="text-gray-400 hover:text-white transition">

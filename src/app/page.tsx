@@ -12,8 +12,8 @@ const DiscoveryClient = dynamic(() => import("./components/DiscoveryClient"), {
   ),
 });
 
-// Configure dynamic rendering (disabled ISR cache to prevent logged-out navbar state on refresh)
-export const revalidate = 0;
+// Configure dynamic rendering with static regeneration (ISR) for faster initial loads
+export const revalidate = 60;
 
 export default async function Home() {
   const cookieStore = await cookies();
@@ -52,7 +52,7 @@ export default async function Home() {
       }
     }
 
-    // 1. General Candidate Pool Feed (ordered by updatedAt desc)
+    // 1. General Candidate Pool Feed (ordered by updatedAt desc, limit 10 for pagination)
     players = await prisma.player.findMany({
       where: {},
       include: {
@@ -61,6 +61,7 @@ export default async function Home() {
       orderBy: {
         updatedAt: "desc",
       },
+      take: 10,
     });
 
     // 2. Top Rising Prospects (only registered profiles marked with 'Tier-1 Pro' status, sorted by K/D, limit 4)
