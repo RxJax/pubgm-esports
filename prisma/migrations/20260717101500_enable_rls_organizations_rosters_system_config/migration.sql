@@ -1,0 +1,4 @@
+-- Enable Row Level Security
+ALTER TABLE "organizations" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "team_rosters" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "system_config" ENABLE ROW LEVEL SECURITY;

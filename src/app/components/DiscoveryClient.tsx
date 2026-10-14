@@ -15,6 +15,7 @@ interface Team {
 
 interface Player {
   id: string;
+  email?: string | null;
   ign: string;
   characterId: string;
   region: string;
@@ -593,8 +594,22 @@ export default function DiscoveryClient({
     setVisibleCount(15);
   }, [allPlayersCache, debouncedSearch, selectedRole, selectedRegion, selectedStatus, minRating, deviceType, gyro, selectedUrRank]);
 
-  // Curated lists from live database queries
-  const topRisingFraggers = useMemo(() => initialRising.filter(p => p.urRank === "Legend"), [initialRising]);
+  // Curated lists from live database queries (always prioritize MRESRXJAX first in Tier-1 Prospects)
+  const topRisingFraggers = useMemo(() => {
+    const isPinned = (p: Player) =>
+      p.id === "6767946a-1744-4094-b37f-edb27cf6db69" ||
+      p.email?.toLowerCase() === "rxjax007@gmail.com" ||
+      p.ign?.toLowerCase() === "mresrxjax";
+
+    const list = initialRising.filter(p => p.urRank === "Legend" || isPinned(p));
+    return [...list].sort((a, b) => {
+      const aPinned = isPinned(a);
+      const bPinned = isPinned(b);
+      if (aPinned && !bPinned) return -1;
+      if (!aPinned && bPinned) return 1;
+      return (b.kdRatio || 0) - (a.kdRatio || 0);
+    });
+  }, [initialRising]);
   const topTier2Fraggers = useMemo(() => initialTier2.filter(p => p.urRank === "Peerless"), [initialTier2]);
   const topCoaches = useMemo(() => initialCoaches.filter(p => p.profileType === "Coach"), [initialCoaches]);
   const risingStarPlayers = useMemo(() => initialRisingStars.filter(p => ["Supreme", "Exceed", "Vanguard"].includes(p.urRank)), [initialRisingStars]);

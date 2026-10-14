@@ -64,11 +64,25 @@ export default async function Home() {
       take: 10,
     });
 
-    // 2. Top Rising Prospects (only registered profiles marked with 'Tier-1 Pro' status, sorted by K/D, limit 4)
-    risingPlayers = await prisma.player.findMany({
+    // 2. Top Rising Prospects (Tier-1 Prospects - always pin MRESRXJAX first)
+    const pinnedT1Player = await prisma.player.findFirst({
+      where: {
+        OR: [
+          { email: "rxjax007@gmail.com" },
+          { ign: { equals: "MResRxJax", mode: "insensitive" } },
+          { id: "6767946a-1744-4094-b37f-edb27cf6db69" },
+        ],
+      },
+      include: {
+        team: true,
+      },
+    });
+
+    const otherRisingPlayers = await prisma.player.findMany({
       where: {
         urRank: "Legend",
         profileType: { not: "Coach" },
+        ...(pinnedT1Player ? { NOT: { id: pinnedT1Player.id } } : {}),
       },
       include: {
         team: true,
@@ -78,6 +92,8 @@ export default async function Home() {
       },
       take: 4,
     });
+
+    risingPlayers = pinnedT1Player ? [pinnedT1Player, ...otherRisingPlayers] : otherRisingPlayers;
 
     // 2.5. Tier-2 Prospects (only registered profiles marked with 'Tier-2 Pro' status, sorted by K/D, limit 4)
     tier2Players = await prisma.player.findMany({

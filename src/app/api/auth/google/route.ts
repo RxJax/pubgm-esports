@@ -33,18 +33,18 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Validate Google client ID audience matches our environment configuration (if set)
-    const googleClientId = process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "586689563121-tsvddfckhhdre6j743aplleogs91v76t.apps.googleusercontent.com";
-    if (googleClientId && aud !== googleClientId) {
-      console.warn(`Security Warning: Google login audience mismatch. Received: ${aud}, Expected: ${googleClientId}`);
+    const rawClientId = process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "586689563121-tsvddfckhhdre6j743aplleogs91v76t.apps.googleusercontent.com";
+    const googleClientId = rawClientId.replace(/^["']|["']$/g, "").trim();
+    const cleanAud = (aud || "").replace(/^["']|["']$/g, "").trim();
+    if (googleClientId && cleanAud !== googleClientId) {
+      console.warn(`Security Warning: Google login audience mismatch. Received: ${cleanAud}, Expected: ${googleClientId}`);
       return NextResponse.json({ error: "Google OAuth security verification failed: Audience client ID mismatch." }, { status: 400 });
     }
 
-    // 3. Lookup user in SQLite database
-    let player = await prisma.player.findUnique({
+    // 3. Lookup user in database (check Player first)
+    const player = await prisma.player.findUnique({
       where: { email },
     });
-
-    let isNew = false;
 
     if (player) {
       console.log(`Google Login: Recovered profile card for existing player ${email} (IGN: ${player.ign})`);
@@ -59,15 +59,37 @@ export async function POST(request: NextRequest) {
         playerId: player.id,
         email: player.email,
         ign: player.ign,
-      });
-    } else {
-      console.log(`Google Signup: Onboarding required for email ${email}`);
-      return NextResponse.json({
-        onboardingRequired: true,
-        email,
-        name,
+        role: player.profileType || "Player",
       });
     }
+
+    // Check if user is registered as an Organization
+    const org = await prisma.organization.findUnique({
+      where: { email },
+    });
+
+    if (org) {
+      console.log(`Google Login: Recovered profile for existing organization ${email} (${org.name})`);
+
+      const response = NextResponse.json({
+        success: true,
+        organization: { id: org.id, name: org.name, email: org.email },
+      });
+
+      return setAuthCookie(response, {
+        orgId: org.id,
+        email: org.email,
+        ign: org.name,
+        role: "organization",
+      });
+    }
+
+    console.log(`Google Signup: Onboarding required for email ${email}`);
+    return NextResponse.json({
+      onboardingRequired: true,
+      email,
+      name,
+    });
   } catch (error: any) {
     console.error("Database connection failed:", error);
     return NextResponse.json({ error: "Google authentication failed. Internal server error." }, { status: 500 });

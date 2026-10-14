@@ -34,9 +34,11 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Validate Google client ID audience matches our environment configuration (if set)
-    const googleClientId = process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "586689563121-tsvddfckhhdre6j743aplleogs91v76t.apps.googleusercontent.com";
-    if (googleClientId && aud !== googleClientId) {
-      console.warn(`Security Warning: Google login audience mismatch. Received: ${aud}, Expected: ${googleClientId}`);
+    const rawClientId = process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "586689563121-tsvddfckhhdre6j743aplleogs91v76t.apps.googleusercontent.com";
+    const googleClientId = rawClientId.replace(/^["']|["']$/g, "").trim();
+    const cleanAud = (aud || "").replace(/^["']|["']$/g, "").trim();
+    if (googleClientId && cleanAud !== googleClientId) {
+      console.warn(`Security Warning: Google login audience mismatch. Received: ${cleanAud}, Expected: ${googleClientId}`);
       return NextResponse.json({ error: "Google OAuth security verification failed: Audience client ID mismatch." }, { status: 400 });
     }
 

@@ -66,7 +66,8 @@ export default function RegisterWizard() {
   // Initialize and render the actual Google Sign-In button for Step 1
   useEffect(() => {
     if (step !== 1) return;
-    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "586689563121-tsvddfckhhdre6j743aplleogs91v76t.apps.googleusercontent.com";
+    const rawClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "586689563121-tsvddfckhhdre6j743aplleogs91v76t.apps.googleusercontent.com";
+    const googleClientId = rawClientId.replace(/^["']|["']$/g, "").trim();
     if (!googleClientId) return;
 
     const initializeGoogleBtn = () => {
@@ -74,6 +75,8 @@ export default function RegisterWizard() {
         if (window.google?.accounts?.id) {
           window.google.accounts.id.initialize({
             client_id: googleClientId,
+            ux_mode: "popup",
+            auto_select: false,
             callback: async (response: any) => {
               setError("");
               setLoading(true);
@@ -110,12 +113,14 @@ export default function RegisterWizard() {
 
           const btnContainer = document.getElementById("google-signup-btn");
           if (btnContainer) {
+            const containerWidth = btnContainer.clientWidth || 382;
+            const safeWidth = Math.min(Math.max(containerWidth, 200), 400);
             window.google.accounts.id.renderButton(btnContainer, {
               theme: "filled_black",
               size: "large",
               text: "signup_with",
               shape: "rectangular",
-              width: btnContainer.clientWidth || 382,
+              width: safeWidth,
             });
           }
         }
